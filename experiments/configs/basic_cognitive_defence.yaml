@@ -1,0 +1,31 @@
+# experiments/configs/basic_cognitive_defense.yaml
+experiment:
+  experiment_name: "cognitive_defense_10_clients"
+  seed: 42
+  num_rounds: 10
+  min_clients: 2
+  min_available_clients: 2
+  server_address: "0.0.0.0:8080"
+
+defense:
+  strategy: "cognitive_defense"
+  anomaly_threshold: 0.7
+  reputation_decay: 0.8
+  history_size: 100
+
+attacks:
+  - enabled: true
+    attack_type: "label_flip"
+    intensity: 0.1
+    target_clients: [0, 1, 2]  # First 3 clients will be malicious
+  
+  - enabled: true
+    attack_type: "gradient_noise"
+    intensity: 0.05
+    target_clients: [7, 8]  # Clients 7 and 8 with gradient noise
+
+orchestration:
+  num_clients: 10
+  batch_size: 3  # Spawn 3 clients at a time
+  max_memory_mb: 6000
+  spawn_delay: 2.0

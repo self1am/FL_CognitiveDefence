@@ -1,0 +1,31 @@
+# experiments/configs/adaptive_attack_scenario.yaml
+experiment:
+  experiment_name: "adaptive_attack_scenario"
+  seed: 123
+  num_rounds: 15
+  min_clients: 3
+  min_available_clients: 3
+  server_address: "0.0.0.0:8080"
+
+defense:
+  strategy: "cognitive_defense"
+  anomaly_threshold: 0.6
+  reputation_decay: 0.75
+  history_size: 150
+
+attacks:
+  - enabled: true
+    attack_type: "label_flip"
+    intensity: 0.15
+    target_clients: [0, 1, 2, 3]  # 40% malicious clients
+  
+  - enabled: true
+    attack_type: "gradient_noise"
+    intensity: 0.08
+    target_clients: [8, 9]
+
+orchestration:
+  num_clients: 10
+  batch_size: 2
+  max_memory_mb: 5000
+  spawn_delay: 3.0

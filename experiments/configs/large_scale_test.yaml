@@ -1,0 +1,26 @@
+# experiments/configs/large_scale_test.yaml
+experiment:
+  experiment_name: "large_scale_cognitive_test"
+  seed: 456
+  num_rounds: 8
+  min_clients: 5
+  min_available_clients: 5
+  server_address: "0.0.0.0:8080"
+
+defense:
+  strategy: "cognitive_defense"
+  anomaly_threshold: 0.8
+  reputation_decay: 0.85
+  history_size: 200
+
+attacks:
+  - enabled: true
+    attack_type: "label_flip"
+    intensity: 0.2
+    target_clients: [0, 1, 2, 3, 4, 5]  # 50% malicious clients
+
+orchestration:
+  num_clients: 12
+  batch_size: 4
+  max_memory_mb: 7000
+  spawn_delay: 1.5
