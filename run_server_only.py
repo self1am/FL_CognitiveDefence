@@ -1,7 +1,7 @@
 import argparse
 import yaml
 import flwr as fl
-from src.defences.cognitive_defence import Cognitivedefencestrategy
+from src.defences.cognitive_defence import CognitivedefenceStrategy
 from src.server.cognitive_server import CognitiveAggregationStrategy
 from src.utils.config import ExperimentConfig, defenceConfig, DeterministicEnvironment
 from src.utils.logging_utils import ExperimentLogger
@@ -28,7 +28,7 @@ def main():
     logger.logger.info(f"Starting server on {args.host}:{args.port}")
     
     # Create defence
-    defence = Cognitivedefencestrategy(
+    defence = CognitivedefenceStrategy(
         anomaly_threshold=defence_config.anomaly_threshold,
         reputation_decay=defence_config.reputation_decay,
         history_size=defence_config.history_size

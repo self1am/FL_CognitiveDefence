@@ -59,7 +59,7 @@ class ExperimentRunner:
             )
         else:
             # Fallback to cognitive defence
-            defence = Cognitivedefencestrategy()
+            defence = CognitivedefenceStrategy()
         
         # Create aggregation strategy
         strategy = CognitiveAggregationStrategy(
