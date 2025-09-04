@@ -6,7 +6,7 @@ echo "Setting up Federated Cognitive Defense project..."
 
 # Create directory structure
 echo "Creating directory structure..."
-mkdir -p src/{attacks,defenses,datasets,models,clients,server,orchestration,utils}
+mkdir -p src/{attacks,defences,datasets,models,clients,server,orchestration,utils}
 mkdir -p experiments/{configs,scripts,results}
 mkdir -p tests/{unit,integration}
 mkdir -p logs

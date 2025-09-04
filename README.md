@@ -1,10 +1,10 @@
 # Federated Learning with Cognitive Defense Mechanisms
 
-A modular federated learning framework implementing cognitive defense strategies based on OODA loop and MAPE-K frameworks, with support for various attacks and defenses.
+A modular federated learning framework implementing cognitive defense strategies based on OODA loop and MAPE-K frameworks, with support for various attacks and defences.
 
 ## Features
 
-- **Modular Architecture**: Separation of concerns with pluggable attacks and defenses
+- **Modular Architecture**: Separation of concerns with pluggable attacks and defences
 - **Multi-Client Orchestration**: Automated management of 10+ client processes with resource monitoring
 - **Cognitive Defense**: OODA loop and MAPE-K framework implementation
 - **Attack Simulation**: Label flipping, gradient noise, model replacement, and more
@@ -16,8 +16,8 @@ A modular federated learning framework implementing cognitive defense strategies
 ### 1. Setup
 ```bash
 # Clone and setup
-git clone <your-repo-url>
-cd federated-cognitive-defense
+git clone https://github.com/self1am/FL_CognitiveDefence.git
+cd FL_CognitiveDefence
 make setup
 ```
 
@@ -37,7 +37,7 @@ python -m src.orchestration.experiment_runner --config experiments/configs/your_
 federated-cognitive-defense/
 ├── src/
 │   ├── attacks/          # Attack implementations
-│   ├── defenses/         # Defense strategies
+│   ├── defences/         # Defense strategies
 │   ├── clients/          # Client implementations
 │   ├── server/           # Server implementations
 │   ├── models/           # Neural network models
@@ -122,7 +122,7 @@ Results are automatically saved to:
 
 1. **FEMNIST Integration**: More realistic FL dataset
 2. **Quantum Neural Networks**: PennyLane integration
-3. **Advanced Defenses**: Krum, Trimmed Mean, FreqFed
+3. **Advanced defences**: Krum, Trimmed Mean, FreqFed
 4. **Adaptive Attacks**: Learning-based adversarial strategies
 
 ## Contributing

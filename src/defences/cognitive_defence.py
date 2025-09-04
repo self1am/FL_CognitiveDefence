@@ -1,4 +1,4 @@
-# src/defenses/cognitive_defense.py
+# src/defences/cognitive_defense.py
 import numpy as np
 from typing import Dict, List, Tuple, Any
 from collections import deque
@@ -6,7 +6,7 @@ from datetime import datetime
 from .base_defence import BaseDefense
 from ..utils.logging_utils import ExplainableDecision
 
-class CognitiveDefenseStrategy(BaseDefense):
+class Cognitivedefencestrategy(BaseDefense):
     """
     Enhanced cognitive defense implementing OODA loop and MAPE-K framework
     """

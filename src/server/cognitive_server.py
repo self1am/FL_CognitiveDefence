@@ -28,7 +28,7 @@ class CognitiveAggregationStrategy(fl.server.strategy.FedAvg):
             self.logger.logger.info(f"Initialized server with {self.defense.get_defense_description()}")
     
     def aggregate_fit(self, server_round: int, results, failures):
-        """Override aggregation with cognitive defenses"""
+        """Override aggregation with cognitive defences"""
         if self.logger:
             self.logger.logger.info(
                 f"Starting cognitive aggregation for round {server_round} - "

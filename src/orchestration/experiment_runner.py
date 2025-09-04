@@ -10,7 +10,7 @@ import time
 
 from .client_orchestrator import ClientOrchestrator
 from ..server.cognitive_server import CognitiveAggregationStrategy
-from ..defences.cognitive_defence import CognitiveDefenseStrategy
+from ..defences.cognitive_defence import Cognitivedefencestrategy
 from ..utils.config import ExperimentConfig, AttackConfig, DefenseConfig, ConfigManager, DeterministicEnvironment
 from ..utils.logging_utils import ExperimentLogger
 import flwr as fl
@@ -52,14 +52,14 @@ class ExperimentRunner:
         defense_config = DefenseConfig(**self.config.get('defense', {}))
         
         if defense_config.strategy == 'cognitive_defense':
-            defense = CognitiveDefenseStrategy(
+            defense = Cognitivedefencestrategy(
                 anomaly_threshold=defense_config.anomaly_threshold,
                 reputation_decay=defense_config.reputation_decay,
                 history_size=defense_config.history_size
             )
         else:
             # Fallback to cognitive defense
-            defense = CognitiveDefenseStrategy()
+            defense = Cognitivedefencestrategy()
         
         # Create aggregation strategy
         strategy = CognitiveAggregationStrategy(
