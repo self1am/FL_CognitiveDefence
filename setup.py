@@ -2,9 +2,9 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="federated-cognitive-defense",
+    name="federated-cognitive-defence",
     version="0.1.0",
-    description="Federated Learning with Cognitive Defense Mechanisms",
+    description="Federated Learning with Cognitive defence Mechanisms",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     python_requires=">=3.8",

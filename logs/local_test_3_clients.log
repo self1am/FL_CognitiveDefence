@@ -1,0 +1,31 @@
+2025-09-04 16:17:28,582 - local_test_3_clients - INFO - Starting experiment: local_test_3_clients
+2025-09-04 16:17:53,605 - local_test_3_clients - INFO - Starting experiment: local_test_3_clients
+2025-09-04 16:17:53,606 - local_test_3_clients - INFO - Initialized server with Cognitive defence Strategy (OODA Loop + MAPE-K, threshold=0.7)
+2025-09-04 16:17:53,606 - local_test_3_clients - INFO - Starting federated learning server
+2025-09-04 16:17:53,606 - flwr - WARNING - DEPRECATED FEATURE: flwr.server.start_server() is deprecated.
+	Instead, use the `flower-superlink` CLI command to start a SuperLink as shown below:
+
+		$ flower-superlink --insecure
+
+	To view usage and all available options, run:
+
+		$ flower-superlink --help
+
+	Using `start_server()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2025-09-04 16:17:53,606 - flwr - INFO - Starting Flower server, config: num_rounds=3, no round_timeout
+2025-09-04 16:17:53,637 - flwr - INFO - Flower ECE: gRPC server running (3 rounds), SSL is disabled
+2025-09-04 16:17:58,612 - local_test_3_clients - INFO - Starting experiment with 3 clients
+2025-09-04 16:17:59,634 - local_test_3_clients - INFO - Spawned client 0 with PID 23829
+2025-09-04 16:18:01,632 - local_test_3_clients - INFO - Spawned client 1 with PID 23839
+2025-09-04 16:18:06,649 - local_test_3_clients - INFO - Spawned client 2 with PID 23849
+2025-09-04 16:18:06,650 - local_test_3_clients - INFO - Successfully spawned 3/3 clients
+2025-09-04 16:18:06,650 - local_test_3_clients - ERROR - Client 0 failed with code 1
+2025-09-04 16:18:06,650 - local_test_3_clients - ERROR - Client 1 failed with code 1
+2025-09-04 16:18:06,650 - local_test_3_clients - INFO - Waiting for 1 clients: [2]
+2025-09-04 16:18:07,656 - local_test_3_clients - ERROR - Client 2 failed with code 1
+2025-09-04 16:18:21,662 - local_test_3_clients - INFO - Experiment completed: {'experiment_name': 'local_test_3_clients', 'total_clients': 3, 'successful_clients': 0, 'failed_clients': 3, 'duration_seconds': 23.0470130443573, 'results': {'client_logs': {0: {'stdout': '', 'stderr': "/Users/hanafemira/development/FL_CognitiveDefence/fl_config/bin/python: Error while finding module specification for 'src/clients/client_runner.py' (ModuleNotFoundError: No module named 'src/clients/client_runner'). Try using 'src/clients/client_runner' instead of 'src/clients/client_runner.py' as the module name.\n"}, 1: {'stdout': '', 'stderr': "/Users/hanafemira/development/FL_CognitiveDefence/fl_config/bin/python: Error while finding module specification for 'src/clients/client_runner.py' (ModuleNotFoundError: No module named 'src/clients/client_runner'). Try using 'src/clients/client_runner' instead of 'src/clients/client_runner.py' as the module name.\n"}, 2: {'stdout': '', 'stderr': "/Users/hanafemira/development/FL_CognitiveDefence/fl_config/bin/python: Error while finding module specification for 'src/clients/client_runner.py' (ModuleNotFoundError: No module named 'src/clients/client_runner'). Try using 'src/clients/client_runner' instead of 'src/clients/client_runner.py' as the module name.\n"}}, 'resource_usage': {0: None, 1: None, 2: None}, 'status_summary': {0: 'failed', 1: 'failed', 2: 'failed'}}}
+2025-09-04 16:18:21,664 - local_test_3_clients - INFO - Experiment completed. Results saved to experiments/results/local_test_3_clients_results.json

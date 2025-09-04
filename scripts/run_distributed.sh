@@ -7,7 +7,7 @@ set -e
 # Configuration
 SERVER_VM="your-server-vm-ip"
 CLIENT_VMS=("your-client-vm1-ip" "your-client-vm2-ip")
-CONFIG_FILE="experiments/configs/basic_cognitive_defense.yaml"
+CONFIG_FILE="experiments/configs/basic_cognitive_defence.yaml"
 
 echo "Setting up distributed federated learning experiment..."
 

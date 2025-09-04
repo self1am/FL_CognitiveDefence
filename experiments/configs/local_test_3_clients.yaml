@@ -1,0 +1,25 @@
+experiment:
+  experiment_name: "local_test_3_clients"
+  seed: 42
+  num_rounds: 3  # Short test
+  min_clients: 2
+  min_available_clients: 2
+  server_address: "localhost:8080"
+
+defence:
+  strategy: "cognitive_defence"
+  anomaly_threshold: 0.7
+  reputation_decay: 0.8
+  history_size: 100
+
+attacks:
+  - enabled: true
+    attack_type: "label_flip"
+    intensity: 0.1
+    target_clients: [0]  # Only first client is malicious
+
+orchestration:
+  num_clients: 3  # Start small
+  batch_size: 2
+  max_memory_mb: 4000  # Conservative for M1 MacBook
+  spawn_delay: 3.0

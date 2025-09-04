@@ -4,28 +4,28 @@ import numpy as np
 from typing import Dict, List, Tuple, Optional, Any
 from datetime import datetime
 
-from ..defences.base_defence import BaseDefense
+from ..defences.base_defence import Basedefence
 from ..utils.logging_utils import ExperimentLogger, ExplainableDecision
 from ..utils.config import ExperimentConfig
 
 class CognitiveAggregationStrategy(fl.server.strategy.FedAvg):
-    """Enhanced FedAvg with cognitive defense mechanisms"""
+    """Enhanced FedAvg with cognitive defence mechanisms"""
     
     def __init__(self, 
-                 defense: BaseDefense,
+                 defence: Basedefence,
                  config: ExperimentConfig,
                  logger: Optional[ExperimentLogger] = None,
                  **kwargs):
         
         super().__init__(**kwargs)
-        self.defense = defense
+        self.defence = defence
         self.config = config
         self.logger = logger
         self.round_logs = []
         self._current_parameters = None
         
         if self.logger:
-            self.logger.logger.info(f"Initialized server with {self.defense.get_defense_description()}")
+            self.logger.logger.info(f"Initialized server with {self.defence.get_defence_description()}")
     
     def aggregate_fit(self, server_round: int, results, failures):
         """Override aggregation with cognitive defences"""
@@ -56,8 +56,8 @@ class CognitiveAggregationStrategy(fl.server.strategy.FedAvg):
             return super().aggregate_fit(server_round, results, failures)
         
         try:
-            # Apply cognitive defense
-            aggregated_params, decisions = self.defense.aggregate_updates(client_updates)
+            # Apply cognitive defence
+            aggregated_params, decisions = self.defence.aggregate_updates(client_updates)
             
             # Log round information
             round_metrics = {
@@ -65,7 +65,7 @@ class CognitiveAggregationStrategy(fl.server.strategy.FedAvg):
                 'num_clients': len(client_updates),
                 'num_decisions': len(decisions),
                 'avg_decision_confidence': np.mean([d.confidence for d in decisions]) if decisions else 0,
-                'defense_strategy': self.defense.get_defense_description()
+                'defence_strategy': self.defence.get_defence_description()
             }
             
             if self.logger:

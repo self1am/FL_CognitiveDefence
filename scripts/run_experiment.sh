@@ -3,7 +3,7 @@
 set -e
 
 # Default values
-CONFIG_FILE="experiments/configs/basic_cognitive_defense.yaml"
+CONFIG_FILE="experiments/configs/basic_cognitive_defence.yaml"
 SERVER_HOST="localhost"
 
 # Parse command line arguments
@@ -19,7 +19,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         --help)
             echo "Usage: $0 [--config CONFIG_FILE] [--server-host HOST]"
-            echo "  --config: Path to experiment configuration YAML (default: experiments/configs/basic_cognitive_defense.yaml)"
+            echo "  --config: Path to experiment configuration YAML (default: experiments/configs/basic_cognitive_defence.yaml)"
             echo "  --server-host: Server hostname/IP (default: localhost)"
             exit 0
             ;;

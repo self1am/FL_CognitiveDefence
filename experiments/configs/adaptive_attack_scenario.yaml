@@ -7,8 +7,8 @@ experiment:
   min_available_clients: 3
   server_address: "0.0.0.0:8080"
 
-defense:
-  strategy: "cognitive_defense"
+defence:
+  strategy: "cognitive_defence"
   anomaly_threshold: 0.6
   reputation_decay: 0.75
   history_size: 150

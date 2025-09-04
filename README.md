@@ -1,12 +1,12 @@
-# Federated Learning with Cognitive Defense Mechanisms
+# Federated Learning with Cognitive defence Mechanisms
 
-A modular federated learning framework implementing cognitive defense strategies based on OODA loop and MAPE-K frameworks, with support for various attacks and defences.
+A modular federated learning framework implementing cognitive defence strategies based on OODA loop and MAPE-K frameworks, with support for various attacks and defences.
 
 ## Features
 
 - **Modular Architecture**: Separation of concerns with pluggable attacks and defences
 - **Multi-Client Orchestration**: Automated management of 10+ client processes with resource monitoring
-- **Cognitive Defense**: OODA loop and MAPE-K framework implementation
+- **Cognitive defence**: OODA loop and MAPE-K framework implementation
 - **Attack Simulation**: Label flipping, gradient noise, model replacement, and more
 - **Explainable AI**: Decision logging with reasoning and evidence
 - **Deterministic Experiments**: Reproducible results with proper seeding
@@ -34,10 +34,10 @@ python -m src.orchestration.experiment_runner --config experiments/configs/your_
 ## Project Structure
 
 ```
-federated-cognitive-defense/
+federated-cognitive-defence/
 ├── src/
 │   ├── attacks/          # Attack implementations
-│   ├── defences/         # Defense strategies
+│   ├── defences/         # defence strategies
 │   ├── clients/          # Client implementations
 │   ├── server/           # Server implementations
 │   ├── models/           # Neural network models
@@ -57,13 +57,13 @@ Experiments are configured using YAML files. Example:
 
 ```yaml
 experiment:
-  experiment_name: "cognitive_defense_test"
+  experiment_name: "cognitive_defence_test"
   seed: 42
   num_rounds: 10
   server_address: "0.0.0.0:8080"
 
-defense:
-  strategy: "cognitive_defense"
+defence:
+  strategy: "cognitive_defence"
   anomaly_threshold: 0.7
 
 attacks:

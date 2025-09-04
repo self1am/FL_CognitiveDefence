@@ -1,0 +1,33 @@
+{
+  "experiment_name": "local_test_3_clients",
+  "total_clients": 3,
+  "successful_clients": 0,
+  "failed_clients": 3,
+  "duration_seconds": 23.0470130443573,
+  "results": {
+    "client_logs": {
+      "0": {
+        "stdout": "",
+        "stderr": "/Users/hanafemira/development/FL_CognitiveDefence/fl_config/bin/python: Error while finding module specification for 'src/clients/client_runner.py' (ModuleNotFoundError: No module named 'src/clients/client_runner'). Try using 'src/clients/client_runner' instead of 'src/clients/client_runner.py' as the module name.\n"
+      },
+      "1": {
+        "stdout": "",
+        "stderr": "/Users/hanafemira/development/FL_CognitiveDefence/fl_config/bin/python: Error while finding module specification for 'src/clients/client_runner.py' (ModuleNotFoundError: No module named 'src/clients/client_runner'). Try using 'src/clients/client_runner' instead of 'src/clients/client_runner.py' as the module name.\n"
+      },
+      "2": {
+        "stdout": "",
+        "stderr": "/Users/hanafemira/development/FL_CognitiveDefence/fl_config/bin/python: Error while finding module specification for 'src/clients/client_runner.py' (ModuleNotFoundError: No module named 'src/clients/client_runner'). Try using 'src/clients/client_runner' instead of 'src/clients/client_runner.py' as the module name.\n"
+      }
+    },
+    "resource_usage": {
+      "0": null,
+      "1": null,
+      "2": null
+    },
+    "status_summary": {
+      "0": "failed",
+      "1": "failed",
+      "2": "failed"
+    }
+  }
+}

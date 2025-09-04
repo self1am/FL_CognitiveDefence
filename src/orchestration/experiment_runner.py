@@ -10,8 +10,8 @@ import time
 
 from .client_orchestrator import ClientOrchestrator
 from ..server.cognitive_server import CognitiveAggregationStrategy
-from ..defences.cognitive_defence import Cognitivedefencestrategy
-from ..utils.config import ExperimentConfig, AttackConfig, DefenseConfig, ConfigManager, DeterministicEnvironment
+from ..defences.cognitive_defence import CognitivedefenceStrategy
+from ..utils.config import ExperimentConfig, AttackConfig, defenceConfig, ConfigManager, DeterministicEnvironment
 from ..utils.logging_utils import ExperimentLogger
 import flwr as fl
 
@@ -48,22 +48,22 @@ class ExperimentRunner:
     
     def start_server(self) -> subprocess.Popen:
         """Start the federated learning server"""
-        # Create defense strategy
-        defense_config = DefenseConfig(**self.config.get('defense', {}))
+        # Create defence strategy
+        defence_config = defenceConfig(**self.config.get('defence', {}))
         
-        if defense_config.strategy == 'cognitive_defense':
-            defense = Cognitivedefencestrategy(
-                anomaly_threshold=defense_config.anomaly_threshold,
-                reputation_decay=defense_config.reputation_decay,
-                history_size=defense_config.history_size
+        if defence_config.strategy == 'cognitive_defence':
+            defence = CognitivedefenceStrategy(
+                anomaly_threshold=defence_config.anomaly_threshold,
+                reputation_decay=defence_config.reputation_decay,
+                history_size=defence_config.history_size
             )
         else:
-            # Fallback to cognitive defense
-            defense = Cognitivedefencestrategy()
+            # Fallback to cognitive defence
+            defence = Cognitivedefencestrategy()
         
         # Create aggregation strategy
         strategy = CognitiveAggregationStrategy(
-            defense=defense,
+            defence=defence,
             config=self.experiment_config,
             logger=self.logger,
             min_fit_clients=self.experiment_config.min_clients,

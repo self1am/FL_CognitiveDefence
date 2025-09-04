@@ -8,7 +8,7 @@ help:
 	@echo "  install     - Install Python dependencies"
 	@echo "  test        - Run tests"
 	@echo "  clean       - Clean generated files"
-	@echo "  run-basic   - Run basic cognitive defense experiment"
+	@echo "  run-basic   - Run basic cognitive defence experiment"
 	@echo "  run-adaptive - Run adaptive attack scenario"
 	@echo "  run-large   - Run large scale test"
 
@@ -35,7 +35,7 @@ clean:
 
 # Run experiments
 run-basic:
-	python -m src.orchestration.experiment_runner --config experiments/configs/basic_cognitive_defense.yaml
+	python -m src.orchestration.experiment_runner --config experiments/configs/basic_cognitive_defence.yaml
 
 run-adaptive:
 	python -m src.orchestration.experiment_runner --config experiments/configs/adaptive_attack_scenario.yaml

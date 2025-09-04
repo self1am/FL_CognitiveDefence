@@ -34,9 +34,9 @@ class AttackConfig:
     target_clients: List[int] = None  # None means random selection
     
 @dataclass
-class DefenseConfig:
-    """Defense configuration"""
-    strategy: str = "cognitive_defense"
+class defenceConfig:
+    """defence configuration"""
+    strategy: str = "cognitive_defence"
     anomaly_threshold: float = 0.7
     reputation_decay: float = 0.8
     history_size: int = 100

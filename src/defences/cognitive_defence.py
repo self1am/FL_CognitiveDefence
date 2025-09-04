@@ -1,14 +1,14 @@
-# src/defences/cognitive_defense.py
+# src/defences/cognitive_defence.py
 import numpy as np
 from typing import Dict, List, Tuple, Any
 from collections import deque
 from datetime import datetime
-from .base_defence import BaseDefense
+from .base_defence import Basedefence
 from ..utils.logging_utils import ExplainableDecision
 
-class Cognitivedefencestrategy(BaseDefense):
+class CognitivedefenceStrategy(Basedefence):
     """
-    Enhanced cognitive defense implementing OODA loop and MAPE-K framework
+    Enhanced cognitive defence implementing OODA loop and MAPE-K framework
     """
     
     def __init__(self, anomaly_threshold: float = 0.7, reputation_decay: float = 0.8, 
@@ -181,5 +181,5 @@ class Cognitivedefencestrategy(BaseDefense):
         
         return aggregated_params, explainable_decisions
     
-    def get_defense_description(self) -> str:
-        return f"Cognitive Defense Strategy (OODA Loop + MAPE-K, threshold={self.anomaly_threshold})"
+    def get_defence_description(self) -> str:
+        return f"Cognitive defence Strategy (OODA Loop + MAPE-K, threshold={self.anomaly_threshold})"

@@ -2,7 +2,7 @@
 # scripts/setup_project.sh
 set -e
 
-echo "Setting up Federated Cognitive Defense project..."
+echo "Setting up Federated Cognitive defence project..."
 
 # Create directory structure
 echo "Creating directory structure..."

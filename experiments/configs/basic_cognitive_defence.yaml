@@ -1,14 +1,14 @@
-# experiments/configs/basic_cognitive_defense.yaml
+# experiments/configs/basic_cognitive_defence.yaml
 experiment:
-  experiment_name: "cognitive_defense_10_clients"
+  experiment_name: "cognitive_defence_10_clients"
   seed: 42
   num_rounds: 10
   min_clients: 2
   min_available_clients: 2
   server_address: "0.0.0.0:8080"
 
-defense:
-  strategy: "cognitive_defense"
+defence:
+  strategy: "cognitive_defence"
   anomaly_threshold: 0.7
   reputation_decay: 0.8
   history_size: 100
