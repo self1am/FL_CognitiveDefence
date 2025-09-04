@@ -1,0 +1,32 @@
+# experiments/configs/distributed_10_clients.yaml
+# Replace YOUR_SERVER_VM_IP with your actual Azure VM IP
+experiment:
+  experiment_name: "distributed_10_clients_test"
+  seed: 42
+  num_rounds: 5
+  min_clients: 3
+  min_available_clients: 3
+  server_address: "YOUR_SERVER_VM_IP:8080"  # Replace this!
+
+defense:
+  strategy: "cognitive_defense"
+  anomaly_threshold: 0.7
+  reputation_decay: 0.8
+  history_size: 100
+
+attacks:
+  - enabled: true
+    attack_type: "label_flip"
+    intensity: 0.15
+    target_clients: [0, 1, 2]  # First 3 clients malicious
+  
+  - enabled: true
+    attack_type: "gradient_noise"
+    intensity: 0.05
+    target_clients: [7, 8]
+
+orchestration:
+  num_clients: 10
+  batch_size: 3  # Spawn 3 clients at a time
+  max_memory_mb: 3000  # Conservative for 4GB VMs
+  spawn_delay: 4.0  # Longer delay for network

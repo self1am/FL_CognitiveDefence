@@ -1,0 +1,18 @@
+# experiments/configs/server_only.yaml
+# Configuration to run ONLY the server (for VM)
+experiment:
+  experiment_name: "server_only_mode"
+  seed: 42
+  num_rounds: 10
+  min_clients: 2
+  min_available_clients: 2
+  server_address: "0.0.0.0:8080"  # Listen on all interfaces
+
+defense:
+  strategy: "cognitive_defense"
+  anomaly_threshold: 0.7
+  reputation_decay: 0.8
+  history_size: 100
+
+# No orchestration section - server only
+server_only: true
