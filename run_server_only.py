@@ -1,9 +1,9 @@
 import argparse
 import yaml
 import flwr as fl
-from src.defenses.cognitive_defense import CognitiveDefenseStrategy
+from src.defences.cognitive_defence import Cognitivedefencestrategy
 from src.server.cognitive_server import CognitiveAggregationStrategy
-from src.utils.config import ExperimentConfig, DefenseConfig, DeterministicEnvironment
+from src.utils.config import ExperimentConfig, defenceConfig, DeterministicEnvironment
 from src.utils.logging_utils import ExperimentLogger
 
 def main():
@@ -18,7 +18,7 @@ def main():
         config = yaml.safe_load(f)
     
     experiment_config = ExperimentConfig(**config.get('experiment', {}))
-    defense_config = DefenseConfig(**config.get('defense', {}))
+    defence_config = defenceConfig(**config.get('defence', {}))
     
     # Setup deterministic environment
     DeterministicEnvironment.setup_seeds(experiment_config.seed)
@@ -27,16 +27,16 @@ def main():
     logger = ExperimentLogger(f"{experiment_config.experiment_name}_server")
     logger.logger.info(f"Starting server on {args.host}:{args.port}")
     
-    # Create defense
-    defense = CognitiveDefenseStrategy(
-        anomaly_threshold=defense_config.anomaly_threshold,
-        reputation_decay=defense_config.reputation_decay,
-        history_size=defense_config.history_size
+    # Create defence
+    defence = Cognitivedefencestrategy(
+        anomaly_threshold=defence_config.anomaly_threshold,
+        reputation_decay=defence_config.reputation_decay,
+        history_size=defence_config.history_size
     )
     
     # Create strategy
     strategy = CognitiveAggregationStrategy(
-        defense=defense,
+        defence=defence,
         config=experiment_config,
         logger=logger,
         min_fit_clients=experiment_config.min_clients,
