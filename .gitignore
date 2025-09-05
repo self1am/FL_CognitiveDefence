@@ -1,5 +1,6 @@
 experiments/results/
 experiments/logs/
+logs/
 __pycache__/
 *.pyc
 *.pyo
