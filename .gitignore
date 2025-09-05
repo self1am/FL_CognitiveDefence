@@ -1,0 +1,17 @@
+experiments/results/
+experiments/logs/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+*.log
+.DS_Store
+.vscode/
+.idea/
+env/
+venv/
+env.bak/
+venv.bak/
+*.egg-info/
