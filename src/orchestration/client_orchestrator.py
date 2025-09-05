@@ -109,7 +109,7 @@ class ClientOrchestrator:
         self.logger = logger
         self.client_processes: Dict[int, ClientProcess] = {}
         self.resource_monitor = ResourceMonitor(max_memory_mb=max_memory_mb)
-        self.client_script_path = "src/clients/client_runner.py"
+        self.client_script_path = "src.clients.client_runner"
         
     def generate_client_config(self, client_id: int, attack_config: Optional[AttackConfig] = None) -> Dict[str, Any]:
         """Generate configuration for a specific client"""

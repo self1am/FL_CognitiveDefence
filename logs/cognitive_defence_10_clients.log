@@ -1,0 +1,44 @@
+2025-09-05 01:57:51,127 - cognitive_defence_10_clients - INFO - Starting experiment: cognitive_defence_10_clients
+2025-09-05 01:57:51,127 - cognitive_defence_10_clients - INFO - Initialized server with Cognitive defence Strategy (OODA Loop + MAPE-K, threshold=0.7)
+2025-09-05 01:57:51,127 - cognitive_defence_10_clients - INFO - Starting federated learning server
+2025-09-05 01:57:51,127 - flwr - WARNING - DEPRECATED FEATURE: flwr.server.start_server() is deprecated.
+	Instead, use the `flower-superlink` CLI command to start a SuperLink as shown below:
+
+		$ flower-superlink --insecure
+
+	To view usage and all available options, run:
+
+		$ flower-superlink --help
+
+	Using `start_server()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2025-09-05 01:57:51,128 - flwr - INFO - Starting Flower server, config: num_rounds=10, no round_timeout
+2025-09-05 01:57:51,152 - flwr - INFO - Flower ECE: gRPC server running (10 rounds), SSL is disabled
+2025-09-05 01:57:56,133 - cognitive_defence_10_clients - INFO - Starting experiment with 10 clients
+2025-09-05 01:57:57,160 - cognitive_defence_10_clients - INFO - Spawned client 0 with PID 31862
+2025-09-05 01:57:59,159 - cognitive_defence_10_clients - INFO - Spawned client 1 with PID 31866
+2025-09-05 01:58:01,164 - cognitive_defence_10_clients - INFO - Spawned client 2 with PID 31868
+2025-09-05 01:58:08,196 - cognitive_defence_10_clients - INFO - Spawned client 3 with PID 31885
+2025-09-05 01:58:10,200 - cognitive_defence_10_clients - INFO - Spawned client 4 with PID 31888
+2025-09-05 01:58:12,201 - cognitive_defence_10_clients - INFO - Spawned client 5 with PID 31889
+2025-09-05 01:58:19,324 - cognitive_defence_10_clients - INFO - Spawned client 6 with PID 31909
+2025-09-05 01:58:21,329 - cognitive_defence_10_clients - INFO - Spawned client 7 with PID 31912
+2025-09-05 01:58:23,333 - cognitive_defence_10_clients - INFO - Spawned client 8 with PID 31920
+2025-09-05 01:58:30,361 - cognitive_defence_10_clients - INFO - Spawned client 9 with PID 31930
+2025-09-05 01:58:30,362 - cognitive_defence_10_clients - INFO - Successfully spawned 10/10 clients
+2025-09-05 01:58:30,363 - cognitive_defence_10_clients - ERROR - Client 0 failed with code 1
+2025-09-05 01:58:30,363 - cognitive_defence_10_clients - INFO - Waiting for 9 clients: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+2025-09-05 01:58:30,363 - cognitive_defence_10_clients - ERROR - Client 1 failed with code 1
+2025-09-05 01:58:30,363 - cognitive_defence_10_clients - ERROR - Client 2 failed with code 1
+2025-09-05 01:58:30,363 - cognitive_defence_10_clients - ERROR - Client 3 failed with code 1
+2025-09-05 01:58:30,363 - cognitive_defence_10_clients - ERROR - Client 4 failed with code 1
+2025-09-05 01:58:30,364 - cognitive_defence_10_clients - ERROR - Client 5 failed with code 1
+2025-09-05 01:58:30,364 - cognitive_defence_10_clients - ERROR - Client 6 failed with code 1
+2025-09-05 01:58:30,364 - cognitive_defence_10_clients - ERROR - Client 7 failed with code 1
+2025-09-05 01:58:30,364 - cognitive_defence_10_clients - ERROR - Client 8 failed with code 1
+2025-09-05 01:58:31,369 - cognitive_defence_10_clients - ERROR - Client 9 failed with code 1
+2025-09-05 01:58:44,295 - cognitive_defence_10_clients - INFO - Experiment completed: {'experiment_name': 'cognitive_defence_10_clients', 'total_clients': 10, 'successful_clients': 0, 'failed_clients': 10, 'duration_seconds': 48.15839910507202, 'results': {'client_logs': {0: {'stdout': '', 'stderr': "/Users/hanafemira/development/FL_CognitiveDefence/fl_config/bin/python: Error while finding module specification for 'src/clients/client_runner.py' (ModuleNotFoundError: No module named 'src/clients/client_runner'). Try using 'src/clients/client_runner' instead of 'src/clients/client_runner.py' as the module name.\n"}, 1: {'stdout': '', 'stderr': "/Users/hanafemira/development/FL_CognitiveDefence/fl_config/bin/python: Error while finding module specification for 'src/clients/client_runner.py' (ModuleNotFoundError: No module named 'src/clients/client_runner'). Try using 'src/clients/client_runner' instead of 'src/clients/client_runner.py' as the module name.\n"}, 2: {'stdout': '', 'stderr': "/Users/hanafemira/development/FL_CognitiveDefence/fl_config/bin/python: Error while finding module specification for 'src/clients/client_runner.py' (ModuleNotFoundError: No module named 'src/clients/client_runner'). Try using 'src/clients/client_runner' instead of 'src/clients/client_runner.py' as the module name.\n"}, 3: {'stdout': '', 'stderr': "/Users/hanafemira/development/FL_CognitiveDefence/fl_config/bin/python: Error while finding module specification for 'src/clients/client_runner.py' (ModuleNotFoundError: No module named 'src/clients/client_runner'). Try using 'src/clients/client_runner' instead of 'src/clients/client_runner.py' as the module name.\n"}, 4: {'stdout': '', 'stderr': "/Users/hanafemira/development/FL_CognitiveDefence/fl_config/bin/python: Error while finding module specification for 'src/clients/client_runner.py' (ModuleNotFoundError: No module named 'src/clients/client_runner'). Try using 'src/clients/client_runner' instead of 'src/clients/client_runner.py' as the module name.\n"}, 5: {'stdout': '', 'stderr': "/Users/hanafemira/development/FL_CognitiveDefence/fl_config/bin/python: Error while finding module specification for 'src/clients/client_runner.py' (ModuleNotFoundError: No module named 'src/clients/client_runner'). Try using 'src/clients/client_runner' instead of 'src/clients/client_runner.py' as the module name.\n"}, 6: {'stdout': '', 'stderr': "/Users/hanafemira/development/FL_CognitiveDefence/fl_config/bin/python: Error while finding module specification for 'src/clients/client_runner.py' (ModuleNotFoundError: No module named 'src/clients/client_runner'). Try using 'src/clients/client_runner' instead of 'src/clients/client_runner.py' as the module name.\n"}, 7: {'stdout': '', 'stderr': "/Users/hanafemira/development/FL_CognitiveDefence/fl_config/bin/python: Error while finding module specification for 'src/clients/client_runner.py' (ModuleNotFoundError: No module named 'src/clients/client_runner'). Try using 'src/clients/client_runner' instead of 'src/clients/client_runner.py' as the module name.\n"}, 8: {'stdout': '', 'stderr': "/Users/hanafemira/development/FL_CognitiveDefence/fl_config/bin/python: Error while finding module specification for 'src/clients/client_runner.py' (ModuleNotFoundError: No module named 'src/clients/client_runner'). Try using 'src/clients/client_runner' instead of 'src/clients/client_runner.py' as the module name.\n"}, 9: {'stdout': '', 'stderr': "/Users/hanafemira/development/FL_CognitiveDefence/fl_config/bin/python: Error while finding module specification for 'src/clients/client_runner.py' (ModuleNotFoundError: No module named 'src/clients/client_runner'). Try using 'src/clients/client_runner' instead of 'src/clients/client_runner.py' as the module name.\n"}}, 'resource_usage': {0: None, 1: None, 2: None, 3: None, 4: None, 5: None, 6: None, 7: None, 8: None, 9: None}, 'status_summary': {0: 'failed', 1: 'failed', 2: 'failed', 3: 'failed', 4: 'failed', 5: 'failed', 6: 'failed', 7: 'failed', 8: 'failed', 9: 'failed'}}}
+2025-09-05 01:58:44,299 - cognitive_defence_10_clients - INFO - Experiment completed. Results saved to experiments/results/cognitive_defence_10_clients_results.json

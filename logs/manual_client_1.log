@@ -1,0 +1,300 @@
+2025-09-04 19:03:59,269 - manual_client_1 - INFO - Starting client 1 connecting to 20.169.237.127:8080
+2025-09-04 19:04:03,358 - manual_client_1 - INFO - Client 1 initialized with 5997 training samples
+2025-09-04 19:04:03,368 - manual_client_1 - INFO - Client 1 ready. Connecting to server...
+2025-09-04 19:04:03,369 - flwr - WARNING - DEPRECATED FEATURE: flwr.client.start_client() is deprecated.
+	Instead, use the `flower-supernode` CLI command to start a SuperNode as shown below:
+
+		$ flower-supernode --insecure --superlink='<IP>:<PORT>'
+
+	To view all available options, run:
+
+		$ flower-supernode --help
+
+	Using `start_client()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2025-09-04 19:04:03,395 - flwr - DEBUG - Opened insecure gRPC connection (no certificates were passed)
+2025-09-04 19:04:03,397 - flwr - DEBUG - ChannelConnectivity.IDLE
+2025-09-04 19:04:03,399 - flwr - DEBUG - ChannelConnectivity.CONNECTING
+2025-09-04 19:04:03,904 - flwr - DEBUG - ChannelConnectivity.READY
+2025-09-04 19:04:06,437 - flwr - INFO - 
+2025-09-04 19:04:06,437 - flwr - INFO - Received: train message f3645b96-5c02-484c-bbeb-d27fe772835e
+2025-09-04 19:04:07,282 - flwr - ERROR - Client raised an exception.
+Traceback (most recent call last):
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/compat/client/app.py", line 466, in start_client_internal
+    reply_message = client_app(message=message, context=context)
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/client_app.py", line 144, in __call__
+    return self._call(message, context)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/client_app.py", line 128, in ffn
+    out_message = handle_legacy_message_from_msgtype(
+        client_fn=client_fn, message=message, context=context
+    )
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/message_handler/message_handler.py", line 128, in handle_legacy_message_from_msgtype
+    fit_res = maybe_call_fit(
+        client=client,
+        fit_ins=recorddict_to_fitins(message.content, keep_input=True),
+    )
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/client.py", line 224, in maybe_call_fit
+    return client.fit(fit_ins)
+           ~~~~~~~~~~^^^^^^^^^
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/numpy_client.py", line 227, in _fit
+    results = self.numpy_client.fit(parameters, ins.config)  # type: ignore
+  File "/Users/hanafemira/development/FL_CognitiveDefence/src/clients/enhanced_client.py", line 69, in fit
+    attacked_dataset = self.attack.attack_data(self.trainloader.dataset, self.client_id)
+  File "/Users/hanafemira/development/FL_CognitiveDefence/src/attacks/label_flip.py", line 43, in attack_data
+    available_classes.remove(labels[idx].item())
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+ValueError: list.remove(x): x not in list
+2025-09-04 19:04:07,385 - flwr - DEBUG - gRPC channel closed
+2025-09-04 19:04:07,385 - manual_client_1 - ERROR - Client 1 failed: list.remove(x): x not in list
+2025-09-04 19:04:16,571 - manual_client_1 - INFO - Starting client 1 connecting to 20.169.237.127:8080
+2025-09-04 19:04:20,369 - manual_client_1 - INFO - Client 1 initialized with 5997 training samples
+2025-09-04 19:04:20,369 - manual_client_1 - INFO - Client 1 ready. Connecting to server...
+2025-09-04 19:04:20,369 - flwr - WARNING - DEPRECATED FEATURE: flwr.client.start_client() is deprecated.
+	Instead, use the `flower-supernode` CLI command to start a SuperNode as shown below:
+
+		$ flower-supernode --insecure --superlink='<IP>:<PORT>'
+
+	To view all available options, run:
+
+		$ flower-supernode --help
+
+	Using `start_client()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2025-09-04 19:04:20,387 - flwr - DEBUG - Opened insecure gRPC connection (no certificates were passed)
+2025-09-04 19:04:20,388 - flwr - DEBUG - ChannelConnectivity.IDLE
+2025-09-04 19:04:20,389 - flwr - DEBUG - ChannelConnectivity.CONNECTING
+2025-09-04 19:04:20,844 - flwr - DEBUG - ChannelConnectivity.READY
+2025-09-04 19:04:59,490 - flwr - INFO - 
+2025-09-04 19:04:59,491 - flwr - INFO - Received: evaluate message 30207b0a-e5d2-4a26-ba93-04052fd6efd4
+2025-09-04 19:05:05,752 - manual_client_1 - INFO - Client 1 Evaluation - Loss: 2.3058, Accuracy: 0.0900
+2025-09-04 19:05:05,753 - flwr - INFO - Sent reply
+2025-09-04 19:05:08,353 - flwr - INFO - 
+2025-09-04 19:05:08,353 - flwr - INFO - Received: train message 89e529d7-90f5-4313-99ca-c35dbb416cd6
+2025-09-04 19:05:09,251 - flwr - ERROR - Client raised an exception.
+Traceback (most recent call last):
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/compat/client/app.py", line 466, in start_client_internal
+    reply_message = client_app(message=message, context=context)
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/client_app.py", line 144, in __call__
+    return self._call(message, context)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/client_app.py", line 128, in ffn
+    out_message = handle_legacy_message_from_msgtype(
+        client_fn=client_fn, message=message, context=context
+    )
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/message_handler/message_handler.py", line 128, in handle_legacy_message_from_msgtype
+    fit_res = maybe_call_fit(
+        client=client,
+        fit_ins=recorddict_to_fitins(message.content, keep_input=True),
+    )
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/client.py", line 224, in maybe_call_fit
+    return client.fit(fit_ins)
+           ~~~~~~~~~~^^^^^^^^^
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/numpy_client.py", line 227, in _fit
+    results = self.numpy_client.fit(parameters, ins.config)  # type: ignore
+  File "/Users/hanafemira/development/FL_CognitiveDefence/src/clients/enhanced_client.py", line 69, in fit
+    attacked_dataset = self.attack.attack_data(self.trainloader.dataset, self.client_id)
+  File "/Users/hanafemira/development/FL_CognitiveDefence/src/attacks/label_flip.py", line 43, in attack_data
+    available_classes.remove(labels[idx].item())
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+ValueError: list.remove(x): x not in list
+2025-09-04 19:05:09,394 - flwr - DEBUG - gRPC channel closed
+2025-09-04 19:05:09,394 - manual_client_1 - ERROR - Client 1 failed: list.remove(x): x not in list
+2025-09-04 19:06:01,957 - manual_client_1 - INFO - Starting client 1 connecting to 20.169.237.127:8080
+2025-09-04 19:06:05,901 - manual_client_1 - INFO - Client 1 initialized with 5997 training samples
+2025-09-04 19:06:05,901 - manual_client_1 - INFO - Client 1 ready. Connecting to server...
+2025-09-04 19:06:05,901 - flwr - WARNING - DEPRECATED FEATURE: flwr.client.start_client() is deprecated.
+	Instead, use the `flower-supernode` CLI command to start a SuperNode as shown below:
+
+		$ flower-supernode --insecure --superlink='<IP>:<PORT>'
+
+	To view all available options, run:
+
+		$ flower-supernode --help
+
+	Using `start_client()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2025-09-04 19:06:05,922 - flwr - DEBUG - Opened insecure gRPC connection (no certificates were passed)
+2025-09-04 19:06:05,925 - flwr - DEBUG - ChannelConnectivity.IDLE
+2025-09-04 19:06:05,926 - flwr - DEBUG - ChannelConnectivity.CONNECTING
+2025-09-04 19:06:06,422 - flwr - DEBUG - ChannelConnectivity.READY
+2025-09-04 19:06:09,500 - flwr - INFO - 
+2025-09-04 19:06:09,500 - flwr - INFO - Received: evaluate message 139f2139-375f-48f6-8eed-a42ba91a1076
+2025-09-04 19:06:12,860 - manual_client_1 - INFO - Client 1 Evaluation - Loss: 2.3058, Accuracy: 0.0900
+2025-09-04 19:06:12,862 - flwr - INFO - Sent reply
+2025-09-04 19:06:15,350 - flwr - INFO - 
+2025-09-04 19:06:15,350 - flwr - INFO - Received: train message d1e2c105-f01d-4c13-8a08-73f9ae54f695
+2025-09-04 19:06:16,216 - flwr - ERROR - Client raised an exception.
+Traceback (most recent call last):
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/compat/client/app.py", line 466, in start_client_internal
+    reply_message = client_app(message=message, context=context)
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/client_app.py", line 144, in __call__
+    return self._call(message, context)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/client_app.py", line 128, in ffn
+    out_message = handle_legacy_message_from_msgtype(
+        client_fn=client_fn, message=message, context=context
+    )
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/message_handler/message_handler.py", line 128, in handle_legacy_message_from_msgtype
+    fit_res = maybe_call_fit(
+        client=client,
+        fit_ins=recorddict_to_fitins(message.content, keep_input=True),
+    )
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/client.py", line 224, in maybe_call_fit
+    return client.fit(fit_ins)
+           ~~~~~~~~~~^^^^^^^^^
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/numpy_client.py", line 227, in _fit
+    results = self.numpy_client.fit(parameters, ins.config)  # type: ignore
+  File "/Users/hanafemira/development/FL_CognitiveDefence/src/clients/enhanced_client.py", line 69, in fit
+    attacked_dataset = self.attack.attack_data(self.trainloader.dataset, self.client_id)
+  File "/Users/hanafemira/development/FL_CognitiveDefence/src/attacks/label_flip.py", line 43, in attack_data
+    available_classes.remove(labels[idx].item())
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+ValueError: list.remove(x): x not in list
+2025-09-04 19:06:16,270 - flwr - DEBUG - gRPC channel closed
+2025-09-04 19:06:16,270 - manual_client_1 - ERROR - Client 1 failed: list.remove(x): x not in list
+2025-09-05 14:37:48,737 - manual_client_1 - INFO - Starting client 1 connecting to 20.169.237.127:8080
+2025-09-05 14:37:52,584 - manual_client_1 - INFO - Client 1 initialized with 5997 training samples
+2025-09-05 14:37:52,585 - manual_client_1 - INFO - Client 1 ready. Connecting to server...
+2025-09-05 14:37:52,585 - flwr - WARNING - DEPRECATED FEATURE: flwr.client.start_client() is deprecated.
+	Instead, use the `flower-supernode` CLI command to start a SuperNode as shown below:
+
+		$ flower-supernode --insecure --superlink='<IP>:<PORT>'
+
+	To view all available options, run:
+
+		$ flower-supernode --help
+
+	Using `start_client()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2025-09-05 14:37:52,606 - flwr - DEBUG - Opened insecure gRPC connection (no certificates were passed)
+2025-09-05 14:37:52,607 - flwr - DEBUG - ChannelConnectivity.IDLE
+2025-09-05 14:37:52,613 - flwr - DEBUG - ChannelConnectivity.CONNECTING
+2025-09-05 14:37:53,103 - flwr - DEBUG - ChannelConnectivity.READY
+2025-09-05 14:37:55,842 - flwr - INFO - 
+2025-09-05 14:37:55,842 - flwr - INFO - Received: train message 91ed5aaa-9ac1-441b-b90b-94a0de6ece3c
+2025-09-05 14:37:56,656 - flwr - ERROR - Client raised an exception.
+Traceback (most recent call last):
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/compat/client/app.py", line 466, in start_client_internal
+    reply_message = client_app(message=message, context=context)
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/client_app.py", line 144, in __call__
+    return self._call(message, context)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/client_app.py", line 128, in ffn
+    out_message = handle_legacy_message_from_msgtype(
+        client_fn=client_fn, message=message, context=context
+    )
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/message_handler/message_handler.py", line 128, in handle_legacy_message_from_msgtype
+    fit_res = maybe_call_fit(
+        client=client,
+        fit_ins=recorddict_to_fitins(message.content, keep_input=True),
+    )
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/client.py", line 224, in maybe_call_fit
+    return client.fit(fit_ins)
+           ~~~~~~~~~~^^^^^^^^^
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/numpy_client.py", line 227, in _fit
+    results = self.numpy_client.fit(parameters, ins.config)  # type: ignore
+  File "/Users/hanafemira/development/FL_CognitiveDefence/src/clients/enhanced_client.py", line 69, in fit
+    attacked_dataset = self.attack.attack_data(self.trainloader.dataset, self.client_id)
+  File "/Users/hanafemira/development/FL_CognitiveDefence/src/attacks/label_flip.py", line 43, in attack_data
+    available_classes.remove(labels[idx].item())
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+ValueError: list.remove(x): x not in list
+2025-09-05 14:37:56,817 - flwr - DEBUG - gRPC channel closed
+2025-09-05 14:37:56,818 - manual_client_1 - ERROR - Client 1 failed: list.remove(x): x not in list
+2025-09-05 14:38:34,011 - manual_client_1 - INFO - Starting client 1 connecting to 20.169.237.127:8080
+2025-09-05 14:38:37,915 - manual_client_1 - INFO - Client 1 initialized with 5997 training samples
+2025-09-05 14:38:37,916 - manual_client_1 - INFO - Client 1 ready. Connecting to server...
+2025-09-05 14:38:37,916 - flwr - WARNING - DEPRECATED FEATURE: flwr.client.start_client() is deprecated.
+	Instead, use the `flower-supernode` CLI command to start a SuperNode as shown below:
+
+		$ flower-supernode --insecure --superlink='<IP>:<PORT>'
+
+	To view all available options, run:
+
+		$ flower-supernode --help
+
+	Using `start_client()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2025-09-05 14:38:37,940 - flwr - DEBUG - Opened insecure gRPC connection (no certificates were passed)
+2025-09-05 14:38:37,942 - flwr - DEBUG - ChannelConnectivity.IDLE
+2025-09-05 14:38:37,944 - flwr - DEBUG - ChannelConnectivity.CONNECTING
+2025-09-05 14:38:38,431 - flwr - DEBUG - ChannelConnectivity.READY
+2025-09-05 14:39:10,283 - flwr - INFO - 
+2025-09-05 14:39:10,284 - flwr - INFO - Received: evaluate message 4a002541-6081-49d6-b89f-f5865e8c0cbf
+2025-09-05 14:39:13,069 - manual_client_1 - INFO - Client 1 Evaluation - Loss: 2.3058, Accuracy: 0.0900
+2025-09-05 14:39:13,070 - flwr - INFO - Sent reply
+2025-09-05 14:39:37,740 - flwr - INFO - 
+2025-09-05 14:39:37,741 - flwr - INFO - Received: train message d75873ab-b4ad-4d6e-8fa5-0c57612235a6
+2025-09-05 14:39:38,619 - flwr - ERROR - Client raised an exception.
+Traceback (most recent call last):
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/compat/client/app.py", line 466, in start_client_internal
+    reply_message = client_app(message=message, context=context)
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/client_app.py", line 144, in __call__
+    return self._call(message, context)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/client_app.py", line 128, in ffn
+    out_message = handle_legacy_message_from_msgtype(
+        client_fn=client_fn, message=message, context=context
+    )
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/message_handler/message_handler.py", line 128, in handle_legacy_message_from_msgtype
+    fit_res = maybe_call_fit(
+        client=client,
+        fit_ins=recorddict_to_fitins(message.content, keep_input=True),
+    )
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/client.py", line 224, in maybe_call_fit
+    return client.fit(fit_ins)
+           ~~~~~~~~~~^^^^^^^^^
+  File "/Users/hanafemira/development/federated_learning_defense/fl_env/lib/python3.13/site-packages/flwr/client/numpy_client.py", line 227, in _fit
+    results = self.numpy_client.fit(parameters, ins.config)  # type: ignore
+  File "/Users/hanafemira/development/FL_CognitiveDefence/src/clients/enhanced_client.py", line 69, in fit
+    attacked_dataset = self.attack.attack_data(self.trainloader.dataset, self.client_id)
+  File "/Users/hanafemira/development/FL_CognitiveDefence/src/attacks/label_flip.py", line 43, in attack_data
+    available_classes.remove(labels[idx].item())
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+ValueError: list.remove(x): x not in list
+2025-09-05 14:39:38,626 - flwr - DEBUG - gRPC channel closed
+2025-09-05 14:39:38,626 - manual_client_1 - ERROR - Client 1 failed: list.remove(x): x not in list
+2025-09-05 14:39:44,991 - manual_client_1 - INFO - Starting client 1 connecting to 20.169.237.127:8080
+2025-09-05 14:39:48,955 - manual_client_1 - INFO - Client 1 initialized with 5997 training samples
+2025-09-05 14:39:48,955 - manual_client_1 - INFO - Client 1 ready. Connecting to server...
+2025-09-05 14:39:48,955 - flwr - WARNING - DEPRECATED FEATURE: flwr.client.start_client() is deprecated.
+	Instead, use the `flower-supernode` CLI command to start a SuperNode as shown below:
+
+		$ flower-supernode --insecure --superlink='<IP>:<PORT>'
+
+	To view all available options, run:
+
+		$ flower-supernode --help
+
+	Using `start_client()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2025-09-05 14:39:48,972 - flwr - DEBUG - Opened insecure gRPC connection (no certificates were passed)
+2025-09-05 14:39:48,973 - flwr - DEBUG - ChannelConnectivity.IDLE
+2025-09-05 14:39:48,974 - flwr - DEBUG - ChannelConnectivity.CONNECTING
+2025-09-05 14:39:49,442 - flwr - DEBUG - ChannelConnectivity.READY
+2025-09-05 14:58:31,153 - flwr - DEBUG - ChannelConnectivity.IDLE
+2025-09-05 14:58:31,364 - flwr - DEBUG - gRPC channel closed
+2025-09-05 14:58:31,366 - manual_client_1 - ERROR - Client 1 failed: <_MultiThreadedRendezvous of RPC that terminated with:
+	status = StatusCode.UNAVAILABLE
+	details = "recvmsg:Connection reset by peer"
+	debug_error_string = "UNKNOWN:Error received from peer  {grpc_message:"recvmsg:Connection reset by peer", grpc_status:14}"
+>

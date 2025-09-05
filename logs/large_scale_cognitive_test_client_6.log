@@ -1,0 +1,78 @@
+2025-09-05 15:32:11,927 - large_scale_cognitive_test_client_6 - INFO - Starting client 6 with config: {'client_id': 6, 'server_address': '0.0.0.0:8080', 'experiment_name': 'large_scale_cognitive_test', 'seed': 462, 'batch_size': 32, 'epochs': 2, 'learning_rate': 0.001, 'attack_enabled': False}
+2025-09-05 15:32:16,489 - large_scale_cognitive_test_client_6 - INFO - Client 6 initialized with 5957 training samples
+2025-09-05 15:32:16,489 - large_scale_cognitive_test_client_6 - INFO - Client 6 connecting to 0.0.0.0:8080
+2025-09-05 15:32:16,490 - flwr - WARNING - DEPRECATED FEATURE: flwr.client.start_client() is deprecated.
+	Instead, use the `flower-supernode` CLI command to start a SuperNode as shown below:
+
+		$ flower-supernode --insecure --superlink='<IP>:<PORT>'
+
+	To view all available options, run:
+
+		$ flower-supernode --help
+
+	Using `start_client()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2025-09-05 15:32:16,503 - flwr - DEBUG - Opened insecure gRPC connection (no certificates were passed)
+2025-09-05 15:32:16,504 - flwr - DEBUG - ChannelConnectivity.IDLE
+2025-09-05 15:32:16,505 - flwr - DEBUG - gRPC channel closed
+2025-09-05 15:32:16,505 - large_scale_cognitive_test_client_6 - ERROR - Client 6 failed: <_MultiThreadedRendezvous of RPC that terminated with:
+	status = StatusCode.UNAVAILABLE
+	details = "failed to connect to all addresses; last error: UNKNOWN: ipv4:0.0.0.0:8080: Failed to connect to remote host: connect: Connection refused (61)"
+	debug_error_string = "UNKNOWN:Error received from peer  {grpc_status:14, grpc_message:"failed to connect to all addresses; last error: UNKNOWN: ipv4:0.0.0.0:8080: Failed to connect to remote host: connect: Connection refused (61)"}"
+>
+2025-09-05 15:38:28,800 - large_scale_cognitive_test_client_6 - INFO - Starting client 6 with config: {'client_id': 6, 'server_address': '0.0.0.0:8080', 'experiment_name': 'large_scale_cognitive_test', 'seed': 462, 'batch_size': 32, 'epochs': 2, 'learning_rate': 0.001, 'attack_enabled': False}
+2025-09-05 15:38:33,223 - large_scale_cognitive_test_client_6 - INFO - Client 6 initialized with 5957 training samples
+2025-09-05 15:38:33,223 - large_scale_cognitive_test_client_6 - INFO - Client 6 connecting to 0.0.0.0:8080
+2025-09-05 15:38:33,223 - flwr - WARNING - DEPRECATED FEATURE: flwr.client.start_client() is deprecated.
+	Instead, use the `flower-supernode` CLI command to start a SuperNode as shown below:
+
+		$ flower-supernode --insecure --superlink='<IP>:<PORT>'
+
+	To view all available options, run:
+
+		$ flower-supernode --help
+
+	Using `start_client()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2025-09-05 15:38:33,238 - flwr - DEBUG - Opened insecure gRPC connection (no certificates were passed)
+2025-09-05 15:38:33,239 - flwr - DEBUG - ChannelConnectivity.IDLE
+2025-09-05 15:38:33,240 - flwr - DEBUG - ChannelConnectivity.TRANSIENT_FAILURE
+2025-09-05 15:38:33,443 - flwr - DEBUG - gRPC channel closed
+2025-09-05 15:38:33,444 - large_scale_cognitive_test_client_6 - ERROR - Client 6 failed: <_MultiThreadedRendezvous of RPC that terminated with:
+	status = StatusCode.UNAVAILABLE
+	details = "failed to connect to all addresses; last error: UNKNOWN: ipv4:0.0.0.0:8080: Failed to connect to remote host: connect: Connection refused (61)"
+	debug_error_string = "UNKNOWN:Error received from peer  {grpc_message:"failed to connect to all addresses; last error: UNKNOWN: ipv4:0.0.0.0:8080: Failed to connect to remote host: connect: Connection refused (61)", grpc_status:14}"
+>
+2025-09-05 15:41:14,324 - large_scale_cognitive_test_client_6 - INFO - Starting client 6 with config: {'client_id': 6, 'server_address': '20.169.237.127:8080', 'experiment_name': 'large_scale_cognitive_test', 'seed': 462, 'batch_size': 32, 'epochs': 2, 'learning_rate': 0.001, 'attack_enabled': False}
+2025-09-05 15:41:18,605 - large_scale_cognitive_test_client_6 - INFO - Client 6 initialized with 5957 training samples
+2025-09-05 15:41:18,605 - large_scale_cognitive_test_client_6 - INFO - Client 6 connecting to 20.169.237.127:8080
+2025-09-05 15:41:18,605 - flwr - WARNING - DEPRECATED FEATURE: flwr.client.start_client() is deprecated.
+	Instead, use the `flower-supernode` CLI command to start a SuperNode as shown below:
+
+		$ flower-supernode --insecure --superlink='<IP>:<PORT>'
+
+	To view all available options, run:
+
+		$ flower-supernode --help
+
+	Using `start_client()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2025-09-05 15:41:18,621 - flwr - DEBUG - Opened insecure gRPC connection (no certificates were passed)
+2025-09-05 15:41:18,622 - flwr - DEBUG - ChannelConnectivity.IDLE
+2025-09-05 15:41:18,622 - flwr - DEBUG - ChannelConnectivity.CONNECTING
+2025-09-05 15:41:20,961 - flwr - DEBUG - ChannelConnectivity.TRANSIENT_FAILURE
+2025-09-05 15:41:21,168 - flwr - DEBUG - gRPC channel closed
+2025-09-05 15:41:21,169 - large_scale_cognitive_test_client_6 - ERROR - Client 6 failed: <_MultiThreadedRendezvous of RPC that terminated with:
+	status = StatusCode.UNAVAILABLE
+	details = "failed to connect to all addresses; last error: UNKNOWN: ipv4:20.169.237.127:8080: Failed to connect to remote host: connect: Connection refused (61)"
+	debug_error_string = "UNKNOWN:Error received from peer  {grpc_message:"failed to connect to all addresses; last error: UNKNOWN: ipv4:20.169.237.127:8080: Failed to connect to remote host: connect: Connection refused (61)", grpc_status:14}"
+>
