@@ -1,0 +1,82 @@
+[
+  {
+    "client_id": 11,
+    "round": 1,
+    "avg_loss": 0.0702759635655809,
+    "training_accuracy": 0.9794290512174643,
+    "num_samples": 5955,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-09-05T16:38:43.512544"
+  },
+  {
+    "client_id": 11,
+    "round": 2,
+    "avg_loss": 0.05300495567146212,
+    "training_accuracy": 0.9842989084802687,
+    "num_samples": 5955,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-09-05T16:39:39.139939"
+  },
+  {
+    "client_id": 11,
+    "round": 3,
+    "avg_loss": 0.04233174141352885,
+    "training_accuracy": 0.9880772460117548,
+    "num_samples": 5955,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-09-05T16:40:24.615087"
+  },
+  {
+    "client_id": 11,
+    "round": 4,
+    "avg_loss": 0.03772043732421013,
+    "training_accuracy": 0.9897565071368598,
+    "num_samples": 5955,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-09-05T16:41:16.830258"
+  },
+  {
+    "client_id": 11,
+    "round": 5,
+    "avg_loss": 0.03231021662474296,
+    "training_accuracy": 0.9900083963056255,
+    "num_samples": 5955,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-09-05T16:42:23.127725"
+  },
+  {
+    "client_id": 11,
+    "round": 6,
+    "avg_loss": 0.02849701558764726,
+    "training_accuracy": 0.9925272879932829,
+    "num_samples": 5955,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-09-05T16:43:21.733478"
+  },
+  {
+    "client_id": 11,
+    "round": 7,
+    "avg_loss": 0.023638958087403468,
+    "training_accuracy": 0.9936188077246012,
+    "num_samples": 5955,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-09-05T16:44:33.247071"
+  },
+  {
+    "client_id": 11,
+    "round": 8,
+    "avg_loss": 0.02087191774335358,
+    "training_accuracy": 0.9943744752308984,
+    "num_samples": 5955,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-09-05T16:45:23.735424"
+  }
+]

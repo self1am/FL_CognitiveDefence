@@ -43,6 +43,12 @@ run-adaptive:
 run-large:
 	python -m src.orchestration.experiment_runner --config experiments/configs/large_scale_test.yaml
 
+run-dist:
+	python -m src.orchestration.experiment_runner --config experiments/configs/distributed_10_clients.yaml
+
+run-server-only:
+	python -m src.orchestration.experiment_runner --config experiments/configs/server_only.yaml
+
 # Development targets
 dev-install: install
 	pip install pytest black flake8

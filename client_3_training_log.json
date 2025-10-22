@@ -1,0 +1,92 @@
+[
+  {
+    "client_id": 3,
+    "round": 1,
+    "avg_loss": 0.11298967704642564,
+    "training_accuracy": 0.9686545571451535,
+    "num_samples": 6221,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-09-06T13:56:23.723282"
+  },
+  {
+    "client_id": 3,
+    "round": 2,
+    "avg_loss": 0.058399573978012764,
+    "training_accuracy": 0.9837646680597975,
+    "num_samples": 6221,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-09-06T13:57:17.662728"
+  },
+  {
+    "client_id": 3,
+    "round": 3,
+    "avg_loss": 0.046848345442021336,
+    "training_accuracy": 0.9860954830413117,
+    "num_samples": 6221,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-09-06T13:58:13.235347"
+  },
+  {
+    "client_id": 3,
+    "round": 4,
+    "avg_loss": 0.040279817404629846,
+    "training_accuracy": 0.9890692814660023,
+    "num_samples": 6221,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-09-06T13:59:01.510436"
+  },
+  {
+    "client_id": 3,
+    "round": 5,
+    "avg_loss": 0.03364769804230048,
+    "training_accuracy": 0.9909982317955313,
+    "num_samples": 6221,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-09-06T14:00:13.267810"
+  },
+  {
+    "client_id": 3,
+    "round": 6,
+    "avg_loss": 0.02812832152152017,
+    "training_accuracy": 0.9918823340298988,
+    "num_samples": 6221,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-09-06T14:01:16.639103"
+  },
+  {
+    "client_id": 3,
+    "round": 7,
+    "avg_loss": 0.025801999785441974,
+    "training_accuracy": 0.9929271821250603,
+    "num_samples": 6221,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-09-06T14:02:11.334399"
+  },
+  {
+    "client_id": 3,
+    "round": 8,
+    "avg_loss": 0.02611175240924177,
+    "training_accuracy": 0.9930075550554573,
+    "num_samples": 6221,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-09-06T14:03:21.239420"
+  },
+  {
+    "client_id": 3,
+    "round": 9,
+    "avg_loss": 0.024736508016521153,
+    "training_accuracy": 0.9938916572898248,
+    "num_samples": 6221,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-09-06T14:04:27.250657"
+  }
+]

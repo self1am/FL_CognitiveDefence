@@ -1,12 +1,11 @@
 # experiments/configs/distributed_10_clients.yaml
-# Replace YOUR_SERVER_VM_IP with your actual Azure VM IP
 experiment:
   experiment_name: "distributed_10_clients_test"
   seed: 42
   num_rounds: 5
   min_clients: 3
   min_available_clients: 3
-  server_address: "YOUR_SERVER_VM_IP:8080"  # Replace this!
+  server_address: "20.169.237.127:8080"  
 
 defense:
   strategy: "cognitive_defense"

@@ -1,0 +1,82 @@
+[
+  {
+    "client_id": 7,
+    "round": 1,
+    "avg_loss": 0.052655306974870725,
+    "training_accuracy": 0.9836397631660954,
+    "num_samples": 6418,
+    "attacked": true,
+    "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
+    "timestamp": "2025-09-06T13:57:19.760192"
+  },
+  {
+    "client_id": 7,
+    "round": 2,
+    "avg_loss": 0.03800774171774642,
+    "training_accuracy": 0.9896385166718604,
+    "num_samples": 6418,
+    "attacked": true,
+    "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
+    "timestamp": "2025-09-06T13:58:02.454359"
+  },
+  {
+    "client_id": 7,
+    "round": 3,
+    "avg_loss": 0.029270512558626924,
+    "training_accuracy": 0.9917419756933624,
+    "num_samples": 6418,
+    "attacked": true,
+    "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
+    "timestamp": "2025-09-06T13:59:02.710817"
+  },
+  {
+    "client_id": 7,
+    "round": 4,
+    "avg_loss": 0.029414844222834625,
+    "training_accuracy": 0.9919756933624182,
+    "num_samples": 6418,
+    "attacked": true,
+    "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
+    "timestamp": "2025-09-06T14:00:13.410855"
+  },
+  {
+    "client_id": 7,
+    "round": 5,
+    "avg_loss": 0.025794706191024926,
+    "training_accuracy": 0.9926768463695855,
+    "num_samples": 6418,
+    "attacked": true,
+    "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
+    "timestamp": "2025-09-06T14:01:24.779276"
+  },
+  {
+    "client_id": 7,
+    "round": 6,
+    "avg_loss": 0.021177603595976015,
+    "training_accuracy": 0.994312870052976,
+    "num_samples": 6418,
+    "attacked": true,
+    "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
+    "timestamp": "2025-09-06T14:02:25.935975"
+  },
+  {
+    "client_id": 7,
+    "round": 7,
+    "avg_loss": 0.022241746779784258,
+    "training_accuracy": 0.9947023995014023,
+    "num_samples": 6418,
+    "attacked": true,
+    "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
+    "timestamp": "2025-09-06T14:03:22.186563"
+  },
+  {
+    "client_id": 7,
+    "round": 8,
+    "avg_loss": 0.01549001256345222,
+    "training_accuracy": 0.9962605172951076,
+    "num_samples": 6418,
+    "attacked": true,
+    "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
+    "timestamp": "2025-09-06T14:04:34.356269"
+  }
+]

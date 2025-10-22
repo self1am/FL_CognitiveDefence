@@ -9,7 +9,7 @@ from ..utils.logging_utils import ExplainableDecision
 class CognitivedefenceStrategy(Basedefence):
     """
     Enhanced cognitive defence implementing OODA loop and MAPE-K framework
-    """
+    """     
     
     def __init__(self, anomaly_threshold: float = 0.7, reputation_decay: float = 0.8, 
                  history_size: int = 100):

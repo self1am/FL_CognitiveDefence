@@ -4,7 +4,7 @@ experiment:
   num_rounds: 3  # Short test
   min_clients: 2
   min_available_clients: 2
-  server_address: "localhost:8080"
+  server_address: "20.169.237.127:8080"
 
 defence:
   strategy: "cognitive_defence"

@@ -122,7 +122,7 @@ Results are automatically saved to:
 
 1. **FEMNIST Integration**: More realistic FL dataset
 2. **Quantum Neural Networks**: PennyLane integration
-3. **Advanced defences**: Krum, Trimmed Mean, FreqFed
+3. **Advanced defences**: , Trimmed Mean, FreqFed
 4. **Adaptive Attacks**: Learning-based adversarial strategies
 
 ## Contributing

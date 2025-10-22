@@ -15,7 +15,7 @@ class ExperimentConfig:
     num_rounds: int = 10
     min_clients: int = 2
     min_available_clients: int = 2
-    server_address: str = "0.0.0.0:8080"
+    server_address: str = "127.0.0.1:8080"
     
 @dataclass
 class ClientConfig:
