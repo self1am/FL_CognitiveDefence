@@ -1,0 +1,22 @@
+# no attacks or defences
+experiment:
+  experiment_name: "baseline_experiment"
+  seed: 123
+  num_rounds: 10
+  min_clients: 5
+  min_available_clients: 5
+  server_address: "140.245.224.116:8080"
+
+defence:
+  strategy: "none"
+  anomaly_threshold: 0.0
+  reputation_decay: 0.0
+  history_size: 0
+
+attacks: []
+
+orchestration:
+  num_clients: 10
+  batch_size: 4
+  max_memory_mb: 8000
+  spawn_delay: 2.0

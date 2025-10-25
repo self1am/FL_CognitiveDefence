@@ -5,13 +5,13 @@ experiment:
   num_rounds: 10
   min_clients: 2
   min_available_clients: 2
-  server_address: "140.245.224.116:8080"
+  server_address: "0.0.0.0:8080"
 
 defence:
-  strategy: "cognitive_defence"
-  anomaly_threshold: 0.7
-  reputation_decay: 0.8
-  history_size: 100
+  strategy: "none"
+  anomaly_threshold: 0.0
+  reputation_decay: 0.0
+  history_size: 0
 
 attacks:
   - enabled: true
