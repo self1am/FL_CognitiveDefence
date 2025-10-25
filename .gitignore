@@ -17,5 +17,4 @@ env.bak/
 venv.bak/
 *.egg-info/
 client_0_training_log.json
-client_0_training_log.json
-client_0_training_log.json
+*_training_log.json
