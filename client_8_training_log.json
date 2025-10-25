@@ -2,81 +2,81 @@
   {
     "client_id": 8,
     "round": 1,
-    "avg_loss": 0.06485997470263875,
-    "training_accuracy": 0.980573620143405,
+    "avg_loss": 0.09438750255983595,
+    "training_accuracy": 0.9711522427880607,
     "num_samples": 5997,
     "attacked": true,
     "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
-    "timestamp": "2025-09-06T13:57:10.655006"
+    "timestamp": "2025-10-25T15:25:29.072169"
   },
   {
     "client_id": 8,
     "round": 2,
-    "avg_loss": 0.040064093432347556,
-    "training_accuracy": 0.9873269968317492,
+    "avg_loss": 0.048409434052410556,
+    "training_accuracy": 0.984992496248124,
     "num_samples": 5997,
     "attacked": true,
     "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
-    "timestamp": "2025-09-06T13:58:03.775923"
+    "timestamp": "2025-10-25T15:26:03.034082"
   },
   {
     "client_id": 8,
     "round": 3,
-    "avg_loss": 0.033480341008164924,
-    "training_accuracy": 0.9900783725195931,
+    "avg_loss": 0.03966119734547859,
+    "training_accuracy": 0.9875771218942805,
     "num_samples": 5997,
     "attacked": true,
     "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
-    "timestamp": "2025-09-06T13:59:24.523900"
+    "timestamp": "2025-10-25T15:26:38.143394"
   },
   {
     "client_id": 8,
     "round": 4,
-    "avg_loss": 0.02645388094640808,
-    "training_accuracy": 0.9915791228947807,
+    "avg_loss": 0.02840926830607559,
+    "training_accuracy": 0.9905786226446557,
     "num_samples": 5997,
     "attacked": true,
     "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
-    "timestamp": "2025-09-06T14:00:14.693392"
+    "timestamp": "2025-10-25T15:27:15.232352"
   },
   {
     "client_id": 8,
     "round": 5,
-    "avg_loss": 0.02353767217434392,
-    "training_accuracy": 0.992162748040687,
+    "avg_loss": 0.029374583320483733,
+    "training_accuracy": 0.991162247790562,
     "num_samples": 5997,
     "attacked": true,
     "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
-    "timestamp": "2025-09-06T14:01:14.934011"
+    "timestamp": "2025-10-25T15:27:51.252955"
   },
   {
     "client_id": 8,
     "round": 6,
-    "avg_loss": 0.01928219486203827,
-    "training_accuracy": 0.9935801233950309,
+    "avg_loss": 0.02168208934750246,
+    "training_accuracy": 0.9943304985826247,
     "num_samples": 5997,
     "attacked": true,
     "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
-    "timestamp": "2025-09-06T14:02:17.522663"
+    "timestamp": "2025-10-25T15:28:28.213463"
   },
   {
     "client_id": 8,
     "round": 7,
-    "avg_loss": 0.019104928015455706,
-    "training_accuracy": 0.9945806236451559,
+    "avg_loss": 0.023845319562599374,
+    "training_accuracy": 0.993163248290812,
     "num_samples": 5997,
     "attacked": true,
     "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
-    "timestamp": "2025-09-06T14:03:23.245043"
+    "timestamp": "2025-10-25T15:29:01.676446"
   },
   {
     "client_id": 8,
     "round": 8,
-    "avg_loss": 0.01607987280870879,
-    "training_accuracy": 0.9956644989161247,
+    "avg_loss": 0.018275818459608007,
+    "training_accuracy": 0.9946639986659996,
     "num_samples": 5997,
     "attacked": true,
     "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
-    "timestamp": "2025-09-06T14:04:29.344631"
+    "timestamp": "2025-10-25T15:31:29.312234"
   }
 ]

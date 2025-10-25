@@ -2,41 +2,91 @@
   {
     "client_id": 2,
     "round": 1,
-    "avg_loss": 0.16342460162008907,
-    "training_accuracy": 0.9591622189875465,
+    "avg_loss": 0.7517764145873257,
+    "training_accuracy": 0.8482937085557173,
     "num_samples": 6183,
-    "attacked": false,
-    "attack_type": null,
-    "timestamp": "2025-09-06T14:10:28.733451"
+    "attacked": true,
+    "attack_type": "Label Flip Attack (intensity=0.1, source=None, target=None)",
+    "timestamp": "2025-10-25T15:24:46.632648"
   },
   {
     "client_id": 2,
     "round": 2,
-    "avg_loss": 0.06899940140154041,
-    "training_accuracy": 0.9794598091541323,
+    "avg_loss": 0.672008945097782,
+    "training_accuracy": 0.8770823224971697,
     "num_samples": 6183,
-    "attacked": false,
-    "attack_type": null,
-    "timestamp": "2025-09-06T14:10:48.883423"
+    "attacked": true,
+    "attack_type": "Label Flip Attack (intensity=0.1, source=None, target=None)",
+    "timestamp": "2025-10-25T15:25:26.279669"
   },
   {
     "client_id": 2,
     "round": 3,
-    "avg_loss": 0.04383194538531919,
-    "training_accuracy": 0.9866569626394954,
+    "avg_loss": 0.6538221727403783,
+    "training_accuracy": 0.886139414523694,
     "num_samples": 6183,
-    "attacked": false,
-    "attack_type": null,
-    "timestamp": "2025-09-06T14:11:07.934760"
+    "attacked": true,
+    "attack_type": "Label Flip Attack (intensity=0.1, source=None, target=None)",
+    "timestamp": "2025-10-25T15:26:02.872799"
   },
   {
     "client_id": 2,
     "round": 4,
-    "avg_loss": 0.03153988525921648,
-    "training_accuracy": 0.9917515769044153,
+    "avg_loss": 0.6347659483129523,
+    "training_accuracy": 0.8888080219957949,
     "num_samples": 6183,
-    "attacked": false,
-    "attack_type": null,
-    "timestamp": "2025-09-06T14:11:27.445538"
+    "attacked": true,
+    "attack_type": "Label Flip Attack (intensity=0.1, source=None, target=None)",
+    "timestamp": "2025-10-25T15:26:39.163642"
+  },
+  {
+    "client_id": 2,
+    "round": 5,
+    "avg_loss": 0.6382134784512299,
+    "training_accuracy": 0.8918809639333657,
+    "num_samples": 6183,
+    "attacked": true,
+    "attack_type": "Label Flip Attack (intensity=0.1, source=None, target=None)",
+    "timestamp": "2025-10-25T15:27:15.466285"
+  },
+  {
+    "client_id": 2,
+    "round": 6,
+    "avg_loss": 0.622410233929446,
+    "training_accuracy": 0.8932557011159631,
+    "num_samples": 6183,
+    "attacked": true,
+    "attack_type": "Label Flip Attack (intensity=0.1, source=None, target=None)",
+    "timestamp": "2025-10-25T15:27:52.111217"
+  },
+  {
+    "client_id": 2,
+    "round": 7,
+    "avg_loss": 0.6169227394515399,
+    "training_accuracy": 0.8944687045123726,
+    "num_samples": 6183,
+    "attacked": true,
+    "attack_type": "Label Flip Attack (intensity=0.1, source=None, target=None)",
+    "timestamp": "2025-10-25T15:28:28.795616"
+  },
+  {
+    "client_id": 2,
+    "round": 8,
+    "avg_loss": 0.6142957551001581,
+    "training_accuracy": 0.8943878376192786,
+    "num_samples": 6183,
+    "attacked": true,
+    "attack_type": "Label Flip Attack (intensity=0.1, source=None, target=None)",
+    "timestamp": "2025-10-25T15:29:01.178059"
+  },
+  {
+    "client_id": 2,
+    "round": 9,
+    "avg_loss": 0.6299811572258928,
+    "training_accuracy": 0.8946304382985606,
+    "num_samples": 6183,
+    "attacked": true,
+    "attack_type": "Label Flip Attack (intensity=0.1, source=None, target=None)",
+    "timestamp": "2025-10-25T15:31:29.803959"
   }
 ]
