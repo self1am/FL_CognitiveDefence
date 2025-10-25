@@ -34,6 +34,12 @@ clean:
 	rm -rf logs/*.log experiments/results/*.json
 
 # Run experiments
+run-baseline:
+	python -m src.orchestration.experiment_runner --config experiments/configs/baseline_experiment.yaml
+	
+run-attack-only:
+	python -m src.orchestration.experiment_runner --config experiments/configs/attack_only.yaml
+	
 run-basic:
 	python -m src.orchestration.experiment_runner --config experiments/configs/basic_cognitive_defence.yaml
 
