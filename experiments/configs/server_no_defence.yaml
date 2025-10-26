@@ -8,7 +8,7 @@ experiment:
   min_available_clients: 4
   server_address: "0.0.0.0:8080"  # Listen on all interfaces
 
-defense:
+defence:
   strategy: "none"
   anomaly_threshold: 0.0
   reputation_decay: 0.0
