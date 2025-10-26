@@ -11,6 +11,7 @@ import time
 from .client_orchestrator import ClientOrchestrator
 from ..server.cognitive_server import CognitiveAggregationStrategy
 from ..defences.cognitive_defence import CognitivedefenceStrategy
+from ..defences.no_defence import NoDefenceStrategy
 from ..utils.config import ExperimentConfig, AttackConfig, defenceConfig, ConfigManager, DeterministicEnvironment
 from ..utils.logging_utils import ExperimentLogger
 import flwr as fl
@@ -57,9 +58,12 @@ class ExperimentRunner:
                 reputation_decay=defence_config.reputation_decay,
                 history_size=defence_config.history_size
             )
+        elif defence_config.strategy == 'none':
+            # No defense - simple FedAvg aggregation
+            defence = NoDefenceStrategy()
         else:
-            # Fallback to cognitive defence
-            defence = CognitivedefenceStrategy()
+            # Fallback to no defense for unknown strategies
+            defence = NoDefenceStrategy()
         
         # Create aggregation strategy
         strategy = CognitiveAggregationStrategy(

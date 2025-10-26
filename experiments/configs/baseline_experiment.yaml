@@ -17,6 +17,6 @@ attacks: []
 
 orchestration:
   num_clients: 10
-  batch_size: 4
+  batch_size: 2
   max_memory_mb: 8000
   spawn_delay: 2.0
