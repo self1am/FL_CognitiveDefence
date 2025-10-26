@@ -1,9 +1,8 @@
 import argparse
 import yaml
 import flwr as fl
-from src.defences.cognitive_defence import CognitivedefenceStrategy
-from src.defences.no_defence import NoDefenceStrategy
 from src.server.cognitive_server import CognitiveAggregationStrategy
+from src.server.no_defence_server import NoDefenceAggregationStrategy
 from src.utils.config import ExperimentConfig, defenceConfig, DeterministicEnvironment
 from src.utils.logging_utils import ExperimentLogger
 
@@ -28,28 +27,27 @@ def main():
     logger = ExperimentLogger(f"{experiment_config.experiment_name}_server")
     logger.logger.info(f"Starting server on {args.host}:{args.port}")
     
-    # Create defence based on strategy
+    # Create aggregation strategy based on configuration
     if defence_config.strategy == 'cognitive_defence':
-        defence = CognitivedefenceStrategy(
+        strategy = CognitiveAggregationStrategy(
+            config=experiment_config,
             anomaly_threshold=defence_config.anomaly_threshold,
             reputation_decay=defence_config.reputation_decay,
-            history_size=defence_config.history_size
+            history_size=defence_config.history_size,
+            logger=logger,
+            min_fit_clients=experiment_config.min_clients,
+            min_evaluate_clients=experiment_config.min_clients,
+            min_available_clients=experiment_config.min_available_clients,
         )
-    elif defence_config.strategy == 'none':
-        defence = NoDefenceStrategy()
     else:
-        # Default to no defense for unknown strategies
-        defence = NoDefenceStrategy()
-    
-    # Create strategy
-    strategy = CognitiveAggregationStrategy(
-        defence=defence,
-        config=experiment_config,
-        logger=logger,
-        min_fit_clients=experiment_config.min_clients,
-        min_evaluate_clients=experiment_config.min_clients,
-        min_available_clients=experiment_config.min_available_clients,
-    )
+        # No defense or unknown strategy - use simple FedAvg
+        strategy = NoDefenceAggregationStrategy(
+            config=experiment_config,
+            logger=logger,
+            min_fit_clients=experiment_config.min_clients,
+            min_evaluate_clients=experiment_config.min_clients,
+            min_available_clients=experiment_config.min_available_clients,
+        )
     
     logger.logger.info(f"Server starting with {experiment_config.num_rounds} rounds")
     

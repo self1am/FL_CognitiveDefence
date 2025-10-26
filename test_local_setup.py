@@ -123,31 +123,39 @@ def test_model_creation():
         return False
 
 def test_cognitive_defence():
-    """Test cognitive defence creation"""
-    print("\nTesting cognitive defence...")
+    """Test cognitive aggregation strategy creation"""
+    print("\nTesting cognitive aggregation strategy...")
     
     try:
-        from src.defences.cognitive_defence import CognitivedefenceStrategy
+        from src.server.cognitive_server import CognitiveAggregationStrategy
+        from src.utils.config import ExperimentConfig
         import numpy as np
         
-        defence = CognitivedefenceStrategy()
+        # Create test config
+        config = ExperimentConfig(
+            experiment_name="test",
+            seed=42,
+            num_rounds=5,
+            min_clients=2,
+            min_available_clients=2,
+            server_address="0.0.0.0:8080"
+        )
         
-        # Create dummy client updates
-        client_updates = {
-            "client_0": ([np.random.randn(10), np.random.randn(5)], 100, {"loss": 0.5}),
-            "client_1": ([np.random.randn(10), np.random.randn(5)], 80, {"loss": 0.6}),
-        }
+        strategy = CognitiveAggregationStrategy(
+            config=config,
+            anomaly_threshold=0.7,
+            reputation_decay=0.8,
+            history_size=100
+        )
         
-        aggregated_params, decisions = defence.aggregate_updates(client_updates)
-        
-        print(f"✅ Cognitive defence created")
-        print(f"✅ Processed {len(client_updates)} client updates")
-        print(f"✅ Generated {len(decisions)} decisions")
+        print(f"✅ Cognitive aggregation strategy created")
+        print(f"✅ Anomaly threshold: {strategy.anomaly_threshold}")
+        print(f"✅ Reputation decay: {strategy.reputation_decay}")
         
         return True
         
     except Exception as e:
-        print(f"❌ Cognitive defence failed: {e}")
+        print(f"❌ Cognitive aggregation strategy failed: {e}")
         traceback.print_exc()
         return False
 

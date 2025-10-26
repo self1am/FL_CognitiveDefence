@@ -10,8 +10,7 @@ import time
 
 from .client_orchestrator import ClientOrchestrator
 from ..server.cognitive_server import CognitiveAggregationStrategy
-from ..defences.cognitive_defence import CognitivedefenceStrategy
-from ..defences.no_defence import NoDefenceStrategy
+from ..server.no_defence_server import NoDefenceAggregationStrategy
 from ..utils.config import ExperimentConfig, AttackConfig, defenceConfig, ConfigManager, DeterministicEnvironment
 from ..utils.logging_utils import ExperimentLogger
 import flwr as fl
@@ -49,31 +48,29 @@ class ExperimentRunner:
     
     def start_server(self) -> subprocess.Popen:
         """Start the federated learning server"""
-        # Create defence strategy
+        # Create aggregation strategy based on configuration
         defence_config = defenceConfig(**self.config.get('defence', {}))
         
         if defence_config.strategy == 'cognitive_defence':
-            defence = CognitivedefenceStrategy(
+            strategy = CognitiveAggregationStrategy(
+                config=self.experiment_config,
                 anomaly_threshold=defence_config.anomaly_threshold,
                 reputation_decay=defence_config.reputation_decay,
-                history_size=defence_config.history_size
+                history_size=defence_config.history_size,
+                logger=self.logger,
+                min_fit_clients=self.experiment_config.min_clients,
+                min_evaluate_clients=self.experiment_config.min_clients,
+                min_available_clients=self.experiment_config.min_available_clients,
             )
-        elif defence_config.strategy == 'none':
-            # No defense - simple FedAvg aggregation
-            defence = NoDefenceStrategy()
         else:
-            # Fallback to no defense for unknown strategies
-            defence = NoDefenceStrategy()
-        
-        # Create aggregation strategy
-        strategy = CognitiveAggregationStrategy(
-            defence=defence,
-            config=self.experiment_config,
-            logger=self.logger,
-            min_fit_clients=self.experiment_config.min_clients,
-            min_evaluate_clients=self.experiment_config.min_clients,
-            min_available_clients=self.experiment_config.min_available_clients,
-        )
+            # No defense or unknown strategy - use simple FedAvg
+            strategy = NoDefenceAggregationStrategy(
+                config=self.experiment_config,
+                logger=self.logger,
+                min_fit_clients=self.experiment_config.min_clients,
+                min_evaluate_clients=self.experiment_config.min_clients,
+                min_available_clients=self.experiment_config.min_available_clients,
+            )
         
         self.logger.logger.info("Starting federated learning server")
         
