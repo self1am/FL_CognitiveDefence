@@ -43,6 +43,9 @@ run-attack-only:
 run-attack-only-server:
 	python run_server_with_eval.py --config experiments/configs/server_no_defence.yaml
 
+run-no-attack-server:
+	python run_server_with_eval.py --config experiments/configs/server_no_defence.yaml
+
 run-defence-server:
 	python run_server_with_eval.py --config experiments/configs/server_only.yaml
 	
