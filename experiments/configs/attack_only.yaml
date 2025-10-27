@@ -16,12 +16,12 @@ defence:
 attacks:
   - enabled: true
     attack_type: "label_flip"
-    intensity: 0.1
+    intensity: 0.5
     target_clients: [0, 1, 2]  # First 3 clients will be malicious
   
   - enabled: true
     attack_type: "gradient_noise"
-    intensity: 0.05
+    intensity: 0.2
     target_clients: [7, 8]  # Clients 7 and 8 with gradient noise
 
 orchestration:
