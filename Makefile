@@ -41,7 +41,7 @@ run-attack-only:
 	python -m src.orchestration.experiment_runner --config experiments/configs/attack_only.yaml
 
 run-attack-only-server:
-	python run_server_with_eval.py --config experiments/configs/attack_only.yaml
+	python run_server_with_eval.py --config experiments/configs/server_no_defence.yaml
 	
 run-basic:
 	python -m src.orchestration.experiment_runner --config experiments/configs/basic_cognitive_defence.yaml
