@@ -1,7 +1,10 @@
 # src/server/no_defence_server.py
 import flwr as fl
 import numpy as np
-from typing import List, Tuple, Optional, Any, Dict
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader
+from typing import List, Tuple, Optional, Any, Dict, Callable
 from datetime import datetime
 
 from ..utils.logging_utils import ExperimentLogger, ExplainableDecision
@@ -14,16 +17,20 @@ class NoDefenceAggregationStrategy(fl.server.strategy.FedAvg):
     def __init__(self, 
                  config: ExperimentConfig,
                  logger: Optional[ExperimentLogger] = None,
+                 evaluate_fn: Optional[Callable] = None,
                  **kwargs):
         
-        super().__init__(**kwargs)
+        super().__init__(evaluate_fn=evaluate_fn, **kwargs)
         self.config = config
         self.logger = logger
         self.round_logs = []
         self._current_parameters = None
+        self._evaluate_fn = evaluate_fn
         
         if self.logger:
             self.logger.logger.info("Initialized server with No Defense (Simple FedAvg)")
+            if evaluate_fn:
+                self.logger.logger.info("Centralized evaluation enabled on server")
     
     def aggregate_fit(self, server_round: int, results, failures):
         """Simple FedAvg aggregation without defense mechanisms"""

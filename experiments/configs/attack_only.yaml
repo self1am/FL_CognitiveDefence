@@ -1,10 +1,10 @@
 # experiments/configs/attack_only.yaml
 experiment:
   experiment_name: "attack_only_no_defence"
-  seed: 42
+  seed: 123
   num_rounds: 10
-  min_clients: 2
-  min_available_clients: 2
+  min_clients: 5
+  min_available_clients: 5
   server_address: "140.245.224.116:8080"
 
 defence:

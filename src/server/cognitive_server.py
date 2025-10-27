@@ -20,13 +20,15 @@ class CognitiveAggregationStrategy(fl.server.strategy.FedAvg):
                  reputation_decay: float = 0.8,
                  history_size: int = 100,
                  logger: Optional[ExperimentLogger] = None,
+                 evaluate_fn: Optional[Any] = None,
                  **kwargs):
         
-        super().__init__(**kwargs)
+        super().__init__(evaluate_fn=evaluate_fn, **kwargs)
         self.config = config
         self.logger = logger
         self.round_logs = []
         self._current_parameters = None
+        self._evaluate_fn = evaluate_fn
         
         # Cognitive defense parameters
         self.anomaly_threshold = anomaly_threshold
@@ -40,6 +42,8 @@ class CognitiveAggregationStrategy(fl.server.strategy.FedAvg):
                 f"Initialized server with Cognitive Defense Strategy "
                 f"(OODA Loop + MAPE-K, threshold={self.anomaly_threshold})"
             )
+            if evaluate_fn:
+                self.logger.logger.info("Centralized evaluation enabled on server")
     
     def get_client_reputation(self, client_id: str) -> float:
         """Get client reputation score"""
