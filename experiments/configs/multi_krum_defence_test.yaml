@@ -1,0 +1,31 @@
+# experiments/configs/multi_krum_defence_test.yaml
+# Test configuration for Multi-Krum defence strategy
+experiment:
+  experiment_name: "multi_krum_defence_test"
+  seed: 42
+  num_rounds: 10
+  min_clients: 5
+  min_available_clients: 5
+  server_address: "0.0.0.0:8080"
+
+defence:
+  strategy: "krum"
+  num_byzantine: 2  # Expect up to 2 Byzantine clients
+  multi_krum: true  # Use Multi-Krum (average of top clients)
+
+attacks:
+  - enabled: true
+    attack_type: "label_flip"
+    intensity: 0.1
+    target_clients: [0, 1]  # First 2 clients are malicious
+  
+  - enabled: true
+    attack_type: "gradient_noise"
+    intensity: 0.05
+    target_clients: [7]  # Client 7 with gradient noise
+
+orchestration:
+  num_clients: 10
+  batch_size: 2
+  max_memory_mb: 6000
+  spawn_delay: 2.0

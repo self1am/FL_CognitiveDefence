@@ -1,0 +1,30 @@
+# experiments/configs/trimmed_mean_defence_test.yaml
+# Test configuration for Trimmed Mean defence strategy
+experiment:
+  experiment_name: "trimmed_mean_defence_test"
+  seed: 42
+  num_rounds: 10
+  min_clients: 5
+  min_available_clients: 5
+  server_address: "0.0.0.0:8080"
+
+defence:
+  strategy: "trimmed_mean"
+  beta: 0.2  # Trim 20% from each end (top and bottom)
+
+attacks:
+  - enabled: true
+    attack_type: "label_flip"
+    intensity: 0.1
+    target_clients: [0, 1]  # First 2 clients are malicious
+  
+  - enabled: true
+    attack_type: "gradient_noise"
+    intensity: 0.05
+    target_clients: [7]  # Client 7 with gradient noise
+
+orchestration:
+  num_clients: 10
+  batch_size: 2
+  max_memory_mb: 6000
+  spawn_delay: 2.0
