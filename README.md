@@ -6,7 +6,10 @@ A modular federated learning framework implementing cognitive defence strategies
 
 - **Modular Architecture**: Separation of concerns with pluggable attacks and defences
 - **Multi-Client Orchestration**: Automated management of 10+ client processes with resource monitoring
-- **Cognitive defence**: OODA loop and MAPE-K framework implementation
+- **Multiple Defence Strategies**: 
+  - **Cognitive Defence**: OODA loop and MAPE-K framework implementation
+  - **Krum**: Byzantine-robust aggregation selecting updates with minimal distance scores
+  - **Trimmed Mean**: Robust aggregation removing outliers from both ends
 - **Attack Simulation**: Label flipping, gradient noise, model replacement, and more
 - **Explainable AI**: Decision logging with reasoning and evidence
 - **Deterministic Experiments**: Reproducible results with proper seeding
@@ -31,6 +34,27 @@ make run-basic
 python -m src.orchestration.experiment_runner --config experiments/configs/your_config.yaml
 ```
 
+## Defence Strategies
+
+### Cognitive Defence
+OODA loop-based adaptive defence with reputation system:
+- Observes client update patterns
+- Orients using historical context
+- Decides on weighted aggregation
+- Acts with explainable decisions
+
+### Krum
+Byzantine-robust aggregation from literature (Blanchard et al., NeurIPS 2017):
+- Selects client update(s) with smallest distance score
+- Robust against up to f Byzantine clients
+- Supports both single-Krum and Multi-Krum variants
+
+### Trimmed Mean
+Byzantine-robust aggregation (Yin et al., ICML 2018):
+- Removes β fraction of extreme values per dimension
+- Aggregates remaining values
+- Parameter-wise robustness
+
 ## Project Structure
 
 ```
@@ -53,8 +77,9 @@ federated-cognitive-defence/
 
 ## Configuration
 
-Experiments are configured using YAML files. Example:
+Experiments are configured using YAML files. Example configurations:
 
+### Cognitive Defence
 ```yaml
 experiment:
   experiment_name: "cognitive_defence_test"
@@ -65,6 +90,7 @@ experiment:
 defence:
   strategy: "cognitive_defence"
   anomaly_threshold: 0.7
+  reputation_decay: 0.8
 
 attacks:
   - enabled: true
@@ -75,6 +101,21 @@ attacks:
 orchestration:
   num_clients: 10
   batch_size: 3
+```
+
+### Krum Defence
+```yaml
+defence:
+  strategy: "krum"
+  num_byzantine: 2      # Expected number of malicious clients
+  multi_krum: false     # Use standard Krum (true for Multi-Krum)
+```
+
+### Trimmed Mean Defence
+```yaml
+defence:
+  strategy: "trimmed_mean"
+  beta: 0.2            # Trim 20% from each end
 ```
 
 ## Hardware Requirements
@@ -122,8 +163,9 @@ Results are automatically saved to:
 
 1. **FEMNIST Integration**: More realistic FL dataset
 2. **Quantum Neural Networks**: PennyLane integration
-3. **Advanced defences**: , Trimmed Mean, FreqFed
+3. **Advanced defences**: FreqFed, Median, FoolsGold
 4. **Adaptive Attacks**: Learning-based adversarial strategies
+5. **Comparative Analysis**: Benchmark defences against various attack scenarios
 
 ## Contributing
 
