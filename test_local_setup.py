@@ -167,7 +167,6 @@ def test_krum_defence():
         from src.defences.krum_defence import KrumDefenceStrategy
         from src.server.krum_server import KrumAggregationStrategy
         from src.utils.config import ExperimentConfig
-        import numpy as np
         
         # Test Krum defence
         krum_defence = KrumDefenceStrategy(num_byzantine=2, multi_krum=False)
@@ -207,7 +206,6 @@ def test_trimmed_mean_defence():
         from src.defences.trimmed_mean_defence import TrimmedMeanDefenceStrategy
         from src.server.trimmed_mean_server import TrimmedMeanAggregationStrategy
         from src.utils.config import ExperimentConfig
-        import numpy as np
         
         # Test Trimmed Mean defence
         trimmed_mean_defence = TrimmedMeanDefenceStrategy(beta=0.2)
