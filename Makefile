@@ -9,6 +9,9 @@ help:
 	@echo "  test        - Run tests"
 	@echo "  clean       - Clean generated files"
 	@echo "  run-basic   - Run basic cognitive defence experiment"
+	@echo "  run-krum    - Run Krum defence experiment"
+	@echo "  run-multi-krum - Run Multi-Krum defence experiment"
+	@echo "  run-trimmed-mean - Run Trimmed Mean defence experiment"
 	@echo "  run-adaptive - Run adaptive attack scenario"
 	@echo "  run-large   - Run large scale test"
 
@@ -51,6 +54,15 @@ run-defence-server:
 	
 run-basic:
 	python -m src.orchestration.experiment_runner --config experiments/configs/basic_cognitive_defence.yaml
+
+run-krum:
+	python -m src.orchestration.experiment_runner --config experiments/configs/krum_defence_test.yaml
+
+run-multi-krum:
+	python -m src.orchestration.experiment_runner --config experiments/configs/multi_krum_defence_test.yaml
+
+run-trimmed-mean:
+	python -m src.orchestration.experiment_runner --config experiments/configs/trimmed_mean_defence_test.yaml
 
 run-adaptive:
 	python -m src.orchestration.experiment_runner --config experiments/configs/adaptive_attack_scenario.yaml

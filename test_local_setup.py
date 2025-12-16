@@ -159,6 +159,83 @@ def test_cognitive_defence():
         traceback.print_exc()
         return False
 
+def test_krum_defence():
+    """Test Krum defence strategy creation"""
+    print("\nTesting Krum defence strategy...")
+    
+    try:
+        from src.defences.krum_defence import KrumDefenceStrategy
+        from src.server.krum_server import KrumAggregationStrategy
+        from src.utils.config import ExperimentConfig
+        
+        # Test Krum defence
+        krum_defence = KrumDefenceStrategy(num_byzantine=2, multi_krum=False)
+        print(f"✅ Krum defence strategy created")
+        print(f"✅ Description: {krum_defence.get_defence_description()}")
+        
+        # Test Krum server
+        config = ExperimentConfig(
+            experiment_name="test",
+            seed=42,
+            num_rounds=5,
+            min_clients=2,
+            min_available_clients=2,
+            server_address="0.0.0.0:8080"
+        )
+        
+        strategy = KrumAggregationStrategy(
+            config=config,
+            num_byzantine=2,
+            multi_krum=False
+        )
+        
+        print(f"✅ Krum aggregation strategy created")
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ Krum defence strategy failed: {e}")
+        traceback.print_exc()
+        return False
+
+def test_trimmed_mean_defence():
+    """Test Trimmed Mean defence strategy creation"""
+    print("\nTesting Trimmed Mean defence strategy...")
+    
+    try:
+        from src.defences.trimmed_mean_defence import TrimmedMeanDefenceStrategy
+        from src.server.trimmed_mean_server import TrimmedMeanAggregationStrategy
+        from src.utils.config import ExperimentConfig
+        
+        # Test Trimmed Mean defence
+        trimmed_mean_defence = TrimmedMeanDefenceStrategy(beta=0.2)
+        print(f"✅ Trimmed Mean defence strategy created")
+        print(f"✅ Description: {trimmed_mean_defence.get_defence_description()}")
+        
+        # Test Trimmed Mean server
+        config = ExperimentConfig(
+            experiment_name="test",
+            seed=42,
+            num_rounds=5,
+            min_clients=2,
+            min_available_clients=2,
+            server_address="0.0.0.0:8080"
+        )
+        
+        strategy = TrimmedMeanAggregationStrategy(
+            config=config,
+            beta=0.2
+        )
+        
+        print(f"✅ Trimmed Mean aggregation strategy created")
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ Trimmed Mean defence strategy failed: {e}")
+        traceback.print_exc()
+        return False
+
 def main():
     print("🚀 Testing Federated Cognitive defence Setup\n")
     
@@ -167,7 +244,9 @@ def main():
         test_device_setup,
         test_data_loading,
         test_model_creation,
-        test_cognitive_defence
+        test_cognitive_defence,
+        test_krum_defence,
+        test_trimmed_mean_defence
     ]
     
     results = []

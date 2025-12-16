@@ -11,6 +11,8 @@ import time
 from .client_orchestrator import ClientOrchestrator
 from ..server.cognitive_server import CognitiveAggregationStrategy
 from ..server.no_defence_server import NoDefenceAggregationStrategy
+from ..server.krum_server import KrumAggregationStrategy
+from ..server.trimmed_mean_server import TrimmedMeanAggregationStrategy
 from ..utils.config import ExperimentConfig, AttackConfig, defenceConfig, ConfigManager, DeterministicEnvironment
 from ..utils.logging_utils import ExperimentLogger
 import flwr as fl
@@ -132,6 +134,36 @@ class ExperimentRunner:
                 min_evaluate_clients=self.experiment_config.min_clients,
                 min_available_clients=self.experiment_config.min_available_clients,
                 fraction_evaluate=1.0,  # Evaluate on all clients for distributed metrics
+            )
+        elif defence_config.strategy == 'krum':
+            # Extract Krum-specific parameters
+            num_byzantine = self.config.get('defence', {}).get('num_byzantine', 2)
+            multi_krum = self.config.get('defence', {}).get('multi_krum', False)
+            
+            strategy = KrumAggregationStrategy(
+                config=self.experiment_config,
+                num_byzantine=num_byzantine,
+                multi_krum=multi_krum,
+                logger=self.logger,
+                evaluate_fn=evaluate_fn,
+                min_fit_clients=self.experiment_config.min_clients,
+                min_evaluate_clients=self.experiment_config.min_clients,
+                min_available_clients=self.experiment_config.min_available_clients,
+                fraction_evaluate=1.0,
+            )
+        elif defence_config.strategy == 'trimmed_mean':
+            # Extract Trimmed Mean-specific parameters
+            beta = self.config.get('defence', {}).get('beta', 0.2)
+            
+            strategy = TrimmedMeanAggregationStrategy(
+                config=self.experiment_config,
+                beta=beta,
+                logger=self.logger,
+                evaluate_fn=evaluate_fn,
+                min_fit_clients=self.experiment_config.min_clients,
+                min_evaluate_clients=self.experiment_config.min_clients,
+                min_available_clients=self.experiment_config.min_available_clients,
+                fraction_evaluate=1.0,
             )
         else:
             # No defense or unknown strategy - use simple FedAvg
