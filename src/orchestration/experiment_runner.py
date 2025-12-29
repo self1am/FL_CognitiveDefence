@@ -13,6 +13,7 @@ from ..server.cognitive_server import CognitiveAggregationStrategy
 from ..server.no_defence_server import NoDefenceAggregationStrategy
 from ..server.krum_server import KrumAggregationStrategy
 from ..server.trimmed_mean_server import TrimmedMeanAggregationStrategy
+from ..server.vert_server import VERTAggregationStrategy
 from ..utils.config import ExperimentConfig, AttackConfig, defenceConfig, ConfigManager, DeterministicEnvironment
 from ..utils.logging_utils import ExperimentLogger
 import flwr as fl
@@ -158,6 +159,28 @@ class ExperimentRunner:
             strategy = TrimmedMeanAggregationStrategy(
                 config=self.experiment_config,
                 beta=beta,
+                logger=self.logger,
+                evaluate_fn=evaluate_fn,
+                min_fit_clients=self.experiment_config.min_clients,
+                min_evaluate_clients=self.experiment_config.min_clients,
+                min_available_clients=self.experiment_config.min_available_clients,
+                fraction_evaluate=1.0,
+            )
+        elif defence_config.strategy == 'vert':
+            # Extract VERT-specific parameters
+            kappa = self.config.get('defence', {}).get('kappa', 5)
+            history_size = self.config.get('defence', {}).get('history_size', 10)
+            projection_dim = self.config.get('defence', {}).get('projection_dim', 100)
+            learning_rate = self.config.get('defence', {}).get('learning_rate', 0.01)
+            min_history_rounds = self.config.get('defence', {}).get('min_history_rounds', 3)
+            
+            strategy = VERTAggregationStrategy(
+                config=self.experiment_config,
+                kappa=kappa,
+                history_size=history_size,
+                projection_dim=projection_dim,
+                learning_rate=learning_rate,
+                min_history_rounds=min_history_rounds,
                 logger=self.logger,
                 evaluate_fn=evaluate_fn,
                 min_fit_clients=self.experiment_config.min_clients,

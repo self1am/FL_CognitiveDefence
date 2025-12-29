@@ -236,6 +236,65 @@ def test_trimmed_mean_defence():
         traceback.print_exc()
         return False
 
+def test_vert_defence():
+    """Test VERT defence strategy creation"""
+    print("\nTesting VERT defence strategy...")
+    
+    try:
+        from src.defences.vert_defence import VERTDefenceStrategy
+        from src.server.vert_server import VERTAggregationStrategy
+        from src.utils.config import ExperimentConfig
+        import numpy as np
+        
+        # Test VERT defence
+        vert_defence = VERTDefenceStrategy(kappa=5, history_size=10, projection_dim=100)
+        print(f"✅ VERT defence strategy created")
+        print(f"✅ Description: {vert_defence.get_defence_description()}")
+        
+        # Test VERT aggregation with simulated client updates
+        # Create mock client updates
+        np.random.seed(42)
+        client_updates = {}
+        for i in range(8):
+            # Simulate 2 parameter layers
+            params = [
+                np.random.randn(10, 5).astype(np.float32),
+                np.random.randn(5).astype(np.float32)
+            ]
+            client_updates[f"client_{i}"] = (params, 100, {'loss': 0.5})
+        
+        # Run aggregation (first few rounds will use fallback)
+        for round_num in range(4):
+            aggregated, decisions = vert_defence.aggregate_updates(client_updates)
+            if aggregated is not None:
+                print(f"✅ Round {round_num}: Aggregation successful, {len(decisions)} decisions made")
+        
+        # Test VERT server
+        config = ExperimentConfig(
+            experiment_name="test",
+            seed=42,
+            num_rounds=5,
+            min_clients=2,
+            min_available_clients=2,
+            server_address="0.0.0.0:8080"
+        )
+        
+        strategy = VERTAggregationStrategy(
+            config=config,
+            kappa=5,
+            history_size=10,
+            projection_dim=100
+        )
+        
+        print(f"✅ VERT aggregation strategy created")
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ VERT defence strategy failed: {e}")
+        traceback.print_exc()
+        return False
+
 def main():
     print("🚀 Testing Federated Cognitive defence Setup\n")
     
@@ -246,7 +305,8 @@ def main():
         test_model_creation,
         test_cognitive_defence,
         test_krum_defence,
-        test_trimmed_mean_defence
+        test_trimmed_mean_defence,
+        test_vert_defence
     ]
     
     results = []
