@@ -86,7 +86,7 @@ class VERTAggregationStrategy(fl.server.strategy.FedAvg):
         client_updates = {}
         for i, (client, fit_res) in enumerate(results):
             client_id = f"client_{i}"
-            parameters = [np.array(param) for param in fl.common.parameters_to_ndarrays(fit_res.parameters)]
+            parameters = fl.common.parameters_to_ndarrays(fit_res.parameters)
             num_samples = fit_res.num_examples
             metrics = fit_res.metrics if fit_res.metrics else {}
             

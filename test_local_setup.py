@@ -306,7 +306,7 @@ def main():
         test_cognitive_defence,
         test_krum_defence,
         test_trimmed_mean_defence,
-        test_vert_defence
+        test_vert_defence,
     ]
     
     results = []

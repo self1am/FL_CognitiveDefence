@@ -24,12 +24,20 @@ class VERTDefenceStrategy(Basedefence):
     https://arxiv.org/pdf/2411.10673
     """
     
+    # Class constants for numerical stability and initialization
+    DEFAULT_RANDOM_SEED = 42
+    DEFAULT_COEFF_CENTER = 0.5
+    COEFF_NOISE_SCALE = 0.1
+    PREDICTOR_INIT_SCALE = 0.01
+    NORM_EPSILON = 1e-10
+    
     def __init__(self, 
                  kappa: int = 5,
                  history_size: int = 10,
                  projection_dim: int = 100,
                  learning_rate: float = 0.01,
                  min_history_rounds: int = 3,
+                 random_seed: int = 42,
                  **kwargs):
         """
         Initialize VERT defence strategy.
@@ -40,6 +48,7 @@ class VERTDefenceStrategy(Basedefence):
             projection_dim: Dimension of projected feature space
             learning_rate: Learning rate for predictor training
             min_history_rounds: Minimum rounds of history required before VERT activates
+            random_seed: Random seed for reproducibility
         """
         super().__init__(**kwargs)
         self.kappa = kappa
@@ -47,6 +56,7 @@ class VERTDefenceStrategy(Basedefence):
         self.projection_dim = projection_dim
         self.learning_rate = learning_rate
         self.min_history_rounds = min_history_rounds
+        self.random_seed = random_seed
         
         # Historical gradients storage
         # client_history: {client_id: deque of (round, gradient)}
@@ -82,16 +92,16 @@ class VERTDefenceStrategy(Basedefence):
     def _init_coefficient_matrices(self, gradient_dim: int):
         """Initialize coefficient matrices A and B."""
         # A and B are element-wise coefficient matrices
-        # Initialize with small random values centered around 0.5
-        np.random.seed(42)
-        self.A = 0.5 + 0.1 * np.random.randn(gradient_dim)
-        self.B = 0.5 + 0.1 * np.random.randn(gradient_dim)
+        # Initialize with small random values centered around DEFAULT_COEFF_CENTER
+        np.random.seed(self.random_seed)
+        self.A = self.DEFAULT_COEFF_CENTER + self.COEFF_NOISE_SCALE * np.random.randn(gradient_dim)
+        self.B = self.DEFAULT_COEFF_CENTER + self.COEFF_NOISE_SCALE * np.random.randn(gradient_dim)
     
     def _init_predictor(self):
         """Initialize the predictor weights."""
         # Simple linear predictor from projection_dim to projection_dim
-        np.random.seed(42)
-        self.predictor_weights = np.random.randn(self.projection_dim, self.projection_dim) * 0.01
+        np.random.seed(self.random_seed)
+        self.predictor_weights = np.random.randn(self.projection_dim, self.projection_dim) * self.PREDICTOR_INIT_SCALE
     
     def _project(self, gradient: np.ndarray) -> np.ndarray:
         """
@@ -107,7 +117,7 @@ class VERTDefenceStrategy(Basedefence):
             return projected
         
         # Use deterministic random projection matrix
-        np.random.seed(42)
+        np.random.seed(self.random_seed)
         projection_matrix = np.random.randn(self.projection_dim, gradient_dim) / np.sqrt(gradient_dim)
         return projection_matrix @ gradient
     
@@ -131,7 +141,7 @@ class VERTDefenceStrategy(Basedefence):
         norm_a = np.linalg.norm(a)
         norm_b = np.linalg.norm(b)
         
-        if norm_a < 1e-10 or norm_b < 1e-10:
+        if norm_a < self.NORM_EPSILON or norm_b < self.NORM_EPSILON:
             return 0.0
         
         return float(np.dot(a, b) / (norm_a * norm_b))
