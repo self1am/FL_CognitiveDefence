@@ -10,7 +10,7 @@ Reference: Bhagoji et al., "Analyzing Federated Learning through an
 Adversarial Lens" (ICML 2019)
 """
 import numpy as np
-from typing import List, Optional, Dict, Any, Callable
+from typing import List, Optional, Dict, Any, Callable, Tuple
 from torch.utils.data import Dataset
 from .adaptive_base import AdaptiveAttack
 

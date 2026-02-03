@@ -27,11 +27,41 @@ class ClientConfig:
     
 @dataclass
 class AttackConfig:
-    """Attack configuration"""
+    """Attack configuration with support for adaptive attack parameters"""
     enabled: bool = False
     attack_type: str = "label_flip"
     intensity: float = 0.1
     target_clients: List[int] = None  # None means random selection
+    
+    # Parameters for stat-opt attack
+    constraint_factor: float = 1.5
+    adaptive_learning_rate: float = 0.1
+    
+    # Parameters for dny-opt attack
+    learning_rate: float = 0.1
+    exploration_rate: float = 0.1
+    discount_factor: float = 0.95
+    detection_threshold: float = 0.7
+    
+    # Parameters for min-max attack
+    defense_models: List[str] = None
+    optimization_steps: int = 10
+    threat_model_weights: Dict[str, float] = None
+    
+    # Parameters for min-sum attack
+    distance_weight: float = 0.7
+    optimization_lr: float = 0.01
+    max_iterations: int = 100
+    convergence_threshold: float = 1e-5
+    
+    def __post_init__(self):
+        """Initialize default values for lists and dicts"""
+        if self.target_clients is None:
+            self.target_clients = []
+        if self.defense_models is None:
+            self.defense_models = ['krum', 'trimmed_mean']
+        if self.threat_model_weights is None:
+            self.threat_model_weights = {}
     
 @dataclass
 class defenceConfig:

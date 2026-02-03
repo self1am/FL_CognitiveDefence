@@ -25,7 +25,8 @@ def test_imports():
     
     try:
         from src.attacks.label_flip import LabelFlipAttack
-        print("✅ Attacks imported successfully")
+        from src.attacks import StatOptAttack, DnyOptAttack, MinMaxAttack, MinSumAttack
+        print("✅ Attacks (including adaptive attacks) imported successfully")
     except ImportError as e:
         print(f"❌ Attacks import failed: {e}")
         return False
