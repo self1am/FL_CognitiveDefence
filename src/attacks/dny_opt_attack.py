@@ -235,7 +235,9 @@ class DnyOptAttack(AdaptiveAttack):
         # Update current strategy
         self.current_intensity_level = next_intensity
         self.current_technique = next_technique
-        self.intensity = next_intensity  # Update base intensity
+        # Note: We update the base intensity to reflect current strategy,
+        # but the original intensity is preserved in attack history
+        self.intensity = next_intensity
         
         # Store for next update
         self.previous_state = current_state

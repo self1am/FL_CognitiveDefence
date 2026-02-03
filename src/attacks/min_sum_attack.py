@@ -107,6 +107,11 @@ class MinSumAttack(AdaptiveAttack):
             for benign_update in self.benign_updates:
                 # Ensure same size for distance calculation
                 min_len = min(len(attack_vector), len(benign_update))
+                if min_len != len(attack_vector) or min_len != len(benign_update):
+                    # Log size mismatch warning
+                    import warnings
+                    warnings.warn(f"Parameter size mismatch in min-sum optimization: "
+                                f"attack_vector={len(attack_vector)}, benign_update={len(benign_update)}")
                 distance = np.linalg.norm(attack_vector[:min_len] - benign_update[:min_len])
                 distance_sum += distance ** 2
             

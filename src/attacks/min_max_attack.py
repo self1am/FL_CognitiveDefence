@@ -116,7 +116,11 @@ class MinMaxAttack(AdaptiveAttack):
             (best_strategy, best_intensity)
         """
         attack_strategies = ['sign_flip', 'gradient_noise', 'scaling', 'targeted_noise']
-        intensity_levels = np.linspace(0.05, min(0.5, self.intensity * 3), self.optimization_steps)
+        # Intensity range: start at 5% intensity, up to 50% or 3x base intensity (whichever is smaller)
+        # These bounds ensure attacks are detectable but not so strong as to be trivially rejected
+        min_intensity = 0.05  # Minimum to have measurable impact
+        max_intensity = min(0.5, self.intensity * 3)  # Cap at 50% or 3x base
+        intensity_levels = np.linspace(min_intensity, max_intensity, self.optimization_steps)
         
         best_worst_case_value = float('-inf')
         best_strategy = attack_strategies[0]

@@ -61,7 +61,9 @@ class AttackConfig:
         if self.defense_models is None:
             self.defense_models = ['krum', 'trimmed_mean']
         if self.threat_model_weights is None:
-            self.threat_model_weights = {}
+            # Initialize with uniform weights over defense models
+            uniform_weight = 1.0 / len(self.defense_models)
+            self.threat_model_weights = {d: uniform_weight for d in self.defense_models}
     
 @dataclass
 class defenceConfig:

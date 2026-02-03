@@ -131,7 +131,9 @@ def test_benign_statistics():
     stat_opt = StatOptAttack(intensity=0.2)
     stat_opt.update_benign_statistics(benign_params)
     assert stat_opt.benign_stats, "Benign stats not updated"
-    print(f"✓ StatOptAttack benign statistics: mean={stat_opt.benign_stats['mean']:.4f}, std={stat_opt.benign_stats['std']:.4f}")
+    mean_val = stat_opt.benign_stats.get('mean', 0.0)
+    std_val = stat_opt.benign_stats.get('std', 1.0)
+    print(f"✓ StatOptAttack benign statistics: mean={mean_val:.4f}, std={std_val:.4f}")
     
     # Test min-sum
     min_sum = MinSumAttack(intensity=0.2)
