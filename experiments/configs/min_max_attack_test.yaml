@@ -1,0 +1,36 @@
+# experiments/configs/min_max_attack_test.yaml
+# Minimax Attack (min-max) test configuration
+# Tests the min-max attack with game-theoretic optimization
+
+experiment:
+  experiment_name: "min_max_attack_test"
+  seed: 456
+  num_rounds: 15
+  min_clients: 3
+  min_available_clients: 3
+  server_address: "0.0.0.0:8080"
+
+defence:
+  strategy: "krum"  # Test against Krum defense
+  num_byzantine: 3  # Expected number of malicious clients
+  multi_krum: false
+
+attacks:
+  - enabled: true
+    attack_type: "min_max"
+    intensity: 0.2
+    defense_models: ["krum", "trimmed_mean", "cognitive", "mean"]
+    optimization_steps: 10
+    target_clients: [0, 1, 2]  # 30% malicious clients
+
+orchestration:
+  num_clients: 10
+  batch_size: 2
+  max_memory_mb: 5000
+  spawn_delay: 3.0
+
+client:
+  batch_size: 32
+  epochs: 2
+  learning_rate: 0.001
+  optimizer: "adam"

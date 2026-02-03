@@ -1,0 +1,38 @@
+# experiments/configs/min_sum_attack_test.yaml
+# Minimum Sum Attack (min-sum) test configuration
+# Tests the min-sum attack with distance minimization
+
+experiment:
+  experiment_name: "min_sum_attack_test"
+  seed: 789
+  num_rounds: 15
+  min_clients: 3
+  min_available_clients: 3
+  server_address: "0.0.0.0:8080"
+
+defence:
+  strategy: "krum"  # Krum is most vulnerable to min-sum
+  num_byzantine: 2
+  multi_krum: true  # Test against Multi-Krum variant
+
+attacks:
+  - enabled: true
+    attack_type: "min_sum"
+    intensity: 0.2
+    distance_weight: 0.7
+    optimization_lr: 0.01
+    max_iterations: 100
+    convergence_threshold: 0.00001
+    target_clients: [0, 1]  # 20% malicious clients
+
+orchestration:
+  num_clients: 10
+  batch_size: 2
+  max_memory_mb: 5000
+  spawn_delay: 3.0
+
+client:
+  batch_size: 32
+  epochs: 2
+  learning_rate: 0.001
+  optimizer: "adam"

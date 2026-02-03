@@ -1,0 +1,39 @@
+# experiments/configs/dny_opt_attack_test.yaml
+# Dynamic Optimization Attack (dny-opt) test configuration
+# Tests the dny-opt attack with reinforcement learning adaptation
+
+experiment:
+  experiment_name: "dny_opt_attack_test"
+  seed: 123
+  num_rounds: 20
+  min_clients: 3
+  min_available_clients: 3
+  server_address: "0.0.0.0:8080"
+
+defence:
+  strategy: "cognitive_defence"  # Test against adaptive defense
+  anomaly_threshold: 0.65
+  reputation_decay: 0.8
+  history_size: 150
+
+attacks:
+  - enabled: true
+    attack_type: "dny_opt"
+    intensity: 0.15
+    learning_rate: 0.1
+    exploration_rate: 0.1
+    discount_factor: 0.95
+    detection_threshold: 0.7
+    target_clients: [0, 1, 2, 3]  # 40% malicious clients
+
+orchestration:
+  num_clients: 10
+  batch_size: 2
+  max_memory_mb: 5000
+  spawn_delay: 3.0
+
+client:
+  batch_size: 32
+  epochs: 2
+  learning_rate: 0.001
+  optimizer: "adam"

@@ -1,0 +1,56 @@
+# experiments/configs/all_adaptive_attacks_test.yaml
+# Comprehensive test of all adaptive attacks
+# Multiple attackers using different strategies
+
+experiment:
+  experiment_name: "all_adaptive_attacks_test"
+  seed: 999
+  num_rounds: 20
+  min_clients: 3
+  min_available_clients: 3
+  server_address: "0.0.0.0:8080"
+
+defence:
+  strategy: "cognitive_defence"
+  anomaly_threshold: 0.65
+  reputation_decay: 0.8
+  history_size: 200
+
+attacks:
+  - enabled: true
+    attack_type: "stat_opt"
+    intensity: 0.15
+    constraint_factor: 1.5
+    target_clients: [0, 1]
+  
+  - enabled: true
+    attack_type: "dny_opt"
+    intensity: 0.15
+    learning_rate: 0.1
+    exploration_rate: 0.15
+    target_clients: [2, 3]
+    
+  - enabled: true
+    attack_type: "min_max"
+    intensity: 0.15
+    defense_models: ["krum", "trimmed_mean", "cognitive"]
+    optimization_steps: 8
+    target_clients: [4, 5]
+    
+  - enabled: true
+    attack_type: "min_sum"
+    intensity: 0.15
+    distance_weight: 0.7
+    target_clients: [6, 7]
+
+orchestration:
+  num_clients: 12
+  batch_size: 3
+  max_memory_mb: 6000
+  spawn_delay: 3.0
+
+client:
+  batch_size: 32
+  epochs: 2
+  learning_rate: 0.001
+  optimizer: "adam"

@@ -1,0 +1,35 @@
+# experiments/configs/stat_opt_attack_test.yaml
+# Statistical Optimization Attack (stat-opt) test configuration
+# Tests the stat-opt attack against various defense mechanisms
+
+experiment:
+  experiment_name: "stat_opt_attack_test"
+  seed: 42
+  num_rounds: 15
+  min_clients: 3
+  min_available_clients: 3
+  server_address: "0.0.0.0:8080"
+
+defence:
+  strategy: "trimmed_mean"  # Test against trimmed mean defense
+  beta: 0.2  # Trim 20% from each end
+
+attacks:
+  - enabled: true
+    attack_type: "stat_opt"
+    intensity: 0.2
+    constraint_factor: 1.5
+    adaptive_learning_rate: 0.1
+    target_clients: [0, 1, 2]  # 30% malicious clients
+
+orchestration:
+  num_clients: 10
+  batch_size: 2
+  max_memory_mb: 5000
+  spawn_delay: 3.0
+
+client:
+  batch_size: 32
+  epochs: 2
+  learning_rate: 0.001
+  optimizer: "adam"
