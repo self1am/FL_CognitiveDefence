@@ -2,81 +2,91 @@
   {
     "client_id": 7,
     "round": 1,
-    "avg_loss": 0.052655306974870725,
-    "training_accuracy": 0.9836397631660954,
-    "num_samples": 6418,
-    "attacked": true,
-    "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
-    "timestamp": "2025-09-06T13:57:19.760192"
+    "avg_loss": 0.08623706567015417,
+    "training_accuracy": 0.9731173818667557,
+    "num_samples": 5989,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-10-27T17:30:59.753968"
   },
   {
     "client_id": 7,
     "round": 2,
-    "avg_loss": 0.03800774171774642,
-    "training_accuracy": 0.9896385166718604,
-    "num_samples": 6418,
-    "attacked": true,
-    "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
-    "timestamp": "2025-09-06T13:58:02.454359"
+    "avg_loss": 0.055238465602803655,
+    "training_accuracy": 0.9828018033060612,
+    "num_samples": 5989,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-10-27T17:32:12.738513"
   },
   {
     "client_id": 7,
     "round": 3,
-    "avg_loss": 0.029270512558626924,
-    "training_accuracy": 0.9917419756933624,
-    "num_samples": 6418,
-    "attacked": true,
-    "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
-    "timestamp": "2025-09-06T13:59:02.710817"
+    "avg_loss": 0.04416504918070499,
+    "training_accuracy": 0.9876440140257138,
+    "num_samples": 5989,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-10-27T17:33:28.877588"
   },
   {
     "client_id": 7,
     "round": 4,
-    "avg_loss": 0.029414844222834625,
-    "training_accuracy": 0.9919756933624182,
-    "num_samples": 6418,
-    "attacked": true,
-    "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
-    "timestamp": "2025-09-06T14:00:13.410855"
+    "avg_loss": 0.03793091761593935,
+    "training_accuracy": 0.9886458507263316,
+    "num_samples": 5989,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-10-27T17:34:54.090025"
   },
   {
     "client_id": 7,
     "round": 5,
-    "avg_loss": 0.025794706191024926,
-    "training_accuracy": 0.9926768463695855,
-    "num_samples": 6418,
-    "attacked": true,
-    "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
-    "timestamp": "2025-09-06T14:01:24.779276"
+    "avg_loss": 0.033644501162813596,
+    "training_accuracy": 0.9905660377358491,
+    "num_samples": 5989,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-10-27T17:36:14.040710"
   },
   {
     "client_id": 7,
     "round": 6,
-    "avg_loss": 0.021177603595976015,
-    "training_accuracy": 0.994312870052976,
-    "num_samples": 6418,
-    "attacked": true,
-    "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
-    "timestamp": "2025-09-06T14:02:25.935975"
+    "avg_loss": 0.03630575831138606,
+    "training_accuracy": 0.9915678744364669,
+    "num_samples": 5989,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-10-27T17:37:34.451905"
   },
   {
     "client_id": 7,
     "round": 7,
-    "avg_loss": 0.022241746779784258,
-    "training_accuracy": 0.9947023995014023,
-    "num_samples": 6418,
-    "attacked": true,
-    "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
-    "timestamp": "2025-09-06T14:03:22.186563"
+    "avg_loss": 0.0297837674306982,
+    "training_accuracy": 0.9924027383536483,
+    "num_samples": 5989,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-10-27T17:39:05.631923"
   },
   {
     "client_id": 7,
     "round": 8,
-    "avg_loss": 0.01549001256345222,
-    "training_accuracy": 0.9962605172951076,
-    "num_samples": 6418,
-    "attacked": true,
-    "attack_type": "Gradient Noise Attack (intensity=0.05, type=gaussian)",
-    "timestamp": "2025-09-06T14:04:34.356269"
+    "avg_loss": 0.026896763183918333,
+    "training_accuracy": 0.9934045750542662,
+    "num_samples": 5989,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-10-27T17:40:32.035209"
+  },
+  {
+    "client_id": 7,
+    "round": 9,
+    "avg_loss": 0.019276749922680643,
+    "training_accuracy": 0.993822007012857,
+    "num_samples": 5989,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-10-27T17:41:53.704586"
   }
 ]

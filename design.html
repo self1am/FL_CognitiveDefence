@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beautiful Animation</title>
+</head>
+<body>
+    <h1>Fractal Branch Animation</h1>
+    <div class="controls">
+        <button id="startBtn">Start</button>
+        <button id="stopBtn">Stop</button>
+        <button id="resetBtn">Reset</button>
+        <button id="zoomInBtn">Zoom In</button>
+        <button id="zoomOutBtn">Zoom Out</button>
+        <button id="resetViewBtn">Reset View</button>
+        <span id="stats">Branches: 0</span>
+    </div>
+    <div class="animation-container">
+        <!-- Animation content goes here -->
+    </div>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            background: #333;
+            color: #fff;
+            border: 2px solid #555;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #555;
+            border-color: #777;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        #stats {
+            padding: 10px 20px;
+            background: #222;
+            border-radius: 5px;
+            border: 2px solid #444;
+        }
+
+        .animation-container {
+            width: 100%;
+            height: 600px;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #333;
+            cursor: grab;
+        }
+
+        .animation-container:active {
+            cursor: grabbing;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+
+    <script>
+        // Wait for DOM to be fully loaded
+        window.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.animation-container');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+            container.appendChild(canvas);
+
+            console.log('Canvas created with size:', canvas.width, 'x', canvas.height);
+
+            // Configuration
+            const LINE_LENGTH = 50;
+            const BRANCH_ANGLE = Math.PI / 6; // 30 degrees
+            const GROWTH_SPEED = 1;
+            const LINE_WIDTH = 3;
+            const COLLISION_THRESHOLD = 4;
+
+            // Track all line segments for collision detection
+            const occupiedPoints = new Set();
+            let branches = [];
+            let isAnimating = false;
+            let animationId = null;
+
+            // Pan and zoom state
+            let offsetX = 0;
+            let offsetY = 0;
+            let scale = 1;
+            let isDragging = false;
+            let dragStartX = 0;
+            let dragStartY = 0;
+
+            // Get control buttons
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const zoomInBtn = document.getElementById('zoomInBtn');
+            const zoomOutBtn = document.getElementById('zoomOutBtn');
+            const resetViewBtn = document.getElementById('resetViewBtn');
+            const stats = document.getElementById('stats');
+
+        class Branch {
+            constructor(x, y, angle, generation = 0) {
+                this.startX = x;
+                this.startY = y;
+                this.angle = angle;
+                this.length = 0;
+                this.maxLength = LINE_LENGTH;
+                this.growing = true;
+                this.generation = generation;
+                this.canSplit = true;
+                this.hasSplit = false;
+                
+                // Calculate end point
+                this.endX = x + Math.cos(angle) * this.maxLength;
+                this.endY = y + Math.sin(angle) * this.maxLength;
+            }
+
+            update() {
+                if (!this.growing) return false;
+
+                // Grow the line
+                this.length += GROWTH_SPEED;
+
+                // Current end position
+                const currentEndX = this.startX + Math.cos(this.angle) * this.length;
+                const currentEndY = this.startY + Math.sin(this.angle) * this.length;
+
+                // Check collision with occupied points
+                if (this.checkCollision(currentEndX, currentEndY)) {
+                    this.growing = false;
+                    this.canSplit = false;
+                    this.length = Math.max(0, this.length - GROWTH_SPEED);
+                    return false;
+                }
+
+                // Check if out of bounds (expand the bounds to allow growth beyond visible area)
+                const maxBounds = Math.max(canvas.width, canvas.height) * 3;
+                if (currentEndX < -maxBounds || currentEndX > canvas.width + maxBounds || 
+                    currentEndY < -maxBounds || currentEndY > canvas.height + maxBounds) {
+                    this.growing = false;
+                    this.canSplit = false;
+                    return false;
+                }
+
+                // Mark points as occupied
+                this.markOccupied(currentEndX, currentEndY);
+
+                // Check if reached max length
+                if (this.length >= this.maxLength) {
+                    this.growing = false;
+                    
+                    // Split into two new branches if not collided
+                    if (this.canSplit && !this.hasSplit) {
+                        this.hasSplit = true;
+                        const endX = this.startX + Math.cos(this.angle) * this.length;
+                        const endY = this.startY + Math.sin(this.angle) * this.length;
+                        
+                        // Create two new branches
+                        branches.push(new Branch(endX, endY, this.angle - BRANCH_ANGLE, this.generation + 1));
+                        branches.push(new Branch(endX, endY, this.angle + BRANCH_ANGLE, this.generation + 1));
+                    }
+                    return false;
+                }
+
+                return true;
+            }
+
+            checkCollision(x, y) {
+                // Check surrounding points for collision
+                for (let dx = -COLLISION_THRESHOLD; dx <= COLLISION_THRESHOLD; dx++) {
+                    for (let dy = -COLLISION_THRESHOLD; dy <= COLLISION_THRESHOLD; dy++) {
+                        const key = `${Math.floor(x + dx)},${Math.floor(y + dy)}`;
+                        if (occupiedPoints.has(key)) {
+                            // Don't collide with own path - check if point is along our own line
+                            const dist = Math.sqrt(Math.pow(x - this.startX, 2) + Math.pow(y - this.startY, 2));
+                            // Only consider it a collision if it's far from our start AND not on our direct path
+                            if (dist > this.length + 10) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+
+            markOccupied(x, y) {
+                // Mark this point as belonging to this branch
+                const key = `${Math.floor(x)},${Math.floor(y)}`;
+                if (!occupiedPoints.has(key)) {
+                    occupiedPoints.add(key);
+                }
+            }
+
+            draw() {
+                const currentEndX = this.startX + Math.cos(this.angle) * this.length;
+                const currentEndY = this.startY + Math.sin(this.angle) * this.length;
+
+                // Color based on generation
+                const hue = (this.generation * 30) % 360;
+                ctx.strokeStyle = `hsl(${hue}, 70%, 60%)`;
+                ctx.lineWidth = LINE_WIDTH;
+                ctx.lineCap = 'round';
+
+                ctx.beginPath();
+                ctx.moveTo(this.startX, this.startY);
+                ctx.lineTo(currentEndX, currentEndY);
+                ctx.stroke();
+            }
+        }
+
+            // Animation loop
+            function animate() {
+                if (!isAnimating) return;
+
+                // Save context state
+                ctx.save();
+                
+                // Clear with solid black background
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Apply transformations for pan and zoom
+                ctx.translate(offsetX + canvas.width / 2, offsetY + canvas.height / 2);
+                ctx.scale(scale, scale);
+                ctx.translate(-canvas.width / 2, -canvas.height / 2);
+
+                let anyGrowing = false;
+                for (const branch of branches) {
+                    if (branch.update()) {
+                        anyGrowing = true;
+                    }
+                    branch.draw();
+                }
+
+                // Update stats
+                stats.textContent = `Branches: ${branches.length}`;
+
+                // Restore context state
+                ctx.restore();
+
+                // Continue animating
+                animationId = requestAnimationFrame(animate);
+            }
+
+            // Control functions
+            function startAnimation() {
+                if (branches.length === 0) {
+                    resetAnimation();
+                }
+                isAnimating = true;
+                console.log('Starting animation...');
+                animate();
+            }
+
+            function stopAnimation() {
+                isAnimating = false;
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+                console.log('Animation stopped');
+            }
+
+            function resetAnimation() {
+                stopAnimation();
+                branches = [];
+                occupiedPoints.clear();
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                branches.push(new Branch(centerX, centerY, -Math.PI / 2, 0));
+                stats.textContent = `Branches: ${branches.length}`;
+                // Clear canvas
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                console.log('Animation reset');
+            }
+
+            function zoomIn() {
+                scale *= 1.2;
+                if (isAnimating) {
+                    // Redraw will happen in next animation frame
+                } else {
+                    redraw();
+                }
+            }
+
+            function zoomOut() {
+                scale /= 1.2;
+                if (isAnimating) {
+                    // Redraw will happen in next animation frame
+                } else {
+                    redraw();
+                }
+            }
+
+            function resetView() {
+                scale = 1;
+                offsetX = 0;
+                offsetY = 0;
+                if (isAnimating) {
+                    // Redraw will happen in next animation frame
+                } else {
+                    redraw();
+                }
+            }
+
+            function redraw() {
+                ctx.save();
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.translate(offsetX + canvas.width / 2, offsetY + canvas.height / 2);
+                ctx.scale(scale, scale);
+                ctx.translate(-canvas.width / 2, -canvas.height / 2);
+                for (const branch of branches) {
+                    branch.draw();
+                }
+                ctx.restore();
+            }
+
+            // Event listeners for controls
+            startBtn.addEventListener('click', startAnimation);
+            stopBtn.addEventListener('click', stopAnimation);
+            resetBtn.addEventListener('click', resetAnimation);
+            zoomInBtn.addEventListener('click', zoomIn);
+            zoomOutBtn.addEventListener('click', zoomOut);
+            resetViewBtn.addEventListener('click', resetView);
+
+            // Mouse drag for panning
+            canvas.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                dragStartX = e.clientX - offsetX;
+                dragStartY = e.clientY - offsetY;
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    offsetX = e.clientX - dragStartX;
+                    offsetY = e.clientY - dragStartY;
+                    if (!isAnimating) {
+                        redraw();
+                    }
+                }
+            });
+
+            canvas.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            canvas.addEventListener('mouseleave', () => {
+                isDragging = false;
+            });
+
+            // Touch support for mobile
+            let lastTouchX = 0;
+            let lastTouchY = 0;
+            let lastTouchDistance = 0;
+
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (e.touches.length === 1) {
+                    isDragging = true;
+                    lastTouchX = e.touches[0].clientX;
+                    lastTouchY = e.touches[0].clientY;
+                } else if (e.touches.length === 2) {
+                    // Pinch zoom
+                    const dx = e.touches[0].clientX - e.touches[1].clientX;
+                    const dy = e.touches[0].clientY - e.touches[1].clientY;
+                    lastTouchDistance = Math.sqrt(dx * dx + dy * dy);
+                }
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (e.touches.length === 1 && isDragging) {
+                    const deltaX = e.touches[0].clientX - lastTouchX;
+                    const deltaY = e.touches[0].clientY - lastTouchY;
+                    offsetX += deltaX;
+                    offsetY += deltaY;
+                    lastTouchX = e.touches[0].clientX;
+                    lastTouchY = e.touches[0].clientY;
+                    if (!isAnimating) {
+                        redraw();
+                    }
+                } else if (e.touches.length === 2) {
+                    // Pinch zoom
+                    const dx = e.touches[0].clientX - e.touches[1].clientX;
+                    const dy = e.touches[0].clientY - e.touches[1].clientY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const delta = distance - lastTouchDistance;
+                    scale *= (1 + delta * 0.01);
+                    lastTouchDistance = distance;
+                    if (!isAnimating) {
+                        redraw();
+                    }
+                }
+            });
+
+            canvas.addEventListener('touchend', (e) => {
+                isDragging = false;
+            });
+
+            // Mouse wheel for zooming
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                if (e.deltaY < 0) {
+                    scale *= 1.1;
+                } else {
+                    scale /= 1.1;
+                }
+                if (!isAnimating) {
+                    redraw();
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                canvas.width = container.offsetWidth;
+                canvas.height = container.offsetHeight;
+                if (!isAnimating) {
+                    redraw();
+                }
+            });
+
+            // Initialize
+            resetAnimation();
+            console.log('Controls ready. Click Start to begin!');
+        });
+    </script>
+</body>
+</html>

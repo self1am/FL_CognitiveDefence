@@ -1,0 +1,66 @@
+# Production-scale experiment: 100 clients, 50 rounds, Adaptive attacks
+# Tests all attack types: stat-opt, dny-opt, min-max, min-sum against Cognitive Defence
+# Resource estimate: ~60GB memory, 6-8 vCPU cores
+# Expected duration: 6-8 hours on 64GB/8vCPU machine
+
+experiment:
+  experiment_name: "production_100_clients_adaptive_attacks"
+  seed: 123
+  num_rounds: 50
+  min_clients: 80
+  min_available_clients: 80
+  server_address: "0.0.0.0:8080"
+
+defence:
+  strategy: "cognitive_defence"
+  anomaly_threshold: 0.60
+  reputation_decay: 0.75
+  history_size: 250  # Larger history for adaptive attacks
+
+attacks:
+  # 10 clients with stat-opt attack
+  - enabled: true
+    attack_type: "stat_opt"
+    intensity: 0.15
+    target_clients: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+  
+  # 10 clients with dny-opt attack
+  - enabled: true
+    attack_type: "dny_opt"
+    intensity: 0.15
+    target_clients: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+  
+  # 10 clients with min-max attack
+  - enabled: true
+    attack_type: "min_max"
+    intensity: 0.15
+    target_clients: [20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+  
+  # 10 clients with min-sum attack
+  - enabled: true
+    attack_type: "min_sum"
+    intensity: 0.15
+    target_clients: [30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+
+orchestration:
+  num_clients: 100
+  batch_size: 8
+  max_memory_mb: 58000
+  spawn_delay: 2.0
+  client_timeout_seconds: 2000  # Extended for adaptive attacks
+
+model:
+  name: "MNISTNet"
+  input_shape: [28, 28, 1]
+
+data:
+  dataset: "MNIST"
+  num_classes: 10
+  batch_size: 32
+  train_split: 0.8
+  alpha: 0.5
+
+client_config:
+  local_epochs: 2
+  learning_rate: 0.001
+  optimizer: "SGD"
