@@ -116,11 +116,20 @@ class ClientOrchestrator:
         self.resource_monitor = ResourceMonitor(max_memory_mb=max_memory_mb)
         self.client_script_path = "src.clients.client_runner"
         
+        # Convert 0.0.0.0 to localhost for client connections
+        # Clients need a connectable address, not the bind address
+        if server_address.startswith("0.0.0.0"):
+            self.client_connect_address = server_address.replace("0.0.0.0", "localhost")
+            if self.logger:
+                self.logger.logger.info(f"Server listening on {server_address}, clients will connect to {self.client_connect_address}")
+        else:
+            self.client_connect_address = server_address
+        
     def generate_client_config(self, client_id: int, attack_config: Optional[AttackConfig] = None) -> Dict[str, Any]:
         """Generate configuration for a specific client"""
         config = {
             'client_id': client_id,
-            'server_address': self.server_address,
+            'server_address': self.client_connect_address,  # Use connectable address
             'experiment_name': self.experiment_config.experiment_name,
             'seed': self.experiment_config.seed + client_id,  # Unique seed per client
             'batch_size': 32,
