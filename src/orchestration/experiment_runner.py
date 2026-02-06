@@ -7,9 +7,9 @@ from pathlib import Path
 from typing import Dict, Any
 import subprocess
 import time
-import multiprocessing
 import signal
 import os
+import sys
 
 from .client_orchestrator import ClientOrchestrator
 from ..server.cognitive_server import CognitiveAggregationStrategy
@@ -203,29 +203,35 @@ class ExperimentRunner:
                 fraction_evaluate=1.0,  # Evaluate on all clients for distributed metrics
             )
         
+        
         self.logger.logger.info("Starting federated learning server with centralized evaluation")
         
-        # Start server in separate process (required for signal handling)
-        def run_server_process():
-            # Configure server to run evaluation after each round
-            server_config = fl.server.ServerConfig(
-                num_rounds=self.experiment_config.num_rounds,
-                round_timeout=None  # No timeout for evaluation
-            )
-            
-            fl.server.start_server(
-                server_address=self.experiment_config.server_address,
-                config=server_config,
-                strategy=strategy,
-            )
+        # Create server log file
+        server_log_file = f"logs/{self.experiment_config.experiment_name}_server.log"
+        Path("logs").mkdir(exist_ok=True)
         
-        # Use multiprocessing so server runs in its own main thread (required for signal handling)
-        server_process = multiprocessing.Process(target=run_server_process)
-        server_process.daemon = False
-        server_process.start()
+        # Use run_server_with_eval.py as separate process
+        cmd = [
+            sys.executable,
+            "run_server_with_eval.py",
+            "--config", self.config_path,
+            "--host", self.experiment_config.server_address.split(":")[0],
+            "--port", self.experiment_config.server_address.split(":")[1]
+        ]
+        
+        with open(server_log_file, 'w') as log_file:
+            server_process = subprocess.Popen(
+                cmd,
+                stdout=log_file,
+                stderr=subprocess.STDOUT,
+                text=True
+            )
         
         # Give server time to start and bind to port
         time.sleep(3)
+        
+        self.logger.logger.info(f"Server logs being written to: {server_log_file}")
+        self.logger.logger.info(f"Server process PID: {server_process.pid}")
         
         return server_process
     
@@ -237,7 +243,7 @@ class ExperimentRunner:
         server_process = self.start_server()
         
         # Verify server is alive
-        if not server_process.is_alive():
+        if server_process.poll() is not None:
             self.logger.logger.error("❌ Server process failed to start!")
             raise RuntimeError("Server process exited immediately. Check server logs.")
         
@@ -282,15 +288,16 @@ class ExperimentRunner:
             
         finally:
             # Cleanup: terminate server process
-            if server_process.is_alive():
+            if server_process.poll() is None:  # Still running
                 self.logger.logger.info("Terminating server process...")
                 server_process.terminate()
-                server_process.join(timeout=5)
                 
-                if server_process.is_alive():
+                try:
+                    server_process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
                     self.logger.logger.warning("Server process did not terminate gracefully, killing...")
                     server_process.kill()
-                    server_process.join()
+                    server_process.wait()
             
             self.logger.logger.info("Cleanup complete")
 

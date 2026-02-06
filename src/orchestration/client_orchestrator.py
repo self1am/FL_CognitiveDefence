@@ -271,7 +271,7 @@ class ClientOrchestrator:
         if server_process:
             if self.logger:
                 self.logger.logger.info("Waiting for server to complete training rounds...")
-            server_process.join()  # Block until server process exits
+            server_process.wait()  # Block until server process exits
             if self.logger:
                 self.logger.logger.info("✅ Server completed all training rounds")
         else:
