@@ -211,12 +211,11 @@ class ExperimentRunner:
         Path("logs").mkdir(exist_ok=True)
         
         # Use run_server_with_eval.py as separate process
+        # run_server_with_eval.py only accepts --config argument, server address comes from config file
         cmd = [
             sys.executable,
             "run_server_with_eval.py",
-            "--config", self.config_path,
-            "--host", self.experiment_config.server_address.split(":")[0],
-            "--port", self.experiment_config.server_address.split(":")[1]
+            "--config", self.config_path
         ]
         
         with open(server_log_file, 'w') as log_file:
