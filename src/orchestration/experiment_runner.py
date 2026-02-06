@@ -7,6 +7,9 @@ from pathlib import Path
 from typing import Dict, Any
 import subprocess
 import time
+import multiprocessing
+import signal
+import os
 
 from .client_orchestrator import ClientOrchestrator
 from ..server.cognitive_server import CognitiveAggregationStrategy
@@ -202,8 +205,8 @@ class ExperimentRunner:
         
         self.logger.logger.info("Starting federated learning server with centralized evaluation")
         
-        # Start server in separate process
-        def run_server():
+        # Start server in separate process (required for signal handling)
+        def run_server_process():
             # Configure server to run evaluation after each round
             server_config = fl.server.ServerConfig(
                 num_rounds=self.experiment_config.num_rounds,
@@ -216,57 +219,79 @@ class ExperimentRunner:
                 strategy=strategy,
             )
         
-        import threading
-        server_thread = threading.Thread(target=run_server)
-        server_thread.daemon = True
-        server_thread.start()
+        # Use multiprocessing so server runs in its own main thread (required for signal handling)
+        server_process = multiprocessing.Process(target=run_server_process)
+        server_process.daemon = False
+        server_process.start()
         
-        # Give server time to start
-        time.sleep(5)
+        # Give server time to start and bind to port
+        time.sleep(3)
         
-        return server_thread
+        return server_process
     
     def run_experiment(self) -> Dict[str, Any]:
         """Run complete federated learning experiment"""
         self.logger.logger.info(f"Starting experiment: {self.experiment_config.experiment_name}")
         
         # Start server
-        server_thread = self.start_server()
+        server_process = self.start_server()
         
-        # Create client orchestrator
-        orchestrator = ClientOrchestrator(
-            server_address=self.experiment_config.server_address,
-            experiment_config=self.experiment_config,
-            logger=self.logger,
-            max_memory_mb=self.config.get('orchestration', {}).get('max_memory_mb', 6000)
-        )
+        # Verify server is alive
+        if not server_process.is_alive():
+            self.logger.logger.error("❌ Server process failed to start!")
+            raise RuntimeError("Server process exited immediately. Check server logs.")
         
-        # Get attack configurations
-        attack_configs = self.create_attack_configs()
+        self.logger.logger.info(f"✅ Server started on {self.experiment_config.server_address}")
         
-        # Run multi-client experiment
-        num_clients = self.config.get('orchestration', {}).get('num_clients', 10)
-        batch_size = self.config.get('orchestration', {}).get('batch_size', 3)
-        
-        experiment_results = orchestrator.run_experiment(
-            num_clients=num_clients,
-            attack_configs=attack_configs,
-            batch_size=batch_size
-        )
-        
-        # Save complete experiment log
-        self.logger.save_experiment_log()
-        
-        # Save experiment results
-        results_file = f"experiments/results/{self.experiment_config.experiment_name}_results.json"
-        Path(results_file).parent.mkdir(parents=True, exist_ok=True)
-        
-        with open(results_file, 'w') as f:
-            json.dump(experiment_results, f, indent=2)
-        
-        self.logger.logger.info(f"Experiment completed. Results saved to {results_file}")
-        
-        return experiment_results
+        try:
+            # Create client orchestrator
+            orchestrator = ClientOrchestrator(
+                server_address=self.experiment_config.server_address,
+                experiment_config=self.experiment_config,
+                logger=self.logger,
+                max_memory_mb=self.config.get('orchestration', {}).get('max_memory_mb', 6000)
+            )
+            
+            # Get attack configurations
+            attack_configs = self.create_attack_configs()
+            
+            # Run multi-client experiment
+            num_clients = self.config.get('orchestration', {}).get('num_clients', 10)
+            batch_size = self.config.get('orchestration', {}).get('batch_size', 3)
+            
+            experiment_results = orchestrator.run_experiment(
+                num_clients=num_clients,
+                attack_configs=attack_configs,
+                batch_size=batch_size
+            )
+            
+            # Save complete experiment log
+            self.logger.save_experiment_log()
+            
+            # Save experiment results
+            results_file = f"experiments/results/{self.experiment_config.experiment_name}_results.json"
+            Path(results_file).parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(results_file, 'w') as f:
+                json.dump(experiment_results, f, indent=2)
+            
+            self.logger.logger.info(f"Experiment completed. Results saved to {results_file}")
+            
+            return experiment_results
+            
+        finally:
+            # Cleanup: terminate server process
+            if server_process.is_alive():
+                self.logger.logger.info("Terminating server process...")
+                server_process.terminate()
+                server_process.join(timeout=5)
+                
+                if server_process.is_alive():
+                    self.logger.logger.warning("Server process did not terminate gracefully, killing...")
+                    server_process.kill()
+                    server_process.join()
+            
+            self.logger.logger.info("Cleanup complete")
 
 def main():
     parser = argparse.ArgumentParser()

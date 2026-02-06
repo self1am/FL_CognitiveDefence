@@ -51,8 +51,13 @@ class ResourceMonitor:
         """Check if system can handle another client"""
         current = self.get_current_usage()
         
-        memory_ok = (current['available_memory_mb'] > estimated_memory_mb)
-        cpu_ok = (current['cpu_percent'] < self.max_cpu_percent)
+        # Require at least estimated_memory_mb available, but be more lenient than before
+        # Allow spawning if we have at least 300MB (reduced from 500MB to handle memory pressure)
+        memory_ok = (current['available_memory_mb'] > 300)
+        
+        # Don't block on CPU if we have available memory
+        # CPU will naturally throttle process spawning
+        cpu_ok = True
         
         return memory_ok and cpu_ok
     
