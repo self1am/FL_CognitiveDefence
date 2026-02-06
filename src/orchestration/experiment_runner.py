@@ -262,7 +262,8 @@ class ExperimentRunner:
             experiment_results = orchestrator.run_experiment(
                 num_clients=num_clients,
                 attack_configs=attack_configs,
-                batch_size=batch_size
+                batch_size=batch_size,
+                server_process=server_process
             )
             
             # Save complete experiment log

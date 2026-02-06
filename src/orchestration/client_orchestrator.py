@@ -157,15 +157,20 @@ class ClientOrchestrator:
                 "--config", json.dumps(config)
             ]
             
-            # Start process
-            process = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                bufsize=1,
-                universal_newlines=True
-            )
+            # Create log file for client output
+            client_log_file = f"logs/client_{client_id}.log"
+            Path("logs").mkdir(exist_ok=True)
+            
+            # Start process with output redirection
+            with open(client_log_file, 'w') as log_file:
+                process = subprocess.Popen(
+                    cmd,
+                    stdout=log_file,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    bufsize=1,
+                    universal_newlines=True
+                )
             
             client_process = ClientProcess(
                 client_id=client_id,
@@ -177,7 +182,7 @@ class ClientOrchestrator:
             self.client_processes[client_id] = client_process
             
             if self.logger:
-                self.logger.logger.info(f"Spawned client {client_id} with PID {process.pid}")
+                self.logger.logger.info(f"Spawned client {client_id} with PID {process.pid} (logs: {client_log_file})")
             
             return client_process
             
@@ -219,8 +224,16 @@ class ClientOrchestrator:
     def run_experiment(self, 
                       num_clients: int = 10,
                       attack_configs: Optional[Dict[int, AttackConfig]] = None,
-                      batch_size: int = 3) -> Dict[str, Any]:
-        """Run complete multi-client experiment"""
+                      batch_size: int = 3,
+                      server_process = None) -> Dict[str, Any]:
+        """Run complete multi-client experiment
+        
+        Args:
+            num_clients: Number of clients to spawn
+            attack_configs: Attack configurations per client
+            batch_size: Number of clients to spawn per batch
+            server_process: Reference to server process (multiprocessing.Process)
+        """
         
         if self.logger:
             self.logger.logger.info(f"Starting experiment with {num_clients} clients")
@@ -245,11 +258,24 @@ class ClientOrchestrator:
         # Monitor client processes
         self.monitor_clients()
         
-        # Wait for completion
-        self.wait_for_completion()
+        # Wait for server completion instead of client completion
+        if server_process:
+            if self.logger:
+                self.logger.logger.info("Waiting for server to complete training rounds...")
+            server_process.join()  # Block until server process exits
+            if self.logger:
+                self.logger.logger.info("✅ Server completed all training rounds")
+        else:
+            # Fallback: wait for clients (shouldn't happen in normal flow)
+            if self.logger:
+                self.logger.logger.warning("No server process provided, waiting for clients instead")
+            self.wait_for_completion()
         
         # Stop monitoring
         self.resource_monitor.stop_monitoring()
+        
+        # Terminate all clients gracefully
+        self.terminate_all_clients()
         
         # Collect results
         experiment_duration = time.time() - start_time
@@ -270,7 +296,7 @@ class ClientOrchestrator:
         return experiment_summary
     
     def monitor_clients(self):
-        """Monitor client process status"""
+        """Monitor client process status and connectivity"""
         def monitoring_loop():
             while any(proc.status == "running" for proc in self.client_processes.values()):
                 for client_id, client_proc in self.client_processes.items():
@@ -284,7 +310,15 @@ class ClientOrchestrator:
                             else:
                                 client_proc.status = "failed"
                                 if self.logger:
-                                    self.logger.logger.error(f"Client {client_id} failed with code {poll_result}")
+                                    self.logger.logger.error(f"Client {client_id} failed with exit code {poll_result}")
+                                    # Read error logs
+                                    try:
+                                        with open(f"logs/client_{client_id}.log", 'r') as f:
+                                            error_output = f.read()
+                                            if error_output:
+                                                self.logger.logger.error(f"Client {client_id} output:\n{error_output[-500:]}")  # Last 500 chars
+                                    except:
+                                        pass
                 
                 time.sleep(1)
         
@@ -292,26 +326,48 @@ class ClientOrchestrator:
         self.monitor_thread.daemon = True
         self.monitor_thread.start()
     
-    def wait_for_completion(self, timeout: float = 1800):  # 30 minutes default
-        """Wait for all clients to complete"""
+    def wait_for_completion(self, timeout: float = None):  # None = wait indefinitely
+        """Wait for all clients to complete their training
+        
+        Note: Clients don't exit naturally - they stay connected to server.
+        This waits for either:
+        1. A timeout (if specified)
+        2. User interruption (Ctrl+C)
+        3. Server completion (detected externally)
+        """
+        if timeout is None:
+            timeout = float('inf')
+        
         start_time = time.time()
+        active_clients = len([c for c in self.client_processes.values() if c.status == "running"])
         
-        while time.time() - start_time < timeout:
-            running_clients = [
-                client_id for client_id, proc in self.client_processes.items() 
-                if proc.status == "running"
-            ]
-            
-            if not running_clients:
-                break
-            
+        if self.logger:
+            self.logger.logger.info(f"Waiting for {active_clients} clients to train...")
+            self.logger.logger.info(f"Training is happening in the background. Timeout: {timeout if timeout != float('inf') else 'None (indefinite)'}")
+        
+        try:
+            while time.time() - start_time < timeout:
+                active = [
+                    cid for cid, proc in self.client_processes.items() 
+                    if proc.status == "running" and proc.process.poll() is None
+                ]
+                
+                if not active:
+                    if self.logger:
+                        self.logger.logger.info("All clients have finished or disconnected")
+                    break
+                
+                # Update status every 30 seconds instead of 10
+                time.sleep(30)
+                
+        except KeyboardInterrupt:
             if self.logger:
-                self.logger.logger.info(f"Waiting for {len(running_clients)} clients: {running_clients}")
-            
-            time.sleep(10)
-        
-        # Forcefully terminate remaining processes
-        self.terminate_all_clients()
+                self.logger.logger.info("Received interrupt signal. Terminating all clients...")
+            self.terminate_all_clients()
+            raise
+        finally:
+            # Ensure all clients are cleaned up
+            self.terminate_all_clients()
     
     def terminate_all_clients(self):
         """Terminate all client processes"""
