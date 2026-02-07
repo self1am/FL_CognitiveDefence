@@ -5,7 +5,7 @@ experiment:
   num_rounds: 10
   min_clients: 5
   min_available_clients: 5
-  server_address: "140.245.224.116:8080"
+  server_address: "localhost:8080"
 
 defence:
   strategy: "none"

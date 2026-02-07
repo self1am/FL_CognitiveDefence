@@ -115,8 +115,13 @@ class ExperimentRunner:
         
         return evaluate
     
-    def start_server(self) -> subprocess.Popen:
-        """Start the federated learning server"""
+    def start_server(self, run_in_main_thread: bool = False) -> subprocess.Popen:
+        """Start the federated learning server
+        
+        Args:
+            run_in_main_thread: If True, run server on main thread (blocking). 
+                               If False, run in daemon thread (non-blocking).
+        """
         # Create centralized evaluation function
         evaluate_fn = self.create_centralized_eval_fn()
         
@@ -202,36 +207,65 @@ class ExperimentRunner:
         
         self.logger.logger.info("Starting federated learning server with centralized evaluation")
         
-        # Start server in separate process
-        def run_server():
-            # Configure server to run evaluation after each round
-            server_config = fl.server.ServerConfig(
-                num_rounds=self.experiment_config.num_rounds,
-                round_timeout=None  # No timeout for evaluation
-            )
-            
+        # Configure server to run evaluation after each round
+        server_config = fl.server.ServerConfig(
+            num_rounds=self.experiment_config.num_rounds,
+            round_timeout=None  # No timeout for evaluation
+        )
+        
+        if run_in_main_thread:
+            # Run directly on main thread (blocking) - for server-only mode
+            self.logger.logger.info("Running server on main thread (blocking)")
             fl.server.start_server(
                 server_address=self.experiment_config.server_address,
                 config=server_config,
                 strategy=strategy,
             )
-        
-        import threading
-        server_thread = threading.Thread(target=run_server)
-        server_thread.daemon = True
-        server_thread.start()
-        
-        # Give server time to start
-        time.sleep(5)
-        
-        return server_thread
+            return None
+        else:
+            # Run in daemon thread (non-blocking) - for client-server mode
+            def run_server():
+                fl.server.start_server(
+                    server_address=self.experiment_config.server_address,
+                    config=server_config,
+                    strategy=strategy,
+                )
+            
+            import threading
+            server_thread = threading.Thread(target=run_server)
+            server_thread.daemon = True
+            server_thread.start()
+            
+            # Give server time to start
+            time.sleep(5)
+            
+            return server_thread
     
     def run_experiment(self) -> Dict[str, Any]:
         """Run complete federated learning experiment"""
         self.logger.logger.info(f"Starting experiment: {self.experiment_config.experiment_name}")
         
-        # Start server
-        server_thread = self.start_server()
+        # Check if server_only mode is enabled
+        if self.config.get('server_only', False):
+            self.logger.logger.info("Server-only mode: Running server on main thread, waiting for external clients to connect")
+            self.start_server(run_in_main_thread=True)
+            
+            # If we get here, the server was interrupted
+            self.logger.logger.info("Server interrupted")
+            
+            # Save experiment log
+            self.logger.save_experiment_log()
+            
+            return {
+                'total_clients': 0,
+                'successful_clients': 0,
+                'failed_clients': 0,
+                'duration_seconds': 0,
+                'mode': 'server_only'
+            }
+        
+        # Start server in background thread
+        server_thread = self.start_server(run_in_main_thread=False)
         
         # Create client orchestrator
         orchestrator = ClientOrchestrator(
