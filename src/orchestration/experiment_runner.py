@@ -118,8 +118,13 @@ class ExperimentRunner:
         
         return evaluate
     
-    def start_server(self) -> subprocess.Popen:
-        """Start the federated learning server"""
+    def start_server(self, run_in_main_thread: bool = False) -> subprocess.Popen:
+        """Start the federated learning server
+        
+        Args:
+            run_in_main_thread: If True, run server on main thread (blocking). 
+                               If False, run in daemon thread (non-blocking).
+        """
         # Create centralized evaluation function
         evaluate_fn = self.create_centralized_eval_fn()
         
@@ -238,7 +243,35 @@ class ExperimentRunner:
         """Run complete federated learning experiment"""
         self.logger.logger.info(f"Starting experiment: {self.experiment_config.experiment_name}")
         
-        # Start server
+        # Check if server_only mode is enabled
+        if self.config.get('server_only', False):
+            self.logger.logger.info("Server-only mode: Running server as subprocess, waiting for external clients to connect")
+            server_process = self.start_server()
+            
+            try:
+                # Wait for server process
+                server_process.wait()
+            except KeyboardInterrupt:
+                self.logger.logger.info("Server interrupted")
+                server_process.terminate()
+                try:
+                    server_process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    server_process.kill()
+                    server_process.wait()
+            
+            # Save experiment log
+            self.logger.save_experiment_log()
+            
+            return {
+                'total_clients': 0,
+                'successful_clients': 0,
+                'failed_clients': 0,
+                'duration_seconds': 0,
+                'mode': 'server_only'
+            }
+        
+        # Start server in subprocess mode
         server_process = self.start_server()
         
         # Verify server is alive
