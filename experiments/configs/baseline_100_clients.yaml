@@ -3,8 +3,8 @@ experiment:
   experiment_name: "baseline_100_clients"
   seed: 123
   num_rounds: 10
-  min_clients: 100
-  min_available_clients: 100
+  min_clients: 20
+  min_available_clients: 20
   server_address: "localhost:8080"
 
 defence:
