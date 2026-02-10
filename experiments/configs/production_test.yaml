@@ -4,7 +4,7 @@
 # Expected duration: 6-8 hours on 64GB/8vCPU machine
 
 experiment:
-  experiment_name: "production_100_clients_adaptive_attacks"
+  experiment_name: "production_test_adaptive_attacks"
   seed: 123
   num_rounds: 20
   min_clients: 30
@@ -25,7 +25,7 @@ attacks:
     target_clients: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 orchestration:
-  num_clients: 100
+  num_clients: 30
   batch_size: 8
   max_memory_mb: 58000
   spawn_delay: 2.0
