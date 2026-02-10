@@ -1,0 +1,30 @@
+# baseline with 100 clients
+experiment:
+  experiment_name: "baseline_100_clients"
+  seed: 123
+  num_rounds: 10
+  min_clients: 100
+  min_available_clients: 100
+  server_address: "localhost:8080"
+
+defence:
+  strategy: "none"
+  anomaly_threshold: 0.0
+  reputation_decay: 0.0
+  history_size: 0
+
+attacks: []
+
+orchestration:
+  num_clients: 100
+  batch_size: 2
+  max_memory_mb: 6000
+  spawn_delay: 2.0
+
+# Flower simulation settings (Ray)
+simulation:
+  client_resources:
+    num_cpus: 1
+  ray_init_args:
+    include_dashboard: false
+    log_to_driver: false
