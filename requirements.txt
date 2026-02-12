@@ -11,7 +11,3 @@ tqdm>=4.64.0
 psutil>=5.9.0
 scikit-learn>=1.1.0
 pandas>=1.4.0
-
-# Monitoring and API dependencies
-flask>=2.3.0
-flask-cors>=4.0.0
