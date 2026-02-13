@@ -1,44 +1,31 @@
-# Optimized config with num_cpus: 0.25
-# Based on CPU profiler showing 47% idle time at num_cpus: 0.5
-# Expected: 2x speedup (30 min/round → 15 min/round)
+# Baseline with 100 clients, optimized num_cpus to 0.25
+experiment:
+  experiment_name: "baseline_100_clients_0.25"
+  seed: 123
+  num_rounds: 10
+  min_clients: 20
+  min_available_clients: 20
+  server_address: "localhost:8080"
 
-server:
-  num_rounds: 2  # Just 2 rounds for quick test
-  aggregation_strategy: "fedavg"
-  centralized_evaluation: true
-  model_name: "simple_cnn"
+defence:
+  strategy: "none"
+  anomaly_threshold: 0.0
+  reputation_decay: 0.0
+  history_size: 0
 
-federated:
+attacks: []
+
+orchestration:
   num_clients: 100
+  batch_size: 2
+  max_memory_mb: 6000
+  spawn_delay: 2.0
+
+# Flower simulation settings (Ray)
+simulation:
   client_resources:
-    num_cpus: 0.25  # ← OPTIMIZED FROM 0.5
-    num_gpus: 0
-  
-  # Ray/Flower config
+    num_cpus: 0.25  # OPTIMIZED: reduced from 0.5 for more parallelism
   ray_init_args:
+    include_dashboard: false
+    log_to_driver: false
     num_cpus: 8
-    object_store_memory: 20000000000  # 20GB
-    logging_level: "warning"
-
-client:
-  epochs: 1
-  batch_size: 32
-  learning_rate: 0.01
-  device: "cpu"
-  eval_fraction: 0.1
-
-evaluation:
-  num_test_samples: 10000
-  num_workers: 1
-
-dataset:
-  name: "mnist"
-  data_dir: "data/MNIST/raw"
-  normalize: true
-
-defense:
-  strategy: "no_defense"
-  
-logging:
-  log_level: "INFO"
-  log_file: "logs/baseline_100_clients_0.25.log"
