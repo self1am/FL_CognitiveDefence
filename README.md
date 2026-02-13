@@ -200,3 +200,16 @@ Example configurations available in `experiments/configs/`:
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
+<!-- 
+# SSH via browser, then run:
+tmux new-session -d -s experiment -c /path/to/FL_CognitiveDefence
+
+# Start experiment in that session
+tmux send-keys -t experiment "python run_server_with_eval.py" Enter
+
+# Close the browser tab, come back later, then:
+tmux attach -t experiment
+
+# See what happened while you were gone
+tmux capture-pane -t experiment -p
+ -->

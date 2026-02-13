@@ -1,0 +1,674 @@
+2026-02-10 18:20:42,412 - baseline_100_clients - INFO - Loading centralized test dataset for server evaluation...
+2026-02-10 18:20:55,491 - baseline_100_clients - INFO - Using device for server evaluation: cpu
+2026-02-10 18:20:55,491 - baseline_100_clients - INFO - Initialized server with No Defense (Simple FedAvg)
+2026-02-10 18:20:55,491 - baseline_100_clients - INFO - Centralized evaluation enabled on server
+2026-02-10 18:20:55,491 - baseline_100_clients - INFO - Starting Flower simulation with 100 clients, client_resources={'num_cpus': 1}
+2026-02-10 18:20:55,738 - flwr - WARNING - DEPRECATED FEATURE: flwr.simulation.start_simulation() is deprecated.
+	Instead, use the `flwr run` CLI command to start a local simulation in your Flower app, as shown for example below:
+
+		$ flwr new  # Create a new Flower app from a template
+
+		$ flwr run  # Run the Flower app in Simulation Mode
+
+	Using `start_simulation()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2026-02-10 18:20:55,740 - flwr - INFO - Starting Flower simulation, config: num_rounds=10, no round_timeout
+2026-02-10 18:20:58,336 - flwr - INFO - Flower VCE: Ray initialized with resources: {'CPU': 8.0, 'object_store_memory': 19605642854.0, 'node:10.128.0.2': 1.0, 'node:__internal_head__': 1.0, 'memory': 45746499994.0}
+2026-02-10 18:20:58,336 - flwr - INFO - Optimize your simulation with Flower VCE: https://flower.ai/docs/framework/how-to-run-simulations.html
+2026-02-10 18:20:58,336 - flwr - INFO - Flower VCE: Resources for each Virtual Client: {'num_cpus': 1}
+2026-02-10 18:20:58,365 - flwr - INFO - Flower VCE: Creating VirtualClientEngineActorPool with 8 actors
+2026-02-10 18:20:58,366 - flwr - INFO - [INIT]
+2026-02-10 18:20:58,367 - flwr - INFO - Requesting initial parameters from one random client
+2026-02-10 18:21:18,468 - flwr - INFO - Received initial parameters from one random client
+2026-02-10 18:21:18,468 - flwr - INFO - Starting evaluation of initial global parameters
+2026-02-10 18:21:24,038 - baseline_100_clients - INFO - 📊 Server Round 0 - CENTRALIZED EVALUATION | Loss: 2.3027, Accuracy: 0.1111 (tested on 10000 samples)
+2026-02-10 18:21:24,038 - flwr - INFO - initial parameters (loss, other metrics): 2.3027044117071065, {'centralized_accuracy': 0.1111}
+2026-02-10 18:21:24,039 - flwr - INFO - 
+2026-02-10 18:21:24,039 - flwr - INFO - [ROUND 1]
+2026-02-10 18:21:24,039 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)
+2026-02-10 18:37:12,693 - baseline_100_clients - INFO - Loading centralized test dataset for server evaluation...
+2026-02-10 18:37:31,901 - baseline_100_clients - INFO - Using device for server evaluation: cpu
+2026-02-10 18:37:31,902 - baseline_100_clients - INFO - Initialized server with No Defense (Simple FedAvg)
+2026-02-10 18:37:31,902 - baseline_100_clients - INFO - Centralized evaluation enabled on server
+2026-02-10 18:37:31,902 - baseline_100_clients - INFO - Starting Flower simulation with 100 clients, client_resources={'num_cpus': 0.5}
+2026-02-10 18:37:32,097 - flwr - WARNING - DEPRECATED FEATURE: flwr.simulation.start_simulation() is deprecated.
+	Instead, use the `flwr run` CLI command to start a local simulation in your Flower app, as shown for example below:
+
+		$ flwr new  # Create a new Flower app from a template
+
+		$ flwr run  # Run the Flower app in Simulation Mode
+
+	Using `start_simulation()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2026-02-10 18:37:32,099 - flwr - INFO - Starting Flower simulation, config: num_rounds=10, no round_timeout
+2026-02-10 18:37:34,720 - flwr - INFO - Flower VCE: Ray initialized with resources: {'CPU': 8.0, 'object_store_memory': 19575677337.0, 'node:10.128.0.2': 1.0, 'node:__internal_head__': 1.0, 'memory': 45676580455.0}
+2026-02-10 18:37:34,720 - flwr - INFO - Optimize your simulation with Flower VCE: https://flower.ai/docs/framework/how-to-run-simulations.html
+2026-02-10 18:37:34,721 - flwr - INFO - Flower VCE: Resources for each Virtual Client: {'num_cpus': 0.5}
+2026-02-10 18:37:34,762 - flwr - INFO - Flower VCE: Creating VirtualClientEngineActorPool with 16 actors
+2026-02-10 18:37:34,764 - flwr - INFO - [INIT]
+2026-02-10 18:37:34,764 - flwr - INFO - Requesting initial parameters from one random client
+2026-02-10 18:38:05,946 - flwr - INFO - Received initial parameters from one random client
+2026-02-10 18:38:05,946 - flwr - INFO - Starting evaluation of initial global parameters
+2026-02-10 18:38:17,213 - baseline_100_clients - INFO - 📊 Server Round 0 - CENTRALIZED EVALUATION | Loss: 2.3034, Accuracy: 0.0974 (tested on 10000 samples)
+2026-02-10 18:38:17,214 - flwr - INFO - initial parameters (loss, other metrics): 2.3034329201765122, {'centralized_accuracy': 0.0974}
+2026-02-10 18:38:17,215 - flwr - INFO - 
+2026-02-10 18:38:17,215 - flwr - INFO - [ROUND 1]
+2026-02-10 18:38:17,216 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)
+2026-02-10 18:48:45,300 - baseline_100_clients - INFO - Loading centralized test dataset for server evaluation...
+2026-02-10 18:48:57,856 - baseline_100_clients - INFO - Using device for server evaluation: cpu
+2026-02-10 18:48:57,857 - baseline_100_clients - INFO - Initialized server with No Defense (Simple FedAvg)
+2026-02-10 18:48:57,857 - baseline_100_clients - INFO - Centralized evaluation enabled on server
+2026-02-10 18:48:57,857 - baseline_100_clients - INFO - Starting Flower simulation with 100 clients, client_resources={'num_cpus': 0.5}
+2026-02-10 18:48:58,055 - flwr - WARNING - DEPRECATED FEATURE: flwr.simulation.start_simulation() is deprecated.
+	Instead, use the `flwr run` CLI command to start a local simulation in your Flower app, as shown for example below:
+
+		$ flwr new  # Create a new Flower app from a template
+
+		$ flwr run  # Run the Flower app in Simulation Mode
+
+	Using `start_simulation()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2026-02-10 18:48:58,057 - flwr - INFO - Starting Flower simulation, config: num_rounds=10, no round_timeout
+2026-02-10 18:49:00,645 - flwr - INFO - Flower VCE: Ray initialized with resources: {'node:__internal_head__': 1.0, 'node:10.128.0.2': 1.0, 'object_store_memory': 19608499814.0, 'memory': 45753166234.0, 'CPU': 8.0}
+2026-02-10 18:49:00,645 - flwr - INFO - Optimize your simulation with Flower VCE: https://flower.ai/docs/framework/how-to-run-simulations.html
+2026-02-10 18:49:00,646 - flwr - INFO - Flower VCE: Resources for each Virtual Client: {'num_cpus': 0.5}
+2026-02-10 18:49:00,682 - flwr - INFO - Flower VCE: Creating VirtualClientEngineActorPool with 16 actors
+2026-02-10 18:49:00,683 - flwr - INFO - [INIT]
+2026-02-10 18:49:00,683 - flwr - INFO - Requesting initial parameters from one random client
+2026-02-10 18:49:22,380 - flwr - INFO - Received initial parameters from one random client
+2026-02-10 18:49:22,381 - flwr - INFO - Starting evaluation of initial global parameters
+2026-02-10 18:49:27,856 - baseline_100_clients - INFO - 📊 Server Round 0 - CENTRALIZED EVALUATION | Loss: 2.3027, Accuracy: 0.1111 (tested on 10000 samples)
+2026-02-10 18:49:27,856 - flwr - INFO - initial parameters (loss, other metrics): 2.3027044117071065, {'centralized_accuracy': 0.1111}
+2026-02-10 18:49:27,856 - flwr - INFO - 
+2026-02-10 18:49:27,856 - flwr - INFO - [ROUND 1]
+2026-02-10 18:49:27,856 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)
+2026-02-10 19:25:26,887 - baseline_100_clients - INFO - Loading centralized test dataset for server evaluation...
+2026-02-10 19:25:40,017 - baseline_100_clients - INFO - Using device for server evaluation: cpu
+2026-02-10 19:25:40,018 - baseline_100_clients - INFO - Initialized server with No Defense (Simple FedAvg)
+2026-02-10 19:25:40,018 - baseline_100_clients - INFO - Centralized evaluation enabled on server
+2026-02-10 19:25:40,018 - baseline_100_clients - INFO - Starting Flower simulation with 100 clients, client_resources={'num_cpus': 0.5}
+2026-02-10 19:25:40,243 - flwr - WARNING - DEPRECATED FEATURE: flwr.simulation.start_simulation() is deprecated.
+	Instead, use the `flwr run` CLI command to start a local simulation in your Flower app, as shown for example below:
+
+		$ flwr new  # Create a new Flower app from a template
+
+		$ flwr run  # Run the Flower app in Simulation Mode
+
+	Using `start_simulation()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2026-02-10 19:25:40,244 - flwr - INFO - Starting Flower simulation, config: num_rounds=10, no round_timeout
+2026-02-10 19:25:42,870 - flwr - INFO - Flower VCE: Ray initialized with resources: {'memory': 45757188916.0, 'CPU': 8.0, 'node:10.128.0.2': 1.0, 'object_store_memory': 19610223820.0, 'node:__internal_head__': 1.0}
+2026-02-10 19:25:42,870 - flwr - INFO - Optimize your simulation with Flower VCE: https://flower.ai/docs/framework/how-to-run-simulations.html
+2026-02-10 19:25:42,870 - flwr - INFO - Flower VCE: Resources for each Virtual Client: {'num_cpus': 0.5}
+2026-02-10 19:25:42,910 - flwr - INFO - Flower VCE: Creating VirtualClientEngineActorPool with 16 actors
+2026-02-10 19:25:42,912 - flwr - INFO - [INIT]
+2026-02-10 19:25:42,913 - flwr - INFO - Requesting initial parameters from one random client
+2026-02-10 19:26:05,410 - flwr - INFO - Received initial parameters from one random client
+2026-02-10 19:26:05,410 - flwr - INFO - Starting evaluation of initial global parameters
+2026-02-10 19:26:10,683 - baseline_100_clients - INFO - 📊 Server Round 0 - CENTRALIZED EVALUATION | Loss: 2.3034, Accuracy: 0.0974 (tested on 10000 samples)
+2026-02-10 19:26:10,684 - flwr - INFO - initial parameters (loss, other metrics): 2.3034329201765122, {'centralized_accuracy': 0.0974}
+2026-02-10 19:26:10,684 - flwr - INFO - 
+2026-02-10 19:26:10,684 - flwr - INFO - [ROUND 1]
+2026-02-10 19:26:10,684 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)
+2026-02-10 19:37:43,467 - baseline_100_clients - INFO - Loading centralized test dataset for server evaluation...
+2026-02-10 19:37:56,123 - baseline_100_clients - INFO - Using device for server evaluation: cpu
+2026-02-10 19:37:56,123 - baseline_100_clients - INFO - Initialized server with No Defense (Simple FedAvg)
+2026-02-10 19:37:56,123 - baseline_100_clients - INFO - Centralized evaluation enabled on server
+2026-02-10 19:37:56,123 - baseline_100_clients - INFO - Starting Flower simulation with 100 clients, client_resources={'num_cpus': 0.5}
+2026-02-10 19:37:56,311 - flwr - WARNING - DEPRECATED FEATURE: flwr.simulation.start_simulation() is deprecated.
+	Instead, use the `flwr run` CLI command to start a local simulation in your Flower app, as shown for example below:
+
+		$ flwr new  # Create a new Flower app from a template
+
+		$ flwr run  # Run the Flower app in Simulation Mode
+
+	Using `start_simulation()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2026-02-10 19:37:56,312 - flwr - INFO - Starting Flower simulation, config: num_rounds=10, no round_timeout
+2026-02-10 19:37:58,879 - flwr - INFO - Flower VCE: Ray initialized with resources: {'node:10.128.0.2': 1.0, 'memory': 45742950400.0, 'CPU': 8.0, 'node:__internal_head__': 1.0, 'object_store_memory': 19604121600.0}
+2026-02-10 19:37:58,880 - flwr - INFO - Optimize your simulation with Flower VCE: https://flower.ai/docs/framework/how-to-run-simulations.html
+2026-02-10 19:37:58,880 - flwr - INFO - Flower VCE: Resources for each Virtual Client: {'num_cpus': 0.5}
+2026-02-10 19:37:58,918 - flwr - INFO - Flower VCE: Creating VirtualClientEngineActorPool with 16 actors
+2026-02-10 19:37:58,919 - flwr - INFO - [INIT]
+2026-02-10 19:37:58,920 - flwr - INFO - Requesting initial parameters from one random client
+2026-02-10 19:38:21,170 - flwr - INFO - Received initial parameters from one random client
+2026-02-10 19:38:21,170 - flwr - INFO - Starting evaluation of initial global parameters
+2026-02-10 19:38:26,061 - baseline_100_clients - INFO - 📊 Server Round 0 - CENTRALIZED EVALUATION | Loss: 2.3027, Accuracy: 0.1111 (tested on 10000 samples)
+2026-02-10 19:38:26,061 - flwr - INFO - initial parameters (loss, other metrics): 2.3027044117071065, {'centralized_accuracy': 0.1111}
+2026-02-10 19:38:26,061 - flwr - INFO - 
+2026-02-10 19:38:26,061 - flwr - INFO - [ROUND 1]
+2026-02-10 19:38:26,062 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)
+2026-02-10 20:02:23,674 - flwr - ERROR - Traceback (most recent call last):
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 393, in get_client_result
+    self.process_unordered_future(timeout=timeout)
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 373, in process_unordered_future
+    if self._check_actor_fits_in_pool():
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 336, in _check_actor_fits_in_pool
+    num_actors_updated = pool_size_from_resources(self.client_resources)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 129, in pool_size_from_resources
+    "The ActorPool is empty. The system (CPUs=%s, GPUs=%s) "
+UnboundLocalError: cannot access local variable 'num_cpus' where it is not associated with a value
+
+2026-02-10 20:02:23,675 - flwr - ERROR - cannot access local variable 'num_cpus' where it is not associated with a value
+2026-02-10 20:02:23,678 - flwr - ERROR - Traceback (most recent call last):
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 393, in get_client_result
+    self.process_unordered_future(timeout=timeout)
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 373, in process_unordered_future
+    if self._check_actor_fits_in_pool():
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 336, in _check_actor_fits_in_pool
+    num_actors_updated = pool_size_from_resources(self.client_resources)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 129, in pool_size_from_resources
+    "The ActorPool is empty. The system (CPUs=%s, GPUs=%s) "
+UnboundLocalError: cannot access local variable 'num_cpus' where it is not associated with a value
+
+2026-02-10 20:02:23,679 - flwr - ERROR - cannot access local variable 'num_cpus' where it is not associated with a value
+2026-02-10 20:02:23,682 - flwr - ERROR - Traceback (most recent call last):
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 393, in get_client_result
+    self.process_unordered_future(timeout=timeout)
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 373, in process_unordered_future
+    if self._check_actor_fits_in_pool():
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 336, in _check_actor_fits_in_pool
+    num_actors_updated = pool_size_from_resources(self.client_resources)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 129, in pool_size_from_resources
+    "The ActorPool is empty. The system (CPUs=%s, GPUs=%s) "
+UnboundLocalError: cannot access local variable 'num_cpus' where it is not associated with a value
+
+2026-02-10 20:02:23,683 - flwr - ERROR - cannot access local variable 'num_cpus' where it is not associated with a value
+2026-02-10 20:02:23,684 - flwr - ERROR - Traceback (most recent call last):
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 393, in get_client_result
+    self.process_unordered_future(timeout=timeout)
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 373, in process_unordered_future
+    if self._check_actor_fits_in_pool():
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 336, in _check_actor_fits_in_pool
+    num_actors_updated = pool_size_from_resources(self.client_resources)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 129, in pool_size_from_resources
+    "The ActorPool is empty. The system (CPUs=%s, GPUs=%s) "
+UnboundLocalError: cannot access local variable 'num_cpus' where it is not associated with a value
+
+2026-02-10 20:02:23,687 - flwr - ERROR - Traceback (most recent call last):
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 393, in get_client_result
+    self.process_unordered_future(timeout=timeout)
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 373, in process_unordered_future
+    if self._check_actor_fits_in_pool():
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 336, in _check_actor_fits_in_pool
+    num_actors_updated = pool_size_from_resources(self.client_resources)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 129, in pool_size_from_resources
+    "The ActorPool is empty. The system (CPUs=%s, GPUs=%s) "
+UnboundLocalError: cannot access local variable 'num_cpus' where it is not associated with a value
+
+2026-02-10 20:02:23,692 - flwr - ERROR - cannot access local variable 'num_cpus' where it is not associated with a value
+2026-02-10 20:02:23,691 - flwr - ERROR - Traceback (most recent call last):
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 393, in get_client_result
+    self.process_unordered_future(timeout=timeout)
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 373, in process_unordered_future
+    if self._check_actor_fits_in_pool():
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 336, in _check_actor_fits_in_pool
+    num_actors_updated = pool_size_from_resources(self.client_resources)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 129, in pool_size_from_resources
+    "The ActorPool is empty. The system (CPUs=%s, GPUs=%s) "
+UnboundLocalError: cannot access local variable 'num_cpus' where it is not associated with a value
+
+2026-02-10 20:02:23,692 - flwr - ERROR - cannot access local variable 'num_cpus' where it is not associated with a value
+2026-02-10 20:02:23,696 - flwr - ERROR - cannot access local variable 'num_cpus' where it is not associated with a value
+2026-02-10 20:02:23,689 - flwr - ERROR - Traceback (most recent call last):
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 393, in get_client_result
+    self.process_unordered_future(timeout=timeout)
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 373, in process_unordered_future
+    if self._check_actor_fits_in_pool():
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 336, in _check_actor_fits_in_pool
+    num_actors_updated = pool_size_from_resources(self.client_resources)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/miraahanafee/FL_CognitiveDefence/fl_env/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 129, in pool_size_from_resources
+    "The ActorPool is empty. The system (CPUs=%s, GPUs=%s) "
+UnboundLocalError: cannot access local variable 'num_cpus' where it is not associated with a value
+
+2026-02-10 20:02:23,719 - flwr - ERROR - cannot access local variable 'num_cpus' where it is not associated with a value
+2026-02-12 08:58:58,887 - baseline_100_clients - INFO - Loading centralized test dataset for server evaluation...
+2026-02-12 08:59:12,390 - baseline_100_clients - INFO - Using device for server evaluation: cpu
+2026-02-12 08:59:12,391 - baseline_100_clients - INFO - Initialized server with No Defense (Simple FedAvg)
+2026-02-12 08:59:12,391 - baseline_100_clients - INFO - Centralized evaluation enabled on server
+2026-02-12 08:59:12,391 - baseline_100_clients - INFO - Starting Flower simulation with 100 clients, client_resources={'num_cpus': 0.5}
+2026-02-12 08:59:13,087 - flwr - WARNING - DEPRECATED FEATURE: flwr.simulation.start_simulation() is deprecated.
+	Instead, use the `flwr run` CLI command to start a local simulation in your Flower app, as shown for example below:
+
+		$ flwr new  # Create a new Flower app from a template
+
+		$ flwr run  # Run the Flower app in Simulation Mode
+
+	Using `start_simulation()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2026-02-12 08:59:13,088 - flwr - INFO - Starting Flower simulation, config: num_rounds=10, no round_timeout
+2026-02-12 08:59:17,801 - flwr - INFO - Flower VCE: Ray initialized with resources: {'object_store_memory': 19612993536.0, 'memory': 45763651584.0, 'node:__internal_head__': 1.0, 'node:10.128.0.2': 1.0, 'CPU': 8.0}
+2026-02-12 08:59:17,801 - flwr - INFO - Optimize your simulation with Flower VCE: https://flower.ai/docs/framework/how-to-run-simulations.html
+2026-02-12 08:59:17,801 - flwr - INFO - Flower VCE: Resources for each Virtual Client: {'num_cpus': 0.5}
+2026-02-12 08:59:17,841 - flwr - INFO - Flower VCE: Creating VirtualClientEngineActorPool with 16 actors
+2026-02-12 08:59:17,843 - flwr - INFO - [INIT]
+2026-02-12 08:59:17,843 - flwr - INFO - Requesting initial parameters from one random client
+2026-02-12 08:59:40,467 - flwr - INFO - Received initial parameters from one random client
+2026-02-12 08:59:40,467 - flwr - INFO - Starting evaluation of initial global parameters
+2026-02-12 08:59:46,212 - baseline_100_clients - INFO - 📊 Server Round 0 - CENTRALIZED EVALUATION | Loss: 2.3034, Accuracy: 0.0974 (tested on 10000 samples)
+2026-02-12 08:59:46,212 - flwr - INFO - initial parameters (loss, other metrics): 2.3034329201765122, {'centralized_accuracy': 0.0974}
+2026-02-12 08:59:46,213 - flwr - INFO - 
+2026-02-12 08:59:46,213 - flwr - INFO - [ROUND 1]
+2026-02-12 08:59:46,213 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)
+2026-02-12 09:21:25,576 - baseline_100_clients - INFO - Loading centralized test dataset for server evaluation...
+2026-02-12 09:21:38,676 - baseline_100_clients - INFO - Using device for server evaluation: cpu
+2026-02-12 09:21:38,676 - baseline_100_clients - INFO - Initialized server with No Defense (Simple FedAvg)
+2026-02-12 09:21:38,676 - baseline_100_clients - INFO - Centralized evaluation enabled on server
+2026-02-12 09:21:38,676 - baseline_100_clients - INFO - Starting Flower simulation with 100 clients, client_resources={'num_cpus': 0.5}
+2026-02-12 09:21:38,883 - flwr - WARNING - DEPRECATED FEATURE: flwr.simulation.start_simulation() is deprecated.
+	Instead, use the `flwr run` CLI command to start a local simulation in your Flower app, as shown for example below:
+
+		$ flwr new  # Create a new Flower app from a template
+
+		$ flwr run  # Run the Flower app in Simulation Mode
+
+	Using `start_simulation()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2026-02-12 09:21:38,884 - flwr - INFO - Starting Flower simulation, config: num_rounds=10, no round_timeout
+2026-02-12 09:21:42,348 - flwr - INFO - Flower VCE: Ray initialized with resources: {'memory': 45749450343.0, 'node:__internal_head__': 1.0, 'node:10.128.0.2': 1.0, 'object_store_memory': 19606907289.0, 'CPU': 8.0}
+2026-02-12 09:21:42,349 - flwr - INFO - Optimize your simulation with Flower VCE: https://flower.ai/docs/framework/how-to-run-simulations.html
+2026-02-12 09:21:42,349 - flwr - INFO - Flower VCE: Resources for each Virtual Client: {'num_cpus': 0.5}
+2026-02-12 09:21:42,396 - flwr - INFO - Flower VCE: Creating VirtualClientEngineActorPool with 16 actors
+2026-02-12 09:21:42,397 - flwr - INFO - [INIT]
+2026-02-12 09:21:42,397 - flwr - INFO - Requesting initial parameters from one random client
+2026-02-12 09:22:05,050 - flwr - INFO - Received initial parameters from one random client
+2026-02-12 09:22:05,050 - flwr - INFO - Starting evaluation of initial global parameters
+2026-02-12 09:22:10,863 - baseline_100_clients - INFO - 📊 Server Round 0 - CENTRALIZED EVALUATION | Loss: 2.3027, Accuracy: 0.1111 (tested on 10000 samples)
+2026-02-12 09:22:10,863 - flwr - INFO - initial parameters (loss, other metrics): 2.3027044117071065, {'centralized_accuracy': 0.1111}
+2026-02-12 09:22:10,863 - flwr - INFO - 
+2026-02-12 09:22:10,863 - flwr - INFO - [ROUND 1]
+2026-02-12 09:22:10,864 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)
+2026-02-13 12:39:48,188 - baseline_100_clients - INFO - Loading centralized test dataset for server evaluation...
+2026-02-13 12:40:01,241 - baseline_100_clients - INFO - Using device for server evaluation: cpu
+2026-02-13 12:40:01,241 - baseline_100_clients - INFO - Initialized server with No Defense (Simple FedAvg)
+2026-02-13 12:40:01,241 - baseline_100_clients - INFO - Centralized evaluation enabled on server
+2026-02-13 12:40:01,241 - baseline_100_clients - INFO - Starting Flower simulation with 100 clients, client_resources={'num_cpus': 0.5}
+2026-02-13 12:40:01,497 - flwr - WARNING - DEPRECATED FEATURE: flwr.simulation.start_simulation() is deprecated.
+	Instead, use the `flwr run` CLI command to start a local simulation in your Flower app, as shown for example below:
+
+		$ flwr new  # Create a new Flower app from a template
+
+		$ flwr run  # Run the Flower app in Simulation Mode
+
+	Using `start_simulation()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2026-02-13 12:40:01,498 - flwr - INFO - Starting Flower simulation, config: num_rounds=10, no round_timeout
+2026-02-13 12:40:05,624 - flwr - INFO - Flower VCE: Ray initialized with resources: {'node:__internal_head__': 1.0, 'CPU': 8.0, 'object_store_memory': 19603840204.0, 'node:10.128.0.2': 1.0, 'memory': 45742293812.0}
+2026-02-13 12:40:05,624 - flwr - INFO - Optimize your simulation with Flower VCE: https://flower.ai/docs/framework/how-to-run-simulations.html
+2026-02-13 12:40:05,624 - flwr - INFO - Flower VCE: Resources for each Virtual Client: {'num_cpus': 0.5}
+2026-02-13 12:40:05,669 - flwr - INFO - Flower VCE: Creating VirtualClientEngineActorPool with 16 actors
+2026-02-13 12:40:05,671 - flwr - INFO - [INIT]
+2026-02-13 12:40:05,671 - flwr - INFO - Requesting initial parameters from one random client
+2026-02-13 12:40:29,738 - flwr - INFO - Received initial parameters from one random client
+2026-02-13 12:40:29,739 - flwr - INFO - Starting evaluation of initial global parameters
+2026-02-13 12:40:35,261 - baseline_100_clients - INFO - 📊 Server Round 0 - CENTRALIZED EVALUATION | Loss: 2.3034, Accuracy: 0.0974 (tested on 10000 samples)
+2026-02-13 12:40:35,262 - flwr - INFO - initial parameters (loss, other metrics): 2.3034329201765122, {'centralized_accuracy': 0.0974}
+2026-02-13 12:40:35,262 - flwr - INFO - 
+2026-02-13 12:40:35,262 - flwr - INFO - [ROUND 1]
+2026-02-13 12:40:35,262 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)
+2026-02-13 13:50:55,703 - baseline_100_clients - INFO - Loading centralized test dataset for server evaluation...
+2026-02-13 13:51:08,674 - baseline_100_clients - INFO - Using device for server evaluation: cpu
+2026-02-13 13:51:08,674 - baseline_100_clients - INFO - Initialized server with No Defense (Simple FedAvg)
+2026-02-13 13:51:08,675 - baseline_100_clients - INFO - Centralized evaluation enabled on server
+2026-02-13 13:51:08,675 - baseline_100_clients - INFO - Starting Flower simulation with 100 clients, client_resources={'num_cpus': 0.5}
+2026-02-13 13:51:08,936 - flwr - WARNING - DEPRECATED FEATURE: flwr.simulation.start_simulation() is deprecated.
+	Instead, use the `flwr run` CLI command to start a local simulation in your Flower app, as shown for example below:
+
+		$ flwr new  # Create a new Flower app from a template
+
+		$ flwr run  # Run the Flower app in Simulation Mode
+
+	Using `start_simulation()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2026-02-13 13:51:08,937 - flwr - INFO - Starting Flower simulation, config: num_rounds=10, no round_timeout
+2026-02-13 13:51:12,730 - flwr - INFO - Flower VCE: Ray initialized with resources: {'memory': 45704716288.0, 'CPU': 8.0, 'object_store_memory': 19587735552.0, 'node:10.128.0.2': 1.0, 'node:__internal_head__': 1.0}
+2026-02-13 13:51:12,731 - flwr - INFO - Optimize your simulation with Flower VCE: https://flower.ai/docs/framework/how-to-run-simulations.html
+2026-02-13 13:51:12,733 - flwr - INFO - Flower VCE: Resources for each Virtual Client: {'num_cpus': 0.5}
+2026-02-13 13:51:12,771 - flwr - INFO - Flower VCE: Creating VirtualClientEngineActorPool with 16 actors
+2026-02-13 13:51:12,774 - flwr - INFO - [INIT]
+2026-02-13 13:51:12,774 - flwr - INFO - Requesting initial parameters from one random client
+2026-02-13 13:51:36,805 - flwr - INFO - Received initial parameters from one random client
+2026-02-13 13:51:36,805 - flwr - INFO - Starting evaluation of initial global parameters
+2026-02-13 13:51:42,475 - baseline_100_clients - INFO - 📊 Server Round 0 - CENTRALIZED EVALUATION | Loss: 2.3034, Accuracy: 0.0974 (tested on 10000 samples)
+2026-02-13 13:51:42,476 - flwr - INFO - initial parameters (loss, other metrics): 2.3034329201765122, {'centralized_accuracy': 0.0974}
+2026-02-13 13:51:42,476 - flwr - INFO - 
+2026-02-13 13:51:42,476 - flwr - INFO - [ROUND 1]
+2026-02-13 13:51:42,476 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)
+2026-02-13 14:07:11,355 - baseline_100_clients - INFO - Loading centralized test dataset for server evaluation...
+2026-02-13 14:07:24,467 - baseline_100_clients - INFO - Using device for server evaluation: cpu
+2026-02-13 14:07:24,467 - baseline_100_clients - INFO - Initialized server with No Defense (Simple FedAvg)
+2026-02-13 14:07:24,467 - baseline_100_clients - INFO - Centralized evaluation enabled on server
+2026-02-13 14:07:24,467 - baseline_100_clients - INFO - Starting Flower simulation with 100 clients, client_resources={'num_cpus': 0.5}
+2026-02-13 14:07:24,669 - flwr - WARNING - DEPRECATED FEATURE: flwr.simulation.start_simulation() is deprecated.
+	Instead, use the `flwr run` CLI command to start a local simulation in your Flower app, as shown for example below:
+
+		$ flwr new  # Create a new Flower app from a template
+
+		$ flwr run  # Run the Flower app in Simulation Mode
+
+	Using `start_simulation()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+2026-02-13 14:07:24,670 - flwr - INFO - Starting Flower simulation, config: num_rounds=10, no round_timeout
+2026-02-13 14:07:27,419 - flwr - INFO - Flower VCE: Ray initialized with resources: {'memory': 45712311501.0, 'CPU': 8.0, 'node:__internal_head__': 1.0, 'node:10.128.0.2': 1.0, 'object_store_memory': 19590990643.0}
+2026-02-13 14:07:27,419 - flwr - INFO - Optimize your simulation with Flower VCE: https://flower.ai/docs/framework/how-to-run-simulations.html
+2026-02-13 14:07:27,420 - flwr - INFO - Flower VCE: Resources for each Virtual Client: {'num_cpus': 0.5}
+2026-02-13 14:07:27,463 - flwr - INFO - Flower VCE: Creating VirtualClientEngineActorPool with 16 actors
+2026-02-13 14:07:27,464 - flwr - INFO - [INIT]
+2026-02-13 14:07:27,465 - flwr - INFO - Requesting initial parameters from one random client
+2026-02-13 14:07:50,895 - flwr - INFO - Received initial parameters from one random client
+2026-02-13 14:07:50,896 - flwr - INFO - Starting evaluation of initial global parameters
+2026-02-13 14:07:56,078 - baseline_100_clients - INFO - 📊 Server Round 0 - CENTRALIZED EVALUATION | Loss: 2.3027, Accuracy: 0.1111 (tested on 10000 samples)
+2026-02-13 14:07:56,078 - flwr - INFO - initial parameters (loss, other metrics): 2.3027044117071065, {'centralized_accuracy': 0.1111}
+2026-02-13 14:07:56,079 - flwr - INFO - 
+2026-02-13 14:07:56,079 - flwr - INFO - [ROUND 1]
+2026-02-13 14:07:56,079 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)
+2026-02-13 14:39:45,877 - flwr - INFO - aggregate_fit: received 100 results and 0 failures
+2026-02-13 14:39:45,878 - baseline_100_clients - INFO - Starting FedAvg aggregation for round 1 - 100 results, 0 failures
+2026-02-13 14:39:46,244 - flwr - WARNING - No fit_metrics_aggregation_fn provided
+2026-02-13 14:39:46,246 - baseline_100_clients - INFO - ROUND 1 SUMMARY: {
+  "round": 1,
+  "timestamp": "2026-02-13T14:39:46.245286",
+  "metrics": {
+    "round": 1,
+    "num_clients": 100,
+    "num_decisions": 100,
+    "avg_decision_confidence": 1.0,
+    "defence_strategy": "No Defense (Simple FedAvg)"
+  },
+  "decisions_summary": {
+    "total_decisions": 100,
+    "avg_confidence": 1.0,
+    "decision_types": [
+      "accept"
+    ]
+  }
+}
+2026-02-13 14:39:52,619 - baseline_100_clients - INFO - 📊 Server Round 1 - CENTRALIZED EVALUATION | Loss: 2.3038, Accuracy: 0.0974 (tested on 10000 samples)
+2026-02-13 14:39:52,619 - flwr - INFO - fit progress: (1, 2.3037570798472995, {'centralized_accuracy': 0.0974}, 1916.5404952550016)
+2026-02-13 14:39:52,620 - flwr - INFO - configure_evaluate: strategy sampled 100 clients (out of 100)
+2026-02-13 14:46:11,480 - flwr - INFO - aggregate_evaluate: received 100 results and 0 failures
+2026-02-13 14:46:11,480 - flwr - WARNING - No evaluate_metrics_aggregation_fn provided
+2026-02-13 14:46:11,480 - flwr - INFO - 
+2026-02-13 14:46:11,480 - flwr - INFO - [ROUND 2]
+2026-02-13 14:46:11,480 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)
+2026-02-13 15:15:57,631 - flwr - INFO - aggregate_fit: received 100 results and 0 failures
+2026-02-13 15:15:57,631 - baseline_100_clients - INFO - Starting FedAvg aggregation for round 2 - 100 results, 0 failures
+2026-02-13 15:15:57,951 - baseline_100_clients - INFO - ROUND 2 SUMMARY: {
+  "round": 2,
+  "timestamp": "2026-02-13T15:15:57.951141",
+  "metrics": {
+    "round": 2,
+    "num_clients": 100,
+    "num_decisions": 100,
+    "avg_decision_confidence": 1.0,
+    "defence_strategy": "No Defense (Simple FedAvg)"
+  },
+  "decisions_summary": {
+    "total_decisions": 100,
+    "avg_confidence": 1.0,
+    "decision_types": [
+      "accept"
+    ]
+  }
+}
+2026-02-13 15:16:03,577 - baseline_100_clients - INFO - 📊 Server Round 2 - CENTRALIZED EVALUATION | Loss: 1.9115, Accuracy: 0.5934 (tested on 10000 samples)
+2026-02-13 15:16:03,578 - flwr - INFO - fit progress: (2, 1.9115027781504734, {'centralized_accuracy': 0.5934}, 4087.498823839007)
+2026-02-13 15:16:03,578 - flwr - INFO - configure_evaluate: strategy sampled 100 clients (out of 100)
+2026-02-13 15:22:17,218 - flwr - INFO - aggregate_evaluate: received 100 results and 0 failures
+2026-02-13 15:22:17,219 - flwr - INFO - 
+2026-02-13 15:22:17,219 - flwr - INFO - [ROUND 3]
+2026-02-13 15:22:17,220 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)
+2026-02-13 15:51:42,004 - flwr - INFO - aggregate_fit: received 100 results and 0 failures
+2026-02-13 15:51:42,005 - baseline_100_clients - INFO - Starting FedAvg aggregation for round 3 - 100 results, 0 failures
+2026-02-13 15:51:42,357 - baseline_100_clients - INFO - ROUND 3 SUMMARY: {
+  "round": 3,
+  "timestamp": "2026-02-13T15:51:42.357015",
+  "metrics": {
+    "round": 3,
+    "num_clients": 100,
+    "num_decisions": 100,
+    "avg_decision_confidence": 1.0,
+    "defence_strategy": "No Defense (Simple FedAvg)"
+  },
+  "decisions_summary": {
+    "total_decisions": 100,
+    "avg_confidence": 1.0,
+    "decision_types": [
+      "accept"
+    ]
+  }
+}
+2026-02-13 15:51:48,163 - baseline_100_clients - INFO - 📊 Server Round 3 - CENTRALIZED EVALUATION | Loss: 0.2522, Accuracy: 0.9716 (tested on 10000 samples)
+2026-02-13 15:51:48,164 - flwr - INFO - fit progress: (3, 0.2522413824584074, {'centralized_accuracy': 0.9716}, 6232.0850778930035)
+2026-02-13 15:51:48,164 - flwr - INFO - configure_evaluate: strategy sampled 100 clients (out of 100)
+2026-02-13 15:58:01,545 - flwr - INFO - aggregate_evaluate: received 100 results and 0 failures
+2026-02-13 15:58:01,545 - flwr - INFO - 
+2026-02-13 15:58:01,545 - flwr - INFO - [ROUND 4]
+2026-02-13 15:58:01,546 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)
+2026-02-13 16:27:18,639 - flwr - INFO - aggregate_fit: received 100 results and 0 failures
+2026-02-13 16:27:18,641 - baseline_100_clients - INFO - Starting FedAvg aggregation for round 4 - 100 results, 0 failures
+2026-02-13 16:27:18,988 - baseline_100_clients - INFO - ROUND 4 SUMMARY: {
+  "round": 4,
+  "timestamp": "2026-02-13T16:27:18.987148",
+  "metrics": {
+    "round": 4,
+    "num_clients": 100,
+    "num_decisions": 100,
+    "avg_decision_confidence": 1.0,
+    "defence_strategy": "No Defense (Simple FedAvg)"
+  },
+  "decisions_summary": {
+    "total_decisions": 100,
+    "avg_confidence": 1.0,
+    "decision_types": [
+      "accept"
+    ]
+  }
+}
+2026-02-13 16:27:24,958 - baseline_100_clients - INFO - 📊 Server Round 4 - CENTRALIZED EVALUATION | Loss: 0.0657, Accuracy: 0.9863 (tested on 10000 samples)
+2026-02-13 16:27:24,958 - flwr - INFO - fit progress: (4, 0.06565769048478858, {'centralized_accuracy': 0.9863}, 8368.879644638)
+2026-02-13 16:27:24,959 - flwr - INFO - configure_evaluate: strategy sampled 100 clients (out of 100)
+2026-02-13 16:33:33,495 - flwr - INFO - aggregate_evaluate: received 100 results and 0 failures
+2026-02-13 16:33:33,496 - flwr - INFO - 
+2026-02-13 16:33:33,496 - flwr - INFO - [ROUND 5]
+2026-02-13 16:33:33,497 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)
+2026-02-13 17:03:07,285 - flwr - INFO - aggregate_fit: received 100 results and 0 failures
+2026-02-13 17:03:07,285 - baseline_100_clients - INFO - Starting FedAvg aggregation for round 5 - 100 results, 0 failures
+2026-02-13 17:03:07,593 - baseline_100_clients - INFO - ROUND 5 SUMMARY: {
+  "round": 5,
+  "timestamp": "2026-02-13T17:03:07.593267",
+  "metrics": {
+    "round": 5,
+    "num_clients": 100,
+    "num_decisions": 100,
+    "avg_decision_confidence": 1.0,
+    "defence_strategy": "No Defense (Simple FedAvg)"
+  },
+  "decisions_summary": {
+    "total_decisions": 100,
+    "avg_confidence": 1.0,
+    "decision_types": [
+      "accept"
+    ]
+  }
+}
+2026-02-13 17:03:13,159 - baseline_100_clients - INFO - 📊 Server Round 5 - CENTRALIZED EVALUATION | Loss: 0.0952, Accuracy: 0.9888 (tested on 10000 samples)
+2026-02-13 17:03:13,159 - flwr - INFO - fit progress: (5, 0.0952042780763167, {'centralized_accuracy': 0.9888}, 10517.080330310011)
+2026-02-13 17:03:13,159 - flwr - INFO - configure_evaluate: strategy sampled 100 clients (out of 100)
+2026-02-13 17:09:24,115 - flwr - INFO - aggregate_evaluate: received 100 results and 0 failures
+2026-02-13 17:09:24,116 - flwr - INFO - 
+2026-02-13 17:09:24,116 - flwr - INFO - [ROUND 6]
+2026-02-13 17:09:24,116 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)
+2026-02-13 17:40:05,987 - flwr - INFO - aggregate_fit: received 100 results and 0 failures
+2026-02-13 17:40:05,990 - baseline_100_clients - INFO - Starting FedAvg aggregation for round 6 - 100 results, 0 failures
+2026-02-13 17:40:06,341 - baseline_100_clients - INFO - ROUND 6 SUMMARY: {
+  "round": 6,
+  "timestamp": "2026-02-13T17:40:06.339878",
+  "metrics": {
+    "round": 6,
+    "num_clients": 100,
+    "num_decisions": 100,
+    "avg_decision_confidence": 1.0,
+    "defence_strategy": "No Defense (Simple FedAvg)"
+  },
+  "decisions_summary": {
+    "total_decisions": 100,
+    "avg_confidence": 1.0,
+    "decision_types": [
+      "accept"
+    ]
+  }
+}
+2026-02-13 17:40:12,167 - baseline_100_clients - INFO - 📊 Server Round 6 - CENTRALIZED EVALUATION | Loss: 0.1182, Accuracy: 0.9895 (tested on 10000 samples)
+2026-02-13 17:40:12,168 - flwr - INFO - fit progress: (6, 0.11815754547240628, {'centralized_accuracy': 0.9895}, 12736.088785303)
+2026-02-13 17:40:12,169 - flwr - INFO - configure_evaluate: strategy sampled 100 clients (out of 100)
+2026-02-13 17:46:20,854 - flwr - INFO - aggregate_evaluate: received 100 results and 0 failures
+2026-02-13 17:46:20,855 - flwr - INFO - 
+2026-02-13 17:46:20,856 - flwr - INFO - [ROUND 7]
+2026-02-13 17:46:20,856 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)
+2026-02-13 18:18:00,663 - flwr - INFO - aggregate_fit: received 100 results and 0 failures
+2026-02-13 18:18:00,663 - baseline_100_clients - INFO - Starting FedAvg aggregation for round 7 - 100 results, 0 failures
+2026-02-13 18:18:01,000 - baseline_100_clients - INFO - ROUND 7 SUMMARY: {
+  "round": 7,
+  "timestamp": "2026-02-13T18:18:01.000604",
+  "metrics": {
+    "round": 7,
+    "num_clients": 100,
+    "num_decisions": 100,
+    "avg_decision_confidence": 1.0,
+    "defence_strategy": "No Defense (Simple FedAvg)"
+  },
+  "decisions_summary": {
+    "total_decisions": 100,
+    "avg_confidence": 1.0,
+    "decision_types": [
+      "accept"
+    ]
+  }
+}
+2026-02-13 18:18:06,594 - baseline_100_clients - INFO - 📊 Server Round 7 - CENTRALIZED EVALUATION | Loss: 0.1146, Accuracy: 0.9886 (tested on 10000 samples)
+2026-02-13 18:18:06,594 - flwr - INFO - fit progress: (7, 0.11458408020460492, {'centralized_accuracy': 0.9886}, 15010.515482735005)
+2026-02-13 18:18:06,595 - flwr - INFO - configure_evaluate: strategy sampled 100 clients (out of 100)
+2026-02-13 18:24:14,878 - flwr - INFO - aggregate_evaluate: received 100 results and 0 failures
+2026-02-13 18:24:14,878 - flwr - INFO - 
+2026-02-13 18:24:14,878 - flwr - INFO - [ROUND 8]
+2026-02-13 18:24:14,879 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)
+2026-02-13 18:58:17,244 - flwr - INFO - aggregate_fit: received 100 results and 0 failures
+2026-02-13 18:58:17,246 - baseline_100_clients - INFO - Starting FedAvg aggregation for round 8 - 100 results, 0 failures
+2026-02-13 18:58:17,559 - baseline_100_clients - INFO - ROUND 8 SUMMARY: {
+  "round": 8,
+  "timestamp": "2026-02-13T18:58:17.559260",
+  "metrics": {
+    "round": 8,
+    "num_clients": 100,
+    "num_decisions": 100,
+    "avg_decision_confidence": 1.0,
+    "defence_strategy": "No Defense (Simple FedAvg)"
+  },
+  "decisions_summary": {
+    "total_decisions": 100,
+    "avg_confidence": 1.0,
+    "decision_types": [
+      "accept"
+    ]
+  }
+}
+2026-02-13 18:58:23,256 - baseline_100_clients - INFO - 📊 Server Round 8 - CENTRALIZED EVALUATION | Loss: 0.1077, Accuracy: 0.9878 (tested on 10000 samples)
+2026-02-13 18:58:23,256 - flwr - INFO - fit progress: (8, 0.10773674728775955, {'centralized_accuracy': 0.9878}, 17427.17753874701)
+2026-02-13 18:58:23,257 - flwr - INFO - configure_evaluate: strategy sampled 100 clients (out of 100)
+2026-02-13 19:04:33,144 - flwr - INFO - aggregate_evaluate: received 100 results and 0 failures
+2026-02-13 19:04:33,145 - flwr - INFO - 
+2026-02-13 19:04:33,145 - flwr - INFO - [ROUND 9]
+2026-02-13 19:04:33,145 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)
+2026-02-13 19:39:46,426 - flwr - INFO - aggregate_fit: received 100 results and 0 failures
+2026-02-13 19:39:46,427 - baseline_100_clients - INFO - Starting FedAvg aggregation for round 9 - 100 results, 0 failures
+2026-02-13 19:39:46,748 - baseline_100_clients - INFO - ROUND 9 SUMMARY: {
+  "round": 9,
+  "timestamp": "2026-02-13T19:39:46.748667",
+  "metrics": {
+    "round": 9,
+    "num_clients": 100,
+    "num_decisions": 100,
+    "avg_decision_confidence": 1.0,
+    "defence_strategy": "No Defense (Simple FedAvg)"
+  },
+  "decisions_summary": {
+    "total_decisions": 100,
+    "avg_confidence": 1.0,
+    "decision_types": [
+      "accept"
+    ]
+  }
+}
+2026-02-13 19:39:52,394 - baseline_100_clients - INFO - 📊 Server Round 9 - CENTRALIZED EVALUATION | Loss: 0.1073, Accuracy: 0.9869 (tested on 10000 samples)
+2026-02-13 19:39:52,394 - flwr - INFO - fit progress: (9, 0.10726586467390702, {'centralized_accuracy': 0.9869}, 19916.31524311501)
+2026-02-13 19:39:52,394 - flwr - INFO - configure_evaluate: strategy sampled 100 clients (out of 100)
+2026-02-13 19:46:02,422 - flwr - INFO - aggregate_evaluate: received 100 results and 0 failures
+2026-02-13 19:46:02,423 - flwr - INFO - 
+2026-02-13 19:46:02,423 - flwr - INFO - [ROUND 10]
+2026-02-13 19:46:02,423 - flwr - INFO - configure_fit: strategy sampled 100 clients (out of 100)

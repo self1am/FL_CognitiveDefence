@@ -1,0 +1,50 @@
+# Aggressive optimization - focus on faster per-client training
+# Not on parallelism (already CPU maxed)
+
+server:
+  num_rounds: 10
+  aggregation_strategy: "fedavg"
+  centralized_evaluation: true
+  # OPTIMIZATION: Skip early evals
+  evaluation_strategy: "steps"
+  eval_steps: 2  # Only eval every 2 rounds instead of every round
+  model_name: "simple_cnn"
+
+federated:
+  num_clients: 100
+  # OPTIMIZATION: Stick with 0.25 (good middle ground, less overhead than 0.125)
+  client_resources:
+    num_cpus: 0.25
+    num_gpus: 0
+  
+  ray_init_args:
+    num_cpus: 8
+    object_store_memory: 20000000000
+    logging_level: "warning"
+
+client:
+  # OPTIMIZATION: Faster training per client
+  epochs: 1              # From 2 - saves 50% training time
+  batch_size: 64         # From 32 - modern CPUs prefer larger batches
+  learning_rate: 0.01
+  device: "cpu"
+  eval_fraction: 0.1
+  # OPTIMIZATION: Skip client-side validation
+  local_validation: false
+
+evaluation:
+  # OPTIMIZATION: Smaller test set 
+  num_test_samples: 5000  # From 10000 - saves ~50% eval time
+  num_workers: 8          # Parallel evaluation
+
+dataset:
+  name: "mnist"
+  data_dir: "data/MNIST/raw"
+  normalize: true
+
+defense:
+  strategy: "no_defense"
+  
+logging:
+  log_level: "INFO"
+  log_file: "logs/baseline_100_clients_optimized.log"
