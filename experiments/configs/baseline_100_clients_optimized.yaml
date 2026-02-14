@@ -28,7 +28,7 @@ orchestration:
 # Flower simulation settings (Ray)
 simulation:
   client_resources:
-    num_cpus: 0.125  # OPTIMIZATION: Better than 0.5
+    num_cpus: 0.25  # OPTIMIZATION: Better than 0.5
   ray_init_args:
     include_dashboard: false
     log_to_driver: false
