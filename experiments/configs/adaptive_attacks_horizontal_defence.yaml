@@ -10,22 +10,19 @@ experiment:
 
 defence:
   strategy: "horizontal"
-  aggregation_method: "trimmed_mean"
   anomaly_threshold: 0.85
   reputation_decay: 0.95
   history_size: 5
-  krum_f: 10
-  trimmed_mean_beta: 0.2
 
 attacks:
-  - type: "adaptive_poison"
-    enabled: true
-    num_attackers: 10
-    poison_fraction: 0.1
-    perturbation_scale: 1.0
-    adaptation_rate: 0.1
-    attack_rounds: [3, 4, 5, 6, 7, 8, 9, 10]
-    learning_rate: 0.01
+  - enabled: true
+    attack_type: "dny_opt"
+    intensity: 0.5
+    target_clients: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    learning_rate: 0.1
+    exploration_rate: 0.1
+    discount_factor: 0.95
+    detection_threshold: 0.7
 
 orchestration:
   num_clients: 100

@@ -13,20 +13,12 @@ defence:
   anomaly_threshold: 0.75
   reputation_decay: 0.92
   history_size: 10
-  # Cognitive defense specific parameters
-  decision_threshold: 0.70
-  confidence_weight: 0.85
-  entropy_threshold: 0.5
-  deviation_sensitivity: 0.8
-  update_frequency: 2
 
 attacks:
-  - type: "static_poison"
-    enabled: true
-    num_attackers: 10
-    poison_fraction: 0.1
-    perturbation_scale: 1.0
-    attack_rounds: [3, 4, 5, 6, 7, 8, 9, 10]
+  - enabled: true
+    attack_type: "label_flip"
+    intensity: 0.5
+    target_clients: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 orchestration:
   num_clients: 100
