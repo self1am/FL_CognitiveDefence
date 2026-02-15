@@ -1,0 +1,50 @@
+# Adaptive attacks with cognitive defense
+# Scenario: Defends against adaptive poison attacks using cognitive defense mechanisms
+experiment:
+  experiment_name: "adaptive_attacks_cognitive_defence"
+  seed: 123
+  num_rounds: 10
+  min_clients: 20
+  min_available_clients: 20
+  server_address: "localhost:8080"
+
+defence:
+  strategy: "cognitive"
+  anomaly_threshold: 0.75
+  reputation_decay: 0.92
+  history_size: 10
+  # Cognitive defense specific parameters
+  decision_threshold: 0.70
+  confidence_weight: 0.85
+  entropy_threshold: 0.5
+  deviation_sensitivity: 0.8
+  update_frequency: 2
+
+attacks:
+  - type: "adaptive_poison"
+    enabled: true
+    num_attackers: 10
+    poison_fraction: 0.1
+    perturbation_scale: 1.0
+    adaptation_rate: 0.1
+    attack_rounds: [3, 4, 5, 6, 7, 8, 9, 10]
+    learning_rate: 0.01
+
+orchestration:
+  num_clients: 100
+  batch_size: 2
+  max_memory_mb: 6000
+  spawn_delay: 2.0
+  epochs: 1
+  batch_size_client: 64
+
+simulation:
+  client_resources:
+    num_cpus: 0.25
+  ray_init_args:
+    include_dashboard: false
+    log_to_driver: false
+    num_cpus: 8
+
+evaluation:
+  num_test_samples: 5000
