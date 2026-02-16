@@ -67,11 +67,26 @@ class AttackConfig:
     
 @dataclass
 class defenceConfig:
-    """defence configuration"""
+    """defence configuration - supports all defense strategies"""
     strategy: str = "cognitive_defence"
+    
+    # Cognitive defense parameters
     anomaly_threshold: float = 0.7
     reputation_decay: float = 0.8
     history_size: int = 100
+    
+    # Krum defense parameters
+    num_byzantine: int = 2
+    multi_krum: bool = False
+    
+    # Trimmed Mean defense parameters
+    beta: float = 0.2
+    
+    # VERT defense parameters
+    kappa: int = 5
+    projection_dim: int = 100
+    learning_rate: float = 0.01
+    min_history_rounds: int = 3
 
 class DeterministicEnvironment:
     """Ensures deterministic behavior across experiments"""
