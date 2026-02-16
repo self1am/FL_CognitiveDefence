@@ -11,7 +11,7 @@ experiment:
 defence:
   strategy: "krum"
   num_byzantine: 40  # Number of malicious clients
-  multi_krum: false
+  multi_krum: true  # Average top clients instead of picking just one
 
 attacks:
   - enabled: true
