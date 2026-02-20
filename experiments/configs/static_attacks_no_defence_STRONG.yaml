@@ -27,7 +27,7 @@ orchestration:
 
 simulation:
   client_resources:
-    num_cpus: 0.5  # Increased from 0.25 - only 16 concurrent clients now
+    num_cpus: 0.25  # Increased from 0.25 - only 16 concurrent clients now
   ray_init_args:
     include_dashboard: false
     log_to_driver: false
