@@ -6,8 +6,8 @@ experiment:
   experiment_name: "dny_opt_attack_test"
   seed: 123
   num_rounds: 20
-  min_clients: 3
-  min_available_clients: 3
+  min_clients: 20
+  min_available_clients: 20
   server_address: "0.0.0.0:8080"
 
 defence:
@@ -27,13 +27,20 @@ attacks:
     target_clients: [0, 1, 2, 3]  # 40% malicious clients
 
 orchestration:
-  num_clients: 10
+  num_clients: 100
   batch_size: 2
   max_memory_mb: 5000
-  spawn_delay: 3.0
+  spawn_delay: 2.0
+  epochs: 1
+  batch_size_client: 64
 
-client:
-  batch_size: 32
-  epochs: 2
-  learning_rate: 0.001
-  optimizer: "adam"
+simulation:
+  client_resources:
+    num_cpus: 0.25
+  ray_init_args:
+    include_dashboard: false
+    log_to_driver: false
+    num_cpus: 8
+
+evaluation:
+  num_test_samples: 5000
