@@ -4,13 +4,13 @@ experiment:
   experiment_name: "multi_krum_defence_test"
   seed: 42
   num_rounds: 10
-  min_clients: 5
-  min_available_clients: 5
+  min_clients: 20
+  min_available_clients: 20
   server_address: "0.0.0.0:8080"
 
 defence:
   strategy: "krum"
-  num_byzantine: 2  # Expect up to 2 Byzantine clients
+  num_byzantine: 40  # Expect up to 40 Byzantine clients
   multi_krum: true  # Use Multi-Krum (average of top clients)
 
 attacks:
@@ -25,7 +25,7 @@ attacks:
   #   target_clients: [7]  # Client 7 with gradient noise
 
 orchestration:
-  num_clients: 10
+  num_clients: 100
   batch_size: 2
   max_memory_mb: 6000
   spawn_delay: 2.0
