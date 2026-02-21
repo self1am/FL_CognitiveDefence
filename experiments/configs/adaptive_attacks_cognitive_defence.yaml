@@ -9,7 +9,7 @@ experiment:
   server_address: "localhost:8080"
 
 defence:
-  strategy: "cognitive"
+  strategy: "cognitive_defence"
   anomaly_threshold: 0.75
   reputation_decay: 0.92
   history_size: 10
