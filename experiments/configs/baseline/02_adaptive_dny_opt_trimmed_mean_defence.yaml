@@ -1,17 +1,19 @@
-# experiments/configs/dny_opt_attack_test.yaml
-# Dynamic Optimization Attack (dny-opt) test configuration
-# Tests the dny-opt attack with reinforcement learning adaptation
-
+# =============================================================================
+# ADAPTIVE ATTACK: DnyOpt (Q-Learning) — Trimmed Mean Defence
+# Purpose: Evaluate Trimmed Mean defence against adaptive RL-based attacks
+# Attack: 40% malicious clients with RL-based attack adaptation
+# =============================================================================
 experiment:
-  experiment_name: "dny_opt_attack_no_defence"
+  experiment_name: "adaptive_dny_opt_trimmed_mean_defence"
   seed: 123
-  num_rounds: 20
+  num_rounds: 30
   min_clients: 20
   min_available_clients: 20
-  server_address: "0.0.0.0:8080"
+  server_address: "localhost:8080"
 
 defence:
-  strategy: "none"
+  strategy: "trimmed_mean"
+  beta: 0.2
 
 attacks:
   - enabled: true
@@ -26,7 +28,7 @@ attacks:
 orchestration:
   num_clients: 100
   batch_size: 2
-  max_memory_mb: 5000
+  max_memory_mb: 6000
   spawn_delay: 2.0
   epochs: 1
   batch_size_client: 64
@@ -40,4 +42,4 @@ simulation:
     num_cpus: 8
 
 evaluation:
-  num_test_samples: 5000
+  num_test_samples: 10000

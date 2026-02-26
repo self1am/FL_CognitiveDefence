@@ -9,10 +9,12 @@ experiment:
   server_address: "localhost:8080"
 
 defence:
-  strategy: "vertical"
-  anomaly_threshold: 0.80
-  reputation_decay: 0.93
-  history_size: 5
+  strategy: "vert"  # Fixed: was "vertical" which silently fell through to NoDefence
+  kappa: 5
+  history_size: 10
+  projection_dim: 100
+  learning_rate: 0.01
+  min_history_rounds: 3
 
 attacks:
   - enabled: true

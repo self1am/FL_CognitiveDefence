@@ -1,0 +1,35 @@
+# =============================================================================
+# BASELINE: Clean FedAvg — No Attack, No Defence
+# Purpose: Establish ceiling accuracy for MNIST with 100 clients (IID)
+# =============================================================================
+experiment:
+  experiment_name: "baseline_clean_no_attack"
+  seed: 123
+  num_rounds: 30
+  min_clients: 20
+  min_available_clients: 20
+  server_address: "localhost:8080"
+
+defence:
+  strategy: "none"
+
+attacks: []
+
+orchestration:
+  num_clients: 100
+  batch_size: 2
+  max_memory_mb: 6000
+  spawn_delay: 2.0
+  epochs: 1
+  batch_size_client: 64
+
+simulation:
+  client_resources:
+    num_cpus: 0.25
+  ray_init_args:
+    include_dashboard: false
+    log_to_driver: false
+    num_cpus: 8
+
+evaluation:
+  num_test_samples: 10000
