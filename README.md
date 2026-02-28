@@ -2,6 +2,8 @@
 
 A modular federated learning framework implementing cognitive defence strategies based on OODA loop and MAPE-K frameworks, with support for various attacks and defences.
 
+📖 **[Technical Architecture Documentation](TECHNICAL_ARCHITECTURE.md)** - Comprehensive technical writeup covering system architecture, data distribution, experiment methodology, and detailed comparison of defence strategies.
+
 ## Features
 
 - **Modular Architecture**: Separation of concerns with pluggable attacks and defences
