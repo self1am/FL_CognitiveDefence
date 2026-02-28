@@ -202,6 +202,12 @@ class VERTDefenceStrategy(Basedefence):
             # Simple gradient descent update for predictor
             error = predicted - target
             grad_W = np.outer(error, p_input)
+            
+            # Add gradient clipping to prevent exploding gradients/NaNs
+            grad_norm = np.linalg.norm(grad_W)
+            if grad_norm > 1.0:
+                grad_W = grad_W * (1.0 / grad_norm)
+                
             self.predictor_weights -= self.learning_rate * grad_W
     
     def _compute_client_similarity(self, client_id: str, 
