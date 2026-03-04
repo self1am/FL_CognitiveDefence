@@ -87,6 +87,26 @@ class defenceConfig:
     projection_dim: int = 100
     learning_rate: float = 0.01
     min_history_rounds: int = 3
+    
+    # POSG/SAC defense parameters
+    max_clients: int = 100
+    obs_dim: int = 6
+    belief_hidden_dim: int = 64
+    sac_hidden_dims: list = None  # Will be [256, 256] by default
+    lr: float = 0.0003
+    gamma: float = 0.99
+    reward_alpha: float = 1.0
+    reward_beta: float = 0.3
+    reward_gamma: float = 0.2
+    buffer_capacity: int = 50_000
+    batch_size: int = 64
+    device: str = "cpu"
+    
+    def __post_init__(self):
+        """Initialize default values for mutable types"""
+        if self.sac_hidden_dims is None:
+            self.sac_hidden_dims = [256, 256]
+
 
 class DeterministicEnvironment:
     """Ensures deterministic behavior across experiments"""
