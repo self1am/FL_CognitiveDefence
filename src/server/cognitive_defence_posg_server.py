@@ -72,8 +72,9 @@ class POSGAggregationStrategy(fl.server.strategy.FedAvg):
                 self.logger.logger.info("Centralized evaluation enabled on server")
 
     def aggregate_fit(
-        self, server_round: int, results: List[Tuple[fl.client.Client, fl.common.FitRes]],
-        failures: List[Union[Tuple[fl.client.Client, fl.common.FitRes], BaseException]]
+        self, server_round: int,
+        results: List[Tuple[fl.server.client_proxy.ClientProxy, fl.common.FitRes]],
+        failures: List[Union[Tuple[fl.server.client_proxy.ClientProxy, fl.common.FitRes], BaseException]]
     ) -> Tuple[Optional[fl.common.Parameters], Dict[str, float]]:
         """Aggregate fitted model parameters using POSG defence."""
         
@@ -125,25 +126,22 @@ class POSGAggregationStrategy(fl.server.strategy.FedAvg):
         return result_params, metrics_aggregated
 
     def evaluate(
-        self, server_round: int, parameters: fl.common.Parameters,
-        config: Dict[str, fl.common.Scalar]
+        self, server_round: int, parameters: fl.common.Parameters
     ) -> Optional[Tuple[float, Dict[str, fl.common.Scalar]]]:
         """Evaluate model using centralized test set and store accuracy for reward."""
         
-        if self._evaluate_fn is None:
+        if self.evaluate_fn is None:
             return None
         
-        # Convert parameters for evaluation
-        params_array = fl.common.parameters_to_ndarrays(parameters)
-        
-        # Run this round's evaluation
-        result = self._evaluate_fn(server_round, fl.common.ndarrays_to_parameters(params_array), config)
+        # Call evaluate_fn with NDArrays exactly as FedAvg parent does
+        parameters_ndarrays = fl.common.parameters_to_ndarrays(parameters)
+        result = self.evaluate_fn(server_round, parameters_ndarrays, {})
         
         if result is not None:
             loss, metrics = result
-            # Store validation accuracy for next round's reward computation
+            # Store validation accuracy for next round's SAC reward
             if "centralized_accuracy" in metrics:
-                self._last_val_acc = metrics["centralized_accuracy"]
+                self._last_val_acc = float(metrics["centralized_accuracy"])
             
             return loss, metrics
         
