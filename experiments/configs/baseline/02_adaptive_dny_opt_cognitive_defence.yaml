@@ -12,10 +12,19 @@ experiment:
   server_address: "localhost:8080"
 
 defence:
-  strategy: "cognitive_defence"
-  anomaly_threshold: 0.75
-  reputation_decay: 0.92
-  history_size: 10
+  strategy: "cognitive_defence_posg"
+  max_clients: 100
+  obs_dim: 6
+  belief_hidden_dim: 64
+  sac_hidden_dims: [256, 256]
+  lr: 0.0003
+  gamma: 0.99
+  reward_alpha: 1.0
+  reward_beta: 0.3
+  reward_gamma: 0.2
+  buffer_capacity: 50000
+  batch_size: 64
+  history_size: 200
 
 attacks:
   - enabled: true

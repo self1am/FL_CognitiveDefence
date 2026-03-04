@@ -13,6 +13,7 @@ import sys
 
 from .client_orchestrator import ClientOrchestrator
 from ..server.cognitive_server import CognitiveAggregationStrategy
+from ..server.cognitive_server_v2 import CognitiveAggregationStrategyV2
 from ..server.no_defence_server import NoDefenceAggregationStrategy
 from ..server.krum_server import KrumAggregationStrategy
 from ..server.trimmed_mean_server import TrimmedMeanAggregationStrategy
@@ -143,6 +144,33 @@ class ExperimentRunner:
                 min_evaluate_clients=self.experiment_config.min_clients,
                 min_available_clients=self.experiment_config.min_available_clients,
                 fraction_evaluate=1.0,  # Evaluate on all clients for distributed metrics
+            )
+        elif defence_config.strategy == 'cognitive_defence_v2':
+            # CogDef v2: multi-signal OODA + MAPE-K adaptive defence
+            defence_raw = self.config.get('defence', {})
+            strategy = CognitiveAggregationStrategyV2(
+                config=self.experiment_config,
+                anomaly_threshold=defence_raw.get('anomaly_threshold', 0.5),
+                direction_weight=defence_raw.get('direction_weight', 0.40),
+                norm_weight=defence_raw.get('norm_weight', 0.15),
+                cluster_weight=defence_raw.get('cluster_weight', 0.25),
+                temporal_weight=defence_raw.get('temporal_weight', 0.20),
+                initial_reputation=defence_raw.get('initial_reputation', 0.5),
+                recovery_rate=defence_raw.get('recovery_rate', 0.03),
+                penalty_severity=defence_raw.get('penalty_severity', 0.8),
+                yellow_threshold=defence_raw.get('yellow_threshold', 0.3),
+                orange_threshold=defence_raw.get('orange_threshold', 0.6),
+                red_threshold=defence_raw.get('red_threshold', 0.8),
+                clip_multiplier=defence_raw.get('clip_multiplier', 2.0),
+                trim_beta=defence_raw.get('trim_beta', 0.2),
+                enable_mape_k=defence_raw.get('enable_mape_k', True),
+                history_size=defence_raw.get('history_size', 100),
+                logger=self.logger,
+                evaluate_fn=evaluate_fn,
+                min_fit_clients=self.experiment_config.min_clients,
+                min_evaluate_clients=self.experiment_config.min_clients,
+                min_available_clients=self.experiment_config.min_available_clients,
+                fraction_evaluate=1.0,
             )
         elif defence_config.strategy == 'krum':
             # Extract Krum-specific parameters

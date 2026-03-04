@@ -56,7 +56,8 @@ class EnhancedFLClient(fl.client.NumPyClient):
     def set_parameters(self, parameters: List[np.ndarray]):
         """Load parameters into model"""
         params_dict = zip(self.model.state_dict().keys(), parameters)
-        state_dict = {k: torch.tensor(v) for k, v in params_dict}
+        # Move tensors to the same device as the model to avoid MPS/CUDA device mismatches
+        state_dict = {k: torch.tensor(v).to(self.device) for k, v in params_dict}
         self.model.load_state_dict(state_dict, strict=True)
     
     def fit(self, parameters: List[np.ndarray], config: Dict[str, Any]) -> Tuple[List[np.ndarray], int, Dict[str, Any]]:

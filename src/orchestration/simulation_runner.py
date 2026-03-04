@@ -1,5 +1,9 @@
 # src/orchestration/simulation_runner.py
 """Flower simulation runner using Ray for scalable client execution"""
+import os
+# Must be set before any torch/MPS operations for Apple Silicon compatibility
+os.environ.setdefault('PYTORCH_ENABLE_MPS_FALLBACK', '1')
+
 import argparse
 import yaml
 from typing import Dict, Any, Optional
@@ -130,7 +134,8 @@ class SimulationRunner:
             try:
                 model = MNISTNet().to(device)
                 params_dict = zip(model.state_dict().keys(), parameters)
-                state_dict = {k: torch.tensor(v) for k, v in params_dict}
+                # Move tensors to device to avoid MPS/CUDA device mismatches
+                state_dict = {k: torch.tensor(v).to(device) for k, v in params_dict}
                 model.load_state_dict(state_dict, strict=True)
 
                 model.eval()

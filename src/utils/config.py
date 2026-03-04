@@ -95,23 +95,31 @@ class DeterministicEnvironment:
     def setup_seeds(seed: int = 42):
         """Set seeds for reproducibility"""
         torch.manual_seed(seed)
-        torch.cuda.manual_seed(seed)
-        torch.cuda.manual_seed_all(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
+            # Make CuDNN deterministic (CUDA only)
+            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.benchmark = False
         np.random.seed(seed)
         random.seed(seed)
-        
-        # Make CuDNN deterministic
-        torch.backends.cudnn.deterministic = True
-        torch.backends.cudnn.benchmark = False
-        
+
     @staticmethod
     def get_device():
         """Get appropriate device"""
+        import os
         if torch.cuda.is_available():
-            return torch.device("cuda")
+            device = torch.device("cuda")
+            print(f"[Device] CUDA GPU: {torch.cuda.get_device_name(0)} "
+                  f"({torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB VRAM)")
+            return device
         elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
-            return torch.device("mps")  # Apple Silicon
+            # Enable CPU fallback for MPS-unsupported ops (must be set before first MPS use)
+            os.environ.setdefault('PYTORCH_ENABLE_MPS_FALLBACK', '1')
+            print("[Device] Apple Silicon MPS GPU (PYTORCH_ENABLE_MPS_FALLBACK=1 enabled)")
+            return torch.device("mps")
         else:
+            print("[Device] No GPU detected, using CPU")
             return torch.device("cpu")
 
 class ConfigManager:
