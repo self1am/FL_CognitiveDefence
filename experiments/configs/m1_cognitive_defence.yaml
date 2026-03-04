@@ -1,0 +1,43 @@
+# M1 Mac local experiment - cognitive defence with static attacks
+# Apple Silicon MPS GPU is used automatically via DeterministicEnvironment.get_device()
+# NOTE: Do NOT add num_gpus under client_resources - Ray does not manage MPS.
+#       MPS is shared implicitly by all Ray actors on Apple Silicon.
+
+experiment:
+  experiment_name: "m1_cognitive_defence"
+  seed: 42
+  num_rounds: 50
+  min_clients: 10
+  min_available_clients: 10
+  server_address: "localhost:8080"
+
+defence:
+  strategy: "cognitive_defence"
+  anomaly_threshold: 0.7
+  reputation_decay: 0.8
+  history_size: 100
+
+attacks:
+  - enabled: true
+    attack_type: "label_flip"
+    intensity: 0.5
+    target_clients: [0, 1, 2, 3]  # 4 of 10 clients = 40% malicious
+
+orchestration:
+  num_clients: 100
+  epochs: 2
+  batch_size_client: 128  # Larger batch size = better MPS GPU utilisation
+
+simulation:
+  client_resources:
+    # M1 has 8 CPU cores (4 perf + 4 efficiency).
+    # 0.5 cpus/client allows up to 8 concurrent Ray actors.
+    # Do NOT add num_gpus here - Ray has no MPS support; device is auto-detected.
+    num_cpus: 0.5
+  ray_init_args:
+    include_dashboard: false
+    log_to_driver: false
+    num_cpus: 8  # Expose all M1 cores to Ray
+
+evaluation:
+  num_test_samples: 5000

@@ -101,6 +101,7 @@ class defenceConfig:
     buffer_capacity: int = 50_000
     batch_size: int = 64
     device: str = "cpu"
+    warmup_rounds: int = 5
     
     def __post_init__(self):
         """Initialize default values for mutable types"""

@@ -1,0 +1,837 @@
+# src/defences/cognitive_defence_v2.py
+"""
+CogDef v2: Cognitive-Inspired Multi-Signal Defence Framework
+
+Enhanced OODA loop with multi-signal detection, adaptive threat response,
+and MAPE-K self-tuning feedback loop.
+
+This is the Sprint 1-5 implementation skeleton with Sprint 1 fully implemented.
+"""
+import numpy as np
+from typing import Dict, List, Tuple, Any, Optional
+from collections import deque
+from datetime import datetime
+from enum import Enum
+from dataclasses import dataclass, field
+from .base_defence import Basedefence
+from ..utils.logging_utils import ExplainableDecision
+
+
+# =============================================================================
+# Data structures
+# =============================================================================
+
+class ThreatLevel(Enum):
+    """Global threat posture levels."""
+    GREEN = "green"    # Normal operation — weighted FedAvg
+    YELLOW = "yellow"  # Elevated — weighted FedAvg + clipping
+    ORANGE = "orange"  # High — exclude suspects + trimmed mean
+    RED = "red"        # Critical — Krum on trusted clients only
+
+
+@dataclass
+class ClientProfile:
+    """Per-client tracking state across rounds."""
+    reputation: float = 0.5       # Start neutral, earn trust
+    norm_history: deque = field(default_factory=lambda: deque(maxlen=50))
+    direction_history: deque = field(default_factory=lambda: deque(maxlen=50))
+    anomaly_history: deque = field(default_factory=lambda: deque(maxlen=50))
+    rounds_seen: int = 0
+    consecutive_flags: int = 0
+    consecutive_clean: int = 0
+    last_anomaly_score: float = 0.0
+
+
+@dataclass
+class RoundDiagnostics:
+    """Diagnostics collected during a single round for MAPE-K feedback."""
+    round_number: int
+    threat_level: ThreatLevel
+    num_clients: int
+    num_flagged: int
+    num_rejected: int
+    accuracy_before: Optional[float] = None
+    accuracy_after: Optional[float] = None
+    detector_scores: Dict[str, List[float]] = field(default_factory=dict)
+    fusion_weights: Dict[str, float] = field(default_factory=dict)
+
+
+# =============================================================================
+# Main Defence Class
+# =============================================================================
+
+class CognitiveDefenceV2(Basedefence):
+    """
+    Enhanced cognitive defence implementing:
+    - Multi-signal OODA loop (Observe-Orient-Decide-Act)
+    - MAPE-K self-tuning feedback
+    - Adaptive threat posture with escalating response
+    """
+
+    def __init__(
+        self,
+        # Detection thresholds
+        anomaly_threshold: float = 0.5,
+        direction_weight: float = 0.40,
+        norm_weight: float = 0.15,
+        cluster_weight: float = 0.25,
+        temporal_weight: float = 0.20,
+        # Reputation parameters
+        initial_reputation: float = 0.5,
+        recovery_rate: float = 0.03,
+        penalty_severity: float = 0.8,
+        # Threat level thresholds
+        yellow_threshold: float = 0.3,
+        orange_threshold: float = 0.6,
+        red_threshold: float = 0.8,
+        # Posture escalation
+        attack_fraction_trigger: float = 0.30,
+        posture_cooldown_rounds: int = 5,
+        # History
+        history_size: int = 100,
+        # Clipping (for YELLOW mode)
+        clip_multiplier: float = 2.0,
+        # Trimmed Mean (for ORANGE mode)
+        trim_beta: float = 0.2,
+        # Krum (for RED mode)
+        krum_byzantine_fraction: float = 0.4,
+        # MAPE-K
+        enable_mape_k: bool = True,
+        mape_k_window: int = 10,
+    ):
+        super().__init__(history_size=history_size)
+
+        # Detection weights (must sum to ~1.0)
+        self.detector_weights = {
+            'norm': norm_weight,
+            'direction': direction_weight,
+            'cluster': cluster_weight,
+            'temporal': temporal_weight,
+        }
+
+        # Thresholds
+        self.anomaly_threshold = anomaly_threshold
+        self.yellow_threshold = yellow_threshold
+        self.orange_threshold = orange_threshold
+        self.red_threshold = red_threshold
+
+        # Reputation
+        self.initial_reputation = initial_reputation
+        self.recovery_rate = recovery_rate
+        self.penalty_severity = penalty_severity
+
+        # Per-client profiles
+        self.client_profiles: Dict[str, ClientProfile] = {}
+
+        # Global threat posture
+        self.threat_level = ThreatLevel.GREEN
+        self.attack_fraction_trigger = attack_fraction_trigger
+        self.posture_cooldown_rounds = posture_cooldown_rounds
+        self._rounds_since_escalation = 0
+        self._flagged_fraction_history = deque(maxlen=20)
+
+        # Global update history (for orientation baselines)
+        self.global_mean_direction: Optional[np.ndarray] = None
+        self.global_norm_history = deque(maxlen=history_size)
+        self.round_diagnostics: List[RoundDiagnostics] = []
+
+        # Aggregation mode params
+        self.clip_multiplier = clip_multiplier
+        self.trim_beta = trim_beta
+        self.krum_byzantine_fraction = krum_byzantine_fraction
+
+        # MAPE-K
+        self.enable_mape_k = enable_mape_k
+        self.mape_k_window = mape_k_window
+
+    # -----------------------------------------------------------------
+    # Client profile management
+    # -----------------------------------------------------------------
+
+    def _get_profile(self, client_id: str) -> ClientProfile:
+        if client_id not in self.client_profiles:
+            self.client_profiles[client_id] = ClientProfile(
+                reputation=self.initial_reputation
+            )
+        return self.client_profiles[client_id]
+
+    # =================================================================
+    # OBSERVE — Multi-Signal Feature Extraction
+    # =================================================================
+
+    def observe(
+        self,
+        client_updates: Dict[str, Tuple[List[np.ndarray], int, Dict[str, Any]]]
+    ) -> Dict[str, Dict[str, Any]]:
+        """
+        Extract multiple signals from each client's update.
+
+        Returns per-client observation dict with:
+          - param_norms: per-layer L2 norms
+          - total_norm: sum of layer norms
+          - flattened: flattened parameter vector (for direction analysis)
+          - per_layer_norms: list of per-layer norms
+        """
+        observations = {}
+        all_flattened = []
+
+        for client_id, (parameters, num_samples, metrics) in client_updates.items():
+            flat = np.concatenate([p.flatten() for p in parameters])
+            per_layer_norms = [float(np.linalg.norm(p)) for p in parameters]
+            total_norm = float(np.linalg.norm(flat))
+
+            observations[client_id] = {
+                'flattened': flat,
+                'per_layer_norms': per_layer_norms,
+                'total_norm': total_norm,
+                'num_samples': num_samples,
+            }
+            all_flattened.append(flat)
+
+        # Compute consensus direction (geometric median approximation via Weiszfeld)
+        if all_flattened:
+            consensus = self._geometric_median(np.array(all_flattened))
+            for client_id in observations:
+                observations[client_id]['consensus_direction'] = consensus
+
+        return observations
+
+    def _geometric_median(self, points: np.ndarray, max_iter: int = 30, tol: float = 1e-6) -> np.ndarray:
+        """
+        Weiszfeld algorithm for geometric median.
+        More robust than arithmetic mean — a single outlier can't shift it much.
+        """
+        y = np.median(points, axis=0)  # Initialize with coordinate-wise median
+        for _ in range(max_iter):
+            dists = np.linalg.norm(points - y, axis=1, keepdims=True)
+            dists = np.maximum(dists, 1e-10)  # Avoid division by zero
+            weights = 1.0 / dists
+            y_new = np.sum(points * weights, axis=0) / np.sum(weights)
+            if np.linalg.norm(y_new - y) < tol:
+                break
+            y = y_new
+        return y
+
+    # =================================================================
+    # ORIENT — Multi-Detector Fusion
+    # =================================================================
+
+    def orient(
+        self,
+        observations: Dict[str, Dict[str, Any]]
+    ) -> Dict[str, Dict[str, Any]]:
+        """
+        Run all detectors and fuse into per-client anomaly scores.
+        """
+        analysis = {}
+
+        for client_id, obs in observations.items():
+            profile = self._get_profile(client_id)
+            scores = {}
+
+            # --- Detector 1: Norm Anomaly ---
+            scores['norm'] = self._detect_norm_anomaly(obs, profile)
+
+            # --- Detector 2: Direction Anomaly (CRITICAL NEW SIGNAL) ---
+            scores['direction'] = self._detect_direction_anomaly(obs)
+
+            # --- Detector 3: Cluster Outlier (Sprint 4) ---
+            scores['cluster'] = 0.0  # TODO: Sprint 4
+
+            # --- Detector 4: Temporal Inconsistency (Sprint 4) ---
+            scores['temporal'] = self._detect_temporal_anomaly(obs, profile)
+
+            # --- Fused anomaly score ---
+            fused_score = sum(
+                self.detector_weights[k] * scores[k]
+                for k in self.detector_weights
+            )
+
+            # Classify threat level for this client
+            if fused_score >= self.red_threshold:
+                client_threat = ThreatLevel.RED
+            elif fused_score >= self.orange_threshold:
+                client_threat = ThreatLevel.ORANGE
+            elif fused_score >= self.yellow_threshold:
+                client_threat = ThreatLevel.YELLOW
+            else:
+                client_threat = ThreatLevel.GREEN
+
+            analysis[client_id] = {
+                'detector_scores': scores,
+                'fused_score': float(fused_score),
+                'client_threat': client_threat,
+            }
+
+            # Update profile history
+            profile.norm_history.append(obs['total_norm'])
+            profile.anomaly_history.append(fused_score)
+            profile.rounds_seen += 1
+
+        return analysis
+
+    def _detect_norm_anomaly(self, obs: Dict, profile: ClientProfile) -> float:
+        """
+        Per-layer norm z-score anomaly detection (improved from v1).
+        Uses per-layer analysis instead of just total norm.
+        """
+        if len(self.global_norm_history) < 3:
+            return 0.0
+
+        # Compare total norm to global distribution
+        hist_norms = list(self.global_norm_history)
+        mean_norm = np.mean(hist_norms)
+        std_norm = np.std(hist_norms) + 1e-8
+
+        z_score = abs(obs['total_norm'] - mean_norm) / std_norm
+
+        # Normalize to [0, 1] using sigmoid-like mapping
+        # z=2 → ~0.5, z=3 → ~0.73, z=4 → ~0.88
+        score = 1.0 - 1.0 / (1.0 + np.exp(z_score - 2.5))
+        return float(np.clip(score, 0.0, 1.0))
+
+    def _detect_direction_anomaly(self, obs: Dict) -> float:
+        """
+        Cosine similarity to consensus direction.
+        THIS IS THE KEY NEW SIGNAL that catches label-flip attacks.
+
+        Returns score in [0, 1] where:
+          0.0 = perfectly aligned with consensus (safe)
+          1.0 = pointing opposite to consensus (malicious)
+        """
+        consensus = obs.get('consensus_direction')
+        if consensus is None:
+            return 0.0
+
+        flat = obs['flattened']
+        norm_flat = np.linalg.norm(flat)
+        norm_consensus = np.linalg.norm(consensus)
+
+        if norm_flat < 1e-10 or norm_consensus < 1e-10:
+            return 0.0
+
+        cos_sim = np.dot(flat, consensus) / (norm_flat * norm_consensus)
+
+        # Convert: cos_sim=1.0 → score=0.0, cos_sim=-1.0 → score=1.0
+        score = (1.0 - cos_sim) / 2.0
+        return float(np.clip(score, 0.0, 1.0))
+
+    def _detect_temporal_anomaly(self, obs: Dict, profile: ClientProfile) -> float:
+        """
+        Track how consistent this client's behavior is over time.
+        High variance in direction → suspicious.
+        """
+        if len(profile.direction_history) < 3:
+            # Store current direction for future comparison
+            flat = obs['flattened']
+            norm = np.linalg.norm(flat)
+            if norm > 1e-10:
+                profile.direction_history.append(flat / norm)
+            return 0.0
+
+        # Compute current direction
+        flat = obs['flattened']
+        norm = np.linalg.norm(flat)
+        if norm < 1e-10:
+            return 0.0
+        current_dir = flat / norm
+
+        # Cosine similarities to recent directions
+        recent_sims = []
+        for past_dir in list(profile.direction_history)[-5:]:
+            sim = np.dot(current_dir, past_dir)
+            recent_sims.append(sim)
+
+        profile.direction_history.append(current_dir)
+
+        # High variance in similarities → erratic behavior
+        if len(recent_sims) < 2:
+            return 0.0
+
+        variance = np.var(recent_sims)
+        mean_sim = np.mean(recent_sims)
+
+        # Low mean similarity + high variance = very suspicious
+        score = (1.0 - mean_sim) * 0.5 + min(variance * 5.0, 0.5)
+        return float(np.clip(score, 0.0, 1.0))
+
+    # =================================================================
+    # DECIDE — Adaptive Threat Assessment
+    # =================================================================
+
+    def decide(
+        self,
+        analysis: Dict[str, Dict[str, Any]]
+    ) -> Tuple[Dict[str, Dict[str, Any]], List[ExplainableDecision]]:
+        """
+        Make per-client decisions and update global threat posture.
+        """
+        decisions = {}
+        explainable = []
+
+        # Count flagged clients for posture assessment
+        num_flagged = sum(
+            1 for a in analysis.values()
+            if a['client_threat'] in (ThreatLevel.ORANGE, ThreatLevel.RED)
+        )
+        flagged_fraction = num_flagged / max(len(analysis), 1)
+        self._flagged_fraction_history.append(flagged_fraction)
+
+        # Update global threat posture
+        self._update_threat_posture()
+
+        for client_id, client_analysis in analysis.items():
+            profile = self._get_profile(client_id)
+            fused_score = client_analysis['fused_score']
+            client_threat = client_analysis['client_threat']
+
+            # Update reputation
+            if client_threat in (ThreatLevel.ORANGE, ThreatLevel.RED):
+                # Penalize: multiply reputation by (1 - severity * score)
+                penalty = self.penalty_severity * fused_score
+                profile.reputation = max(0.0, profile.reputation * (1.0 - penalty))
+                profile.consecutive_flags += 1
+                profile.consecutive_clean = 0
+            else:
+                # Reward: diminishing returns as reputation approaches 1.0
+                bonus = self.recovery_rate * (1.0 - profile.reputation)
+                profile.reputation = min(1.0, profile.reputation + bonus)
+                profile.consecutive_clean += 1
+                profile.consecutive_flags = 0
+
+            profile.last_anomaly_score = fused_score
+
+            # Determine action based on global posture + client threat
+            action, weight = self._determine_action(
+                client_threat, profile, self.threat_level
+            )
+
+            decisions[client_id] = {
+                'action': action,
+                'weight_multiplier': weight,
+                'client_threat': client_threat.value,
+                'fused_score': fused_score,
+                'reputation': profile.reputation,
+            }
+
+            # Build explainable decision
+            decision = ExplainableDecision(
+                decision=action,
+                confidence=fused_score if action != 'accept' else 1.0 - fused_score,
+                reasoning=(
+                    f"Client threat={client_threat.value}, "
+                    f"fused_score={fused_score:.3f}, "
+                    f"reputation={profile.reputation:.3f}, "
+                    f"action={action}, weight={weight:.3f}, "
+                    f"global_posture={self.threat_level.value}"
+                ),
+                evidence={
+                    'detector_scores': client_analysis['detector_scores'],
+                    'fused_score': fused_score,
+                    'reputation': profile.reputation,
+                    'threat_level': client_threat.value,
+                    'global_posture': self.threat_level.value,
+                    'consecutive_flags': profile.consecutive_flags,
+                }
+            )
+            explainable.append(decision)
+
+        return decisions, explainable
+
+    def _determine_action(
+        self,
+        client_threat: ThreatLevel,
+        profile: ClientProfile,
+        global_posture: ThreatLevel
+    ) -> Tuple[str, float]:
+        """
+        Determine action and weight based on client threat + global posture.
+
+        Returns (action_string, weight_multiplier).
+        """
+        # RED clients are always rejected in ORANGE+ posture
+        if client_threat == ThreatLevel.RED:
+            if global_posture in (ThreatLevel.ORANGE, ThreatLevel.RED):
+                return 'reject', 0.0
+            else:
+                return 'reduce_weight', max(profile.reputation * 0.1, 0.01)
+
+        # ORANGE clients
+        if client_threat == ThreatLevel.ORANGE:
+            if global_posture == ThreatLevel.RED:
+                return 'reject', 0.0
+            elif global_posture == ThreatLevel.ORANGE:
+                return 'reduce_weight', max(profile.reputation * 0.3, 0.01)
+            else:
+                return 'reduce_weight', max(profile.reputation * 0.5, 0.05)
+
+        # YELLOW clients
+        if client_threat == ThreatLevel.YELLOW:
+            return 'reduce_weight', max(profile.reputation * 0.7, 0.1)
+
+        # GREEN clients
+        return 'accept', min(profile.reputation, 1.0)
+
+    def _update_threat_posture(self):
+        """
+        Update global threat posture based on recent flagged fractions.
+        Implements hysteresis (easier to escalate, harder to de-escalate).
+        """
+        if len(self._flagged_fraction_history) < 3:
+            return
+
+        recent_avg = np.mean(list(self._flagged_fraction_history)[-5:])
+        self._rounds_since_escalation += 1
+
+        # Escalation (fast)
+        if recent_avg >= 0.5:
+            self.threat_level = ThreatLevel.RED
+            self._rounds_since_escalation = 0
+        elif recent_avg >= self.attack_fraction_trigger:
+            if self.threat_level.value < ThreatLevel.ORANGE.value:
+                self.threat_level = ThreatLevel.ORANGE
+                self._rounds_since_escalation = 0
+        elif recent_avg >= 0.15:
+            if self.threat_level == ThreatLevel.GREEN:
+                self.threat_level = ThreatLevel.YELLOW
+                self._rounds_since_escalation = 0
+
+        # De-escalation (slow — requires cooldown)
+        if self._rounds_since_escalation >= self.posture_cooldown_rounds:
+            if recent_avg < 0.10 and self.threat_level != ThreatLevel.GREEN:
+                # Step down one level
+                levels = [ThreatLevel.GREEN, ThreatLevel.YELLOW,
+                          ThreatLevel.ORANGE, ThreatLevel.RED]
+                current_idx = levels.index(self.threat_level)
+                if current_idx > 0:
+                    self.threat_level = levels[current_idx - 1]
+                    self._rounds_since_escalation = 0
+
+    # =================================================================
+    # ACT — Threat-Proportional Aggregation
+    # =================================================================
+
+    def act(
+        self,
+        client_updates: Dict[str, Tuple[List[np.ndarray], int, Dict[str, Any]]],
+        decisions: Dict[str, Dict[str, Any]],
+        observations: Dict[str, Dict[str, Any]],
+    ) -> Tuple[Optional[List[np.ndarray]], Dict[str, Any]]:
+        """
+        Aggregate updates using the aggregation mode appropriate for
+        the current global threat posture.
+        """
+        # Filter out rejected clients
+        active_updates = {}
+        for client_id, (params, n_samples, metrics) in client_updates.items():
+            if decisions.get(client_id, {}).get('action') != 'reject':
+                weight = decisions.get(client_id, {}).get('weight_multiplier', 1.0)
+                active_updates[client_id] = (params, n_samples, metrics, weight)
+
+        if not active_updates:
+            # All clients rejected — extreme case, use geometric median of all
+            return self._geometric_median_aggregate(client_updates), {
+                'mode': 'emergency_geometric_median',
+                'reason': 'all clients rejected'
+            }
+
+        # Select aggregation mode based on threat posture
+        if self.threat_level == ThreatLevel.GREEN:
+            result = self._aggregate_peace(active_updates)
+            mode = 'peace_weighted_fedavg'
+        elif self.threat_level == ThreatLevel.YELLOW:
+            result = self._aggregate_vigilant(active_updates, observations)
+            mode = 'vigilant_clipped_fedavg'
+        elif self.threat_level == ThreatLevel.ORANGE:
+            result = self._aggregate_defensive(active_updates)
+            mode = 'defensive_trimmed_mean'
+        else:  # RED
+            result = self._aggregate_lockdown(active_updates)
+            mode = 'lockdown_krum'
+
+        agg_log = {
+            'mode': mode,
+            'threat_level': self.threat_level.value,
+            'num_active': len(active_updates),
+            'num_rejected': len(client_updates) - len(active_updates),
+        }
+
+        return result, agg_log
+
+    def _aggregate_peace(
+        self,
+        active_updates: Dict[str, Tuple[List[np.ndarray], int, Any, float]]
+    ) -> Optional[List[np.ndarray]]:
+        """Mode 1: Reputation-weighted FedAvg."""
+        weighted = []
+        total_weight = 0.0
+
+        for client_id, (params, n_samples, _, rep_weight) in active_updates.items():
+            w = rep_weight * n_samples
+            weighted.append((params, w))
+            total_weight += w
+
+        if total_weight == 0:
+            return None
+
+        num_params = len(weighted[0][0])
+        aggregated = []
+        for idx in range(num_params):
+            wsum = sum(p[idx] * w for p, w in weighted)
+            aggregated.append(wsum / total_weight)
+        return aggregated
+
+    def _aggregate_vigilant(
+        self,
+        active_updates: Dict[str, Tuple[List[np.ndarray], int, Any, float]],
+        observations: Dict[str, Dict[str, Any]],
+    ) -> Optional[List[np.ndarray]]:
+        """Mode 2: Reputation-weighted FedAvg with norm clipping."""
+        # Compute median norm for clipping threshold
+        norms = [obs['total_norm'] for obs in observations.values()]
+        median_norm = float(np.median(norms))
+        clip_threshold = median_norm * self.clip_multiplier
+
+        weighted = []
+        total_weight = 0.0
+
+        for client_id, (params, n_samples, _, rep_weight) in active_updates.items():
+            # Clip update to threshold
+            flat = np.concatenate([p.flatten() for p in params])
+            update_norm = np.linalg.norm(flat)
+            if update_norm > clip_threshold:
+                scale = clip_threshold / update_norm
+                params = [p * scale for p in params]
+
+            w = rep_weight * n_samples
+            weighted.append((params, w))
+            total_weight += w
+
+        if total_weight == 0:
+            return None
+
+        num_params = len(weighted[0][0])
+        aggregated = []
+        for idx in range(num_params):
+            wsum = sum(p[idx] * w for p, w in weighted)
+            aggregated.append(wsum / total_weight)
+        return aggregated
+
+    def _aggregate_defensive(
+        self,
+        active_updates: Dict[str, Tuple[List[np.ndarray], int, Any, float]]
+    ) -> Optional[List[np.ndarray]]:
+        """Mode 3: Trimmed mean on active (non-rejected) clients."""
+        all_params = []
+        for client_id, (params, _, _, _) in active_updates.items():
+            all_params.append(params)
+
+        if not all_params:
+            return None
+
+        n = len(all_params)
+        n_trim = int(np.floor(n * self.trim_beta))
+        num_params = len(all_params[0])
+
+        aggregated = []
+        for idx in range(num_params):
+            stacked = np.stack([p[idx] for p in all_params], axis=0)
+            sorted_params = np.sort(stacked, axis=0)
+            if n_trim > 0 and n - 2 * n_trim > 0:
+                trimmed = sorted_params[n_trim:-n_trim]
+            else:
+                trimmed = sorted_params
+            aggregated.append(np.mean(trimmed, axis=0))
+        return aggregated
+
+    def _aggregate_lockdown(
+        self,
+        active_updates: Dict[str, Tuple[List[np.ndarray], int, Any, float]]
+    ) -> Optional[List[np.ndarray]]:
+        """Mode 4: Multi-Krum on active clients."""
+        client_ids = list(active_updates.keys())
+        n = len(client_ids)
+
+        if n < 4:
+            # Too few clients for Krum, use geometric median
+            return self._aggregate_defensive(active_updates)
+
+        # Flatten all updates
+        flattened = []
+        param_shapes = None
+        for cid in client_ids:
+            params = active_updates[cid][0]
+            if param_shapes is None:
+                param_shapes = [p.shape for p in params]
+            flattened.append(np.concatenate([p.flatten() for p in params]))
+
+        # Pairwise distances
+        n_byz = max(1, int(n * self.krum_byzantine_fraction))
+        n_closest = max(1, n - n_byz - 2)
+
+        dists = np.zeros((n, n))
+        for i in range(n):
+            for j in range(i + 1, n):
+                d = np.linalg.norm(flattened[i] - flattened[j])
+                dists[i, j] = d
+                dists[j, i] = d
+
+        # Krum scores
+        scores = []
+        for i in range(n):
+            d = dists[i].copy()
+            d[i] = np.inf
+            closest = np.sort(d)[:n_closest]
+            scores.append(np.sum(closest ** 2))
+
+        # Select top n_closest
+        selected = np.argsort(scores)[:n_closest]
+        selected_flat = [flattened[i] for i in selected]
+        avg_flat = np.mean(selected_flat, axis=0)
+
+        # Unflatten
+        result = []
+        idx = 0
+        for shape in param_shapes:
+            size = int(np.prod(shape))
+            result.append(avg_flat[idx:idx + size].reshape(shape))
+            idx += size
+        return result
+
+    def _geometric_median_aggregate(
+        self,
+        client_updates: Dict[str, Tuple[List[np.ndarray], int, Dict[str, Any]]]
+    ) -> Optional[List[np.ndarray]]:
+        """Emergency fallback: geometric median of all updates."""
+        all_flat = []
+        param_shapes = None
+        for cid, (params, _, _) in client_updates.items():
+            if param_shapes is None:
+                param_shapes = [p.shape for p in params]
+            all_flat.append(np.concatenate([p.flatten() for p in params]))
+
+        if not all_flat:
+            return None
+
+        median_flat = self._geometric_median(np.array(all_flat))
+
+        result = []
+        idx = 0
+        for shape in param_shapes:
+            size = int(np.prod(shape))
+            result.append(median_flat[idx:idx + size].reshape(shape))
+            idx += size
+        return result
+
+    # =================================================================
+    # MAPE-K Feedback Loop
+    # =================================================================
+
+    def _mape_k_adjust(self):
+        """
+        Monitor-Analyze-Plan-Execute: adjust detector weights and thresholds
+        based on recent accuracy trends and detection outcomes.
+
+        Called at the end of each round.
+        """
+        if not self.enable_mape_k or len(self.round_diagnostics) < self.mape_k_window:
+            return
+
+        recent = self.round_diagnostics[-self.mape_k_window:]
+
+        # Monitor: check if accuracy has been declining
+        accuracies = [
+            r.accuracy_after for r in recent
+            if r.accuracy_after is not None
+        ]
+
+        if len(accuracies) < 3:
+            return
+
+        # Analyze: is accuracy trending down?
+        trend = np.polyfit(range(len(accuracies)), accuracies, 1)[0]
+        avg_flagged = np.mean([r.num_flagged / max(r.num_clients, 1) for r in recent])
+
+        # Plan: adjust weights
+        if trend < -0.005 and avg_flagged < 0.2:
+            # Accuracy dropping but few clients flagged → detectors too lenient
+            # Increase direction weight (most discriminative)
+            self.detector_weights['direction'] = min(
+                0.6, self.detector_weights['direction'] + 0.02
+            )
+            self.anomaly_threshold = max(0.3, self.anomaly_threshold - 0.02)
+
+        elif trend > 0.005 and avg_flagged > 0.4:
+            # Accuracy rising but many flagged → possible false positives
+            # Relax thresholds slightly
+            self.anomaly_threshold = min(0.7, self.anomaly_threshold + 0.01)
+
+        # Renormalize weights
+        total = sum(self.detector_weights.values())
+        for k in self.detector_weights:
+            self.detector_weights[k] /= total
+
+    # =================================================================
+    # Main entry point
+    # =================================================================
+
+    def aggregate_updates(
+        self,
+        client_updates: Dict[str, Tuple[List[np.ndarray], int, Dict[str, Any]]],
+        accuracy: Optional[float] = None,
+    ) -> Tuple[Optional[List[np.ndarray]], List[ExplainableDecision]]:
+        """
+        Main aggregation method implementing the full OODA + MAPE-K loop.
+        """
+        # OODA Loop
+        observations = self.observe(client_updates)
+        analysis = self.orient(observations)
+        decisions, explainable = self.decide(analysis)
+        aggregated, agg_log = self.act(client_updates, decisions, observations)
+
+        # Update global norm history
+        for obs in observations.values():
+            self.global_norm_history.append(obs['total_norm'])
+
+        # Update global mean direction
+        all_flat = [obs['flattened'] for obs in observations.values()]
+        if all_flat:
+            self.global_mean_direction = np.mean(all_flat, axis=0)
+
+        # Store diagnostics for MAPE-K
+        diag = RoundDiagnostics(
+            round_number=self.round_number,
+            threat_level=self.threat_level,
+            num_clients=len(client_updates),
+            num_flagged=sum(
+                1 for a in analysis.values()
+                if a['client_threat'] in (ThreatLevel.ORANGE, ThreatLevel.RED)
+            ),
+            num_rejected=sum(
+                1 for d in decisions.values()
+                if d.get('action') == 'reject'
+            ),
+            accuracy_after=accuracy,
+            detector_scores={
+                k: [a['detector_scores'].get(k, 0) for a in analysis.values()]
+                for k in self.detector_weights
+            },
+            fusion_weights=dict(self.detector_weights),
+        )
+        self.round_diagnostics.append(diag)
+
+        # MAPE-K feedback
+        self._mape_k_adjust()
+
+        self.increment_round()
+        return aggregated, explainable
+
+    def get_defence_description(self) -> str:
+        return (
+            f"CogDef v2 (OODA+MAPE-K, multi-signal, "
+            f"posture={self.threat_level.value}, "
+            f"weights={{dir={self.detector_weights['direction']:.2f}, "
+            f"norm={self.detector_weights['norm']:.2f}, "
+            f"clust={self.detector_weights['cluster']:.2f}, "
+            f"temp={self.detector_weights['temporal']:.2f}}})"
+        )

@@ -135,6 +135,7 @@ class CognitiveDefencePOSG(Basedefence):
         batch_size: int = 64,
         device: str = "cpu",
         history_size: int = 200,
+        warmup_rounds: int = 5,
     ):
         """
         Parameters
@@ -183,6 +184,10 @@ class CognitiveDefencePOSG(Basedefence):
             batch_size=batch_size,
             device=device,
         )
+
+        # Warm-up: use heuristic weights for first N rounds while buffer fills.
+        # The GRU and replay buffer are still updated during warm-up.
+        self.warmup_rounds = warmup_rounds
 
         # ---- Internal bookkeeping ----
         self._global_model_flat: Optional[np.ndarray] = None  # previous global model
@@ -292,14 +297,36 @@ class CognitiveDefencePOSG(Basedefence):
     # OODA: Decide  (SAC policy)
     # ------------------------------------------------------------------
 
+    def _heuristic_weights(
+        self, observations: Dict[str, np.ndarray]
+    ) -> Dict[str, float]:
+        """
+        Norm z-score heuristic used during warm-up rounds.
+
+        Clients whose Fisher-trace z-score > 2.0 are down-weighted to 0.1;
+        others receive weight 1.0.  This mirrors the original OODA defence
+        and keeps learning stable while the SAC buffer fills.
+        """
+        fisher_vals = np.array([obs[4] for obs in observations.values()], dtype=np.float64)
+        mean_f, std_f = fisher_vals.mean(), fisher_vals.std() + 1e-8
+        weights: Dict[str, float] = {}
+        for cid, obs in observations.items():
+            z = abs(obs[4] - mean_f) / std_f
+            weights[cid] = 0.1 if z > 2.0 else 1.0
+        return weights
+
     def decide(
         self,
         state: np.ndarray,
         beliefs: Dict[str, torch.Tensor],
+        observations: Dict[str, np.ndarray],
         deterministic: bool = False,
     ) -> Tuple[Dict[str, Dict[str, Any]], List[ExplainableDecision], np.ndarray]:
         """
         Query the SAC agent for per-client aggregation weights.
+
+        During ``warmup_rounds`` a norm-based heuristic is used instead of
+        the untrained SAC policy, preventing the cold-start accuracy collapse.
 
         Returns
         -------
@@ -307,32 +334,45 @@ class CognitiveDefencePOSG(Basedefence):
         explanations : list[ExplainableDecision]
         raw_action : ndarray  (max_clients,) – full action vector for replay
         """
-        raw_action = self.agent.select_action(state, deterministic=deterministic)
+        in_warmup = self.round_number < self.warmup_rounds
+
+        if in_warmup:
+            # Heuristic weights – but still build a valid raw_action for the
+            # replay buffer so transitions are stored from round 1.
+            heuristic = self._heuristic_weights(observations)
+            raw_action = self.agent.select_action(state, deterministic=False)
+            # Override SAC weights with heuristic for actual aggregation
+            for cid in self._active_client_ids:
+                slot = self._client_slot_map[cid]
+                raw_action[slot] = heuristic.get(cid, 1.0)
+        else:
+            raw_action = self.agent.select_action(state, deterministic=deterministic)
 
         decisions: Dict[str, Dict[str, Any]] = {}
         explanations: List[ExplainableDecision] = []
 
         for cid in self._active_client_ids:
             slot = self._client_slot_map[cid]
-            weight = float(raw_action[slot])
+            weight = float(np.clip(raw_action[slot], 0.0, 1.0))
 
             # Interpret weight for logging
+            phase = "warm-up heuristic" if in_warmup else "SAC policy"
             if weight < 0.2:
                 label = "isolate"
                 reasoning = (
-                    f"SAC policy assigned weight {weight:.3f} (< 0.2) — "
+                    f"{phase} assigned weight {weight:.3f} (< 0.2) — "
                     f"client is effectively isolated based on adverse belief trajectory."
                 )
             elif weight < 0.5:
                 label = "reduce_weight"
                 reasoning = (
-                    f"SAC policy assigned weight {weight:.3f} — "
+                    f"{phase} assigned weight {weight:.3f} — "
                     f"partial trust; monitoring for further adversarial signals."
                 )
             else:
                 label = "accept"
                 reasoning = (
-                    f"SAC policy assigned weight {weight:.3f} (≥ 0.5) — "
+                    f"{phase} assigned weight {weight:.3f} (≥ 0.5) — "
                     f"belief state indicates benign behaviour."
                 )
 
@@ -443,7 +483,7 @@ class CognitiveDefencePOSG(Basedefence):
 
         # 3. Decide  (SAC policy query) --------------------------------------
         decisions, explanations, raw_action = self.decide(
-            state, beliefs, deterministic=deterministic
+            state, beliefs, observations, deterministic=deterministic
         )
 
         # 4. Act  (weighted aggregation) -------------------------------------

@@ -24,6 +24,7 @@ defence:
   reward_gamma: 0.2
   buffer_capacity: 50000
   batch_size: 64
+  warmup_rounds: 5
   history_size: 200
 
 attacks:

@@ -1,0 +1,36 @@
+# Parallel experiment setup - runs on separate Ray instance
+# Use with: python run_server_with_eval.py --config baseline_50_clients_parallel_a.yaml
+# And in another terminal: python run_server_with_eval.py --config baseline_50_clients_parallel_b.yaml
+
+experiment:
+  experiment_name: "baseline_50_clients_parallel_a"
+  seed: 123
+  num_rounds: 50
+  min_clients: 10
+  min_available_clients: 10
+  server_address: "localhost:8080"
+
+defence:
+  strategy: "none"
+  anomaly_threshold: 0.0
+  reputation_decay: 0.0
+  history_size: 0
+
+attacks: []
+
+orchestration:
+  num_clients: 50
+  batch_size: 2
+  max_memory_mb: 3000  # Half the memory (shared with parallel experiment)
+  spawn_delay: 2.0
+
+simulation:
+  client_resources:
+    num_cpus: 0.25
+  ray_init_args:
+    include_dashboard: false
+    log_to_driver: false
+    num_cpus: 4  # Half the cores (will share with parallel B)
+
+evaluation:
+  num_test_samples: 5000

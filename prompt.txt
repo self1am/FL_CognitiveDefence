@@ -1,0 +1,328 @@
+these are the key papaers:
+
+1. Wang, J., Wang, R. and Zhang, F., 2025. How to Defend Against Large-scale Model Poisoning Attacks in Federated Learning: A Vertical Solution. IEEE Transactions on Dependable and Secure Computing.
+
+2. Yang, H., Gu, D. and He, J., 2024. A robust and efficient federated learning algorithm against adaptive model poisoning attacks. IEEE Internet of Things Journal, 11(9), pp.16289-16302.
+
+now additionally we are trying to build our own defence mechanism, by making certain postulates.. here are they
+
+> **…model poisoning in FL is not a computational hardness problem**. It is a **sequential decision problem under strategic uncertainty**. 
+
+~ ChatGPT
+> 
+
+## The real gap (stated cleanly)
+
+> Existing federated learning defenses treat Byzantine robustness as a per-round statistical estimation problem, implicitly assuming stationary, non-adaptive adversaries and a bounded fraction of malicious clients. This formulation breaks down in large-scale, open federated settings where adversaries are strategic, adaptive, and persistent across rounds.
+> 
+
+# Federated Learning Defence as a Belief-Based POMDP
+
+---
+
+## 1. Problem Reformulation
+
+We consider a federated learning (FL) system operating over discrete communication rounds
+
+$$
+( r = 1, 2, \dots, R ).
+$$
+
+At each round, the server aggregates model updates from a dynamically selected subset of clients.
+
+A subset of clients may behave **strategically and adaptively**, with the goal of degrading the global model.
+
+### Key departure from prior work
+
+> Client intent is not directly observable and cannot be reliably inferred from a single round.
+> 
+
+Therefore, federated defence must be treated as a **sequential decision-making problem under uncertainty**, rather than a per-round robust estimation task.
+
+---
+
+## 2. POMDP Formulation
+
+We model the defender (server) as an agent interacting with an environment consisting of clients and attackers.
+
+### 2.1 State Space
+
+For each client  $i \in {1, \dots, N}$ , define a hidden state:
+
+$$
+s_i^{(r)} \in \mathcal{S} = \{ \text{benign}, \text{adversarial} \}
+$$
+
+The **joint system state** at round ( r ) is:
+
+$$
+S^{(r)} = \{ s_1^{(r)}, s_2^{(r)}, \dots, s_N^{(r)} \}
+$$
+
+> These states are latent and may change over time (adaptive attackers).
+> 
+
+---
+
+### 2.2 Observations
+
+At each round ( r ), the server receives model updates:
+
+$$
+\Delta \theta_i^{(r)} \quad \forall i \in \mathcal{S}_r
+$$
+
+From each update, the defender extracts an observation vector:
+
+$$
+o_i^{(r)} = \phi(\Delta \theta_i^{(r)}, \mathcal{H}_i^{(r-1)})
+$$
+
+where:
+
+$$
+( \phi(\cdot) )
+$$
+
+- is a feature extractor
+
+$$
+( \mathcal{H}_i^{(r-1)} ) 
+$$
+
+- is the historical trace of client $i$
+
+Examples of observation features:
+
+$$
+o_i^{(r)} = \Big[|\Delta \theta_i^{(r)}|2,\ \cos(\Delta \theta_i^{(r)}, \bar{\Delta \theta}^{(r)}),\ \Delta \mathcal{L}{val},\ \text{consistency score}\Big]
+$$
+
+> Important: observations are noisy and non-diagnostic individually.
+> 
+
+---
+
+### 2.3 Belief State (Core Object)
+
+Since true states are unobservable, the defender maintains a **belief** for each client:
+
+$$
+b_i^{(r)} = P\big( s_i^{(r)} = \text{adversarial} \mid o_i^{(1:r)} \big)
+$$
+
+The belief vector:
+
+$$
+\mathbf{b}^{(r)} = \{{ b_1^{(r)}, \dots, b_N^{(r)} }\}
+$$
+
+This belief replaces:
+
+- static trust
+- heuristic reputation
+- binary accept/reject logic
+
+> The current reputation score is an implicit belief state.
+> 
+
+---
+
+### 2.4 Belief Update (Bayesian Filtering)
+
+At each round, beliefs are updated using Bayes’ rule:
+
+$$
+b_i^{(r)} =\frac{P(o_i^{(r)} \mid s_i = A) b_i^{(r-1)}}{P(o_i^{(r)} \mid s_i = A) b_i^{(r-1)}+P(o_i^{(r)}\mid s_i = B) (1 - b_i^{(r-1)})}
+$$
+
+where:
+
+- ( A ): adversarial
+- ( B ): benign
+
+In practice, likelihoods are **approximated**, not assumed known:
+
+$$
+\log \frac{P(o \mid A)}{P(o \mid B)} \approx \sum_k \lambda_k f_k(o)
+$$
+
+This justifies:
+
+- Z-scores
+- norm deviations
+- consistency metrics
+
+as **weak evidence**, not hard classifiers.
+
+---
+
+## 3. Action Space: Soft Aggregation as Control
+
+At each round, the defender chooses an action:
+
+$$
+a_i^{(r)} \in [0, 1]
+$$
+
+representing the **aggregation weight** assigned to client ( i ).
+
+We define:
+
+$$
+a_i^{(r)} = g\big( b_i^{(r)} \big)
+$$
+
+A principled choice:
+
+$$
+a_i^{(r)} = (1 - b_i^{(r)}) \cdot n_i
+$$
+
+where 
+
+$$
+( n_i ) 
+$$
+
+is the number of training samples.
+
+This yields the aggregation rule:
+
+$$
+\theta^{(r+1)} =\frac{\sum_{i \in \mathcal{S}r} a_i^{(r)} \Delta \theta_i^{(r)}}{\sum{i \in \mathcal{S}_r} a_i^{(r)}}
+$$
+
+> This strictly generalizes FedAvg and explains soft exclusion.
+> 
+
+---
+
+## 4. Reward Signal
+
+The defender optimizes long-term utility, not per-round robustness.
+
+Define reward:
+
+$$
+R^{(r)} =\mathcal{A}(\theta^{(r+1)}) - \mathcal{A}(\theta^{(r)})
+$$
+
+where $\mathcal{A}$ is validation accuracy.
+
+The objective:
+
+$$
+\max_{\pi} \ \mathbb{E}\left[ \sum_{r=1}^R \gamma^r R^{(r)} \right]
+$$
+
+where:
+
+- $\pi$ : defence policy
+- $\gamma \in (0,1)$ : discount factor
+
+This reframes defense as **long-horizon regret minimization**.
+
+---
+
+## 5. Relation to Existing Defences (Formal Insight)
+
+| Defence | Interpretation |
+| --- | --- |
+| FedAvg | Fixed policy,  $b_i = 0$  |
+| Krum | One-step MAP estimate, no belief memory |
+| Trimmed Mean | Coordinate-wise outlier rejection |
+| Current system | Approximate belief-based policy |
+
+> Stateless defences implicitly assume full observability.
+> 
+> 
+> This assumption is false under adaptive attacks.
+> 
+
+---
+
+## 6. Why This Solves the Literature Gap
+
+### No minority assumption
+
+Beliefs are independent of attacker fraction.
+
+### Multi-round consistency
+
+Belief integrates evidence over time.
+
+### Adaptive attackers
+
+State transitions naturally model attacker adaptation.
+
+### Scalability
+
+Belief update is $\mathcal{O}(nd)$, not  $\mathcal{O}(n^2 d)$ .
+
+---
+
+## 7. Mapping Back to The Existing Architecture
+
+| Current Component | POMDP Equivalent |
+| --- | --- |
+| Reputation | Belief state |
+| Z-score | Observation likelihood |
+| Decay/reward | Bayesian update |
+| Weighted aggregation | Action |
+| Logs | Belief trace |
+
+The current system becomes:
+
+> A first-order approximation of a belief-optimal defence policy.
+> 
+
+---
+
+## Partially Observable Stochastic Game (POSG)
+
+Let:
+
+- $\theta_i∈{benign,malicious}$
+- $b_i^t = P(\theta_i \mid \mathcal{H}_t)$
+
+### Belief Update:
+
+$$
+b_i^{t+1} \propto P(\Delta w_i^t \mid \theta_i) \cdot b_i^t
+$$
+
+### Defence Action:
+
+$$
+a_t \in \{\text{accept}, \text{downweight}, \text{isolate}\}
+$$
+
+### Policy:
+
+$$
+\pi^*(b_t) = \arg\max_\pi \mathbb{E} \left[ \sum_{t=0}^{T} \gamma^t R(s_t, a_t) \right]
+$$
+
+[Research Questions](https://www.notion.so/Research-Questions-2da654b470b88079b0dee1b16de10513?pvs=21)
+
+https://www.sciencedirect.com/science/article/abs/pii/S0167739X21003617
+
+https://openaccess.thecvf.com/content/CVPR2025/papers/Xie_Model_Poisoning_Attacks_to_Federated_Learning_via_Multi-Round_Consistency_CVPR_2025_paper.pdf
+
+https://arxiv.org/pdf/2201.02873
+
+[Formal Foundations for Cognitive Defence in Federated Learning](https://www.notion.so/Formal-Foundations-for-Cognitive-Defence-in-Federated-Learning-2df654b470b8800c8570f2769b73f4d5?pvs=21)
+
+Adaptive attacks defenses related papers:
+
+- https://repository.essex.ac.uk/37557/1/A_Robust_and_Efficient_Federated_Learning_Algorithm_against_Adaptive_Model_Poisoning_Attacks__Revision_version_without_highlighted_final.pdf
+- https://federated-learning.org/fl-ijcai-2021/FTL-IJCAI21_paper_10.pdf
+- https://arxiv.org/html/2510.01261v1
+
+
+so we tried restating the problem, and find a solution considering federated learning as a posg.. as part of this we were trying to use different algorithms for this purpose, including but not limited to qnns, deep q networks, etc. this is yet to be implemented.. now unfortunately we came across an unpublished paper
+
+Palit, V., 2025. Adaptive Federated Learning Defences via Trust-Aware Deep Q-Networks. arXiv preprint arXiv:2510.01261.
+
+but this paper has obvious faults and issues hence it was rejected.. we can find a better way to do this, by fixing those issue or going with a completely different approach.. the idea is to create a state of the art defence mechanism, that is bound to have 98% accuracy across all attack domains.. the expected results against actual results we got are in the figures folder inside experiments/results

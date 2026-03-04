@@ -33,6 +33,7 @@ class POSGAggregationStrategy(fl.server.strategy.FedAvg):
         buffer_capacity: int = 50_000,
         batch_size: int = 64,
         device: str = "cpu",
+        warmup_rounds: int = 5,
         logger: Optional[ExperimentLogger] = None,
         evaluate_fn: Optional[Any] = None,
         **kwargs,
@@ -58,6 +59,7 @@ class POSGAggregationStrategy(fl.server.strategy.FedAvg):
             batch_size=batch_size,
             device=device,
             history_size=200,
+            warmup_rounds=warmup_rounds,
         )
         
         self._current_parameters = None

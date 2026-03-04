@@ -23,27 +23,27 @@ mkdir -p "$LOG_DIR"
 
 # All configs in execution order
 CONFIGS=(
-    "00_clean_no_attack.yaml"
-    "01_static_label_flip_no_defence.yaml"
+    "00_clean_no_attack.yaml" // 
+    "01_static_label_flip_no_defence.yaml" //
     "01_static_label_flip_cognitive_defence.yaml"
-    "01_static_label_flip_krum_defence.yaml"
-    "01_static_label_flip_trimmed_mean_defence.yaml"
-    "01_static_label_flip_vert_defence.yaml"
-    "02_adaptive_dny_opt_no_defence.yaml"
+    "01_static_label_flip_krum_defence.yaml" //
+    "01_static_label_flip_trimmed_mean_defence.yaml" //
+    "01_static_label_flip_vert_defence.yaml" //
+    "02_adaptive_dny_opt_no_defence.yaml" //
     "02_adaptive_dny_opt_cognitive_defence.yaml"
-    "02_adaptive_dny_opt_krum_defence.yaml"
-    "02_adaptive_dny_opt_trimmed_mean_defence.yaml"
-    "02_adaptive_dny_opt_vert_defence.yaml"
-    "03_adaptive_stat_opt_no_defence.yaml"
+    "02_adaptive_dny_opt_krum_defence.yaml" //
+    "02_adaptive_dny_opt_trimmed_mean_defence.yaml" //
+    "02_adaptive_dny_opt_vert_defence.yaml" //
+    "03_adaptive_stat_opt_no_defence.yaml" //
     "03_adaptive_stat_opt_cognitive_defence.yaml"
-    "03_adaptive_stat_opt_krum_defence.yaml"
-    "03_adaptive_stat_opt_trimmed_mean_defence.yaml"
-    "03_adaptive_stat_opt_vert_defence.yaml"
-    "04_adaptive_min_max_no_defence.yaml"
+    "03_adaptive_stat_opt_krum_defence.yaml" //
+    "03_adaptive_stat_opt_trimmed_mean_defence.yaml" //
+    "03_adaptive_stat_opt_vert_defence.yaml" //
+    "04_adaptive_min_max_no_defence.yaml" //
     "04_adaptive_min_max_cognitive_defence.yaml"
-    "04_adaptive_min_max_krum_defence.yaml"
+    "04_adaptive_min_max_krum_defence.yaml" //
     "04_adaptive_min_max_trimmed_mean_defence.yaml"
-    "04_adaptive_min_max_vert_defence.yaml"
+    "04_adaptive_min_max_vert_defence.yaml" //
     "05_adaptive_min_sum_no_defence.yaml"
     "05_adaptive_min_sum_cognitive_defence.yaml"
     "05_adaptive_min_sum_krum_defence.yaml"

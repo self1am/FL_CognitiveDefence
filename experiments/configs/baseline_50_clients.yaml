@@ -1,0 +1,36 @@
+# Baseline with 50 clients for faster rounds
+# Same optimizations but fewer clients = faster to complete
+experiment:
+  experiment_name: "baseline_50_clients"
+  seed: 123
+  num_rounds: 50  # Full 50 rounds
+  min_clients: 10
+  min_available_clients: 10
+  server_address: "localhost:8080"
+
+defence:
+  strategy: "none"
+  anomaly_threshold: 0.0
+  reputation_decay: 0.0
+  history_size: 0
+
+attacks: []
+
+orchestration:
+  num_clients: 50  # REDUCED from 100
+  batch_size: 2
+  max_memory_mb: 6000
+  spawn_delay: 2.0
+
+# Flower simulation settings (Ray)
+simulation:
+  client_resources:
+    num_cpus: 0.25
+  ray_init_args:
+    include_dashboard: false
+    log_to_driver: false
+    num_cpus: 8
+
+# Evaluation settings
+evaluation:
+  num_test_samples: 5000

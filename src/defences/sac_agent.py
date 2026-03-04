@@ -66,6 +66,11 @@ class BetaPolicyNetwork(nn.Module):
         self.shared = _mlp([state_dim] + hidden_dims, activation=nn.ReLU)
         self.alpha_head = nn.Linear(hidden_dims[-1], action_dim)
         self.beta_head = nn.Linear(hidden_dims[-1], action_dim)
+        # Optimistic initialisation: bias the Beta toward high weights initially.
+        # Target mode = (α-1)/(α+β-2) ≈ 0.8  →  α≈5, β≈2
+        # softplus(4.0) + 1 ≈ 5.02  |  softplus(0.54) + 1 ≈ 2.02
+        nn.init.constant_(self.alpha_head.bias, 4.0)
+        nn.init.constant_(self.beta_head.bias, 0.54)
 
     def forward(self, state: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         h = self.shared(state)

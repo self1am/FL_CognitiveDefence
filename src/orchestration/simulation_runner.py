@@ -207,6 +207,7 @@ class SimulationRunner:
                 buffer_capacity=defence_config.buffer_capacity,
                 batch_size=defence_config.batch_size,
                 device=defence_config.device,
+                warmup_rounds=defence_config.warmup_rounds,
                 logger=self.logger,
                 evaluate_fn=evaluate_fn,
                 min_fit_clients=self.experiment_config.min_clients,
