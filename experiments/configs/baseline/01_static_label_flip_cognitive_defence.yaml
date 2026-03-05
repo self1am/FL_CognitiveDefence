@@ -5,7 +5,7 @@
 # =============================================================================
 experiment:
   experiment_name: "static_label_flip_cognitive_defence"
-  seed: 123
+  seed: 321
   num_rounds: 30
   min_clients: 20
   min_available_clients: 20
