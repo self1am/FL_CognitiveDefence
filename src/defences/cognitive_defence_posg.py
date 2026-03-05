@@ -197,6 +197,8 @@ class CognitiveDefencePOSG(Basedefence):
         self._active_client_ids: List[str] = []
         self._client_slot_map: Dict[str, int] = {}  # client_id → slot index
         self._round_diagnostics: deque = deque(maxlen=history_size)
+        # Cache of flattened updates for the current round (used by warmup heuristic)
+        self._current_flattened_updates: Dict[str, np.ndarray] = {}
 
     # ------------------------------------------------------------------
     # Slot management (maps variable client IDs → fixed-size vectors)
@@ -232,6 +234,7 @@ class CognitiveDefencePOSG(Basedefence):
             5  num_samples      – local dataset size (normalised)
         """
         observations: Dict[str, np.ndarray] = {}
+        self._current_flattened_updates = {}  # reset each round
 
         # Normalisation reference for num_samples
         sample_counts = [ns for _, (_, ns, _) in client_updates.items()]
@@ -258,6 +261,7 @@ class CognitiveDefencePOSG(Basedefence):
                 dtype=np.float32,
             )
             observations[client_id] = obs
+            self._current_flattened_updates[client_id] = flat
 
         return observations
 
@@ -301,18 +305,46 @@ class CognitiveDefencePOSG(Basedefence):
         self, observations: Dict[str, np.ndarray]
     ) -> Dict[str, float]:
         """
-        Norm z-score heuristic used during warm-up rounds.
+        Direction-aware heuristic used during warm-up rounds.
 
-        Clients whose Fisher-trace z-score > 2.0 are down-weighted to 0.1;
-        others receive weight 1.0.  This mirrors the original OODA defence
-        and keeps learning stable while the SAC buffer fills.
+        Combines two signals:
+        1. **Fisher-trace z-score** — flags magnitude outliers.
+        2. **Cosine similarity to the coordinate-wise median update** — flags
+           direction outliers.  DynOpt-style attacks normalise their gradient
+           *magnitudes* to evade norm-only heuristics but must point in an
+           adversarial *direction*, so they appear as low-cosine outliers.
+
+        Clients flagged by *either* signal receive weight 0.1.
         """
-        fisher_vals = np.array([obs[4] for obs in observations.values()], dtype=np.float64)
+        cids = list(observations.keys())
+
+        # ── Signal 1: Fisher-trace z-score ──────────────────────────────────
+        fisher_vals = np.array([observations[c][4] for c in cids], dtype=np.float64)
         mean_f, std_f = fisher_vals.mean(), fisher_vals.std() + 1e-8
+
+        # ── Signal 2: Cosine similarity to the coordinate-wise median ───────
+        cos_outlier: Dict[str, bool] = {c: False for c in cids}
+        flats = [self._current_flattened_updates.get(c) for c in cids]
+        if all(f is not None for f in flats) and len(flats) > 1:
+            stacked = np.vstack(flats).astype(np.float64)  # (N, D)
+            median_update = np.median(stacked, axis=0)      # (D,)
+            median_norm = float(np.linalg.norm(median_update))
+            cos_sims = np.array([
+                _cosine_similarity(flats[i], median_update) if median_norm > 1e-8 else 0.0
+                for i in range(len(cids))
+            ])
+            mean_cs, std_cs = cos_sims.mean(), cos_sims.std() + 1e-8
+            for i, cid in enumerate(cids):
+                # Low cosine similarity = pointing away from the majority
+                cos_outlier[cid] = float((cos_sims[i] - mean_cs) / std_cs) < -2.0
+
         weights: Dict[str, float] = {}
-        for cid, obs in observations.items():
-            z = abs(obs[4] - mean_f) / std_f
-            weights[cid] = 0.1 if z > 2.0 else 1.0
+        for i, cid in enumerate(cids):
+            fisher_z = abs(fisher_vals[i] - mean_f) / std_f
+            if fisher_z > 2.0 or cos_outlier[cid]:
+                weights[cid] = 0.1
+            else:
+                weights[cid] = 1.0
         return weights
 
     def decide(
@@ -437,10 +469,36 @@ class CognitiveDefencePOSG(Basedefence):
             }
 
         if weighted_updates and total_weight > 0:
-            num_params = len(weighted_updates[0][0])
+            # ── Median-norm clipping ─────────────────────────────────────────
+            # Cap each update's L2 norm to the per-round median norm.  This
+            # bounds Byzantine amplification independent of detection accuracy.
+            update_norms = [
+                float(np.linalg.norm(_flatten(params)))
+                for params, _ in weighted_updates
+            ]
+            clip_norm = float(np.median(update_norms))
+            clipped_updates: List[Tuple[List[np.ndarray], float]] = []
+            for params, w in weighted_updates:
+                flat = _flatten(params)
+                n = float(np.linalg.norm(flat))
+                if n > clip_norm + 1e-8:
+                    scale = clip_norm / n
+                    shapes = [p.shape for p in params]
+                    flat_c = flat * scale
+                    reconstructed: List[np.ndarray] = []
+                    offset = 0
+                    for shape in shapes:
+                        size = int(np.prod(shape))
+                        reconstructed.append(flat_c[offset: offset + size].reshape(shape))
+                        offset += size
+                    clipped_updates.append((reconstructed, w))
+                else:
+                    clipped_updates.append((params, w))
+            # ─────────────────────────────────────────────────────────────────
+            num_params = len(clipped_updates[0][0])
             aggregated_params: List[np.ndarray] = []
             for idx in range(num_params):
-                weighted_sum = sum(p[idx] * w for p, w in weighted_updates)
+                weighted_sum = sum(p[idx] * w for p, w in clipped_updates)
                 aggregated_params.append(weighted_sum / total_weight)
         else:
             aggregated_params = None
