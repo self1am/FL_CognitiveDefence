@@ -68,6 +68,39 @@ def _fisher_information_trace(update: List[np.ndarray]) -> float:
 
 
 # ======================================================================
+# Online Welford normalizer
+# ======================================================================
+
+class _WelfordNormalizer:
+    """
+    Incremental mean/variance tracker (Welford 1962) for observation normalization.
+
+    Maintains per-feature running statistics so that every feature fed to the
+    GRU has roughly zero mean and unit variance – crucial for stable gradient
+    flow when feature scales span orders of magnitude (e.g. Fisher-trace vs
+    normalized sample-count).
+    """
+
+    def __init__(self, dim: int):
+        self.n = 0
+        self.mean = np.zeros(dim, dtype=np.float64)
+        self.M2 = np.ones(dim, dtype=np.float64)   # initialise to 1 so std≥1 before any data
+
+    def update(self, x: np.ndarray) -> None:
+        self.n += 1
+        delta = x - self.mean
+        self.mean += delta / self.n
+        self.M2 += delta * (x - self.mean)
+
+    def normalize(self, x: np.ndarray) -> np.ndarray:
+        """Return z-scored x; safe (1e-6 floor on std)."""
+        if self.n < 2:
+            return x.astype(np.float32)
+        std = np.sqrt(self.M2 / self.n) + 1e-6
+        return ((x - self.mean) / std).astype(np.float32)
+
+
+# ======================================================================
 # Reward helpers
 # ======================================================================
 
@@ -158,17 +191,27 @@ class CognitiveDefencePOSG(Basedefence):
         self.max_clients = max_clients
         self.obs_dim = obs_dim
         self.device = device
+        self._belief_hidden_dim = belief_hidden_dim
 
         # Reward coefficients
         self.reward_alpha = reward_alpha
         self.reward_beta = reward_beta
         self.reward_gamma = reward_gamma
 
+        # ---- Online observation normalizer (Welford) ----
+        # Normalizes the 6-dim observation before GRU input, ensuring stable
+        # gradient flow regardless of model/dataset-dependent feature scales.
+        self._obs_norm = _WelfordNormalizer(obs_dim)
+
         # ---- Belief tracker (GRU) ----
         self.tracker = ClientTracker(obs_dim=obs_dim, hidden_dim=belief_hidden_dim)
 
         # ---- SAC agent ----
-        state_dim = max_clients * belief_hidden_dim
+        # Compact state: [mean_belief || std_belief] over active clients only.
+        # Dimension = 2 * hidden_dim, independent of max_clients.
+        # This replaces the naive max_clients*hidden_dim concatenation which
+        # was 6400-dimensional and almost entirely zeros — killing learning.
+        state_dim = 2 * belief_hidden_dim
         action_dim = max_clients
         sac_hidden_dims = sac_hidden_dims or [256, 256]
 
@@ -256,10 +299,13 @@ class CognitiveDefencePOSG(Basedefence):
 
             fisher = _fisher_information_trace(parameters)
 
-            obs = np.array(
+            raw_obs = np.array(
                 [total_norm, avg_norm, max_norm, cos_sim, fisher, num_samples / max_samples],
-                dtype=np.float32,
+                dtype=np.float64,
             )
+            # Update running statistics and normalize
+            self._obs_norm.update(raw_obs)
+            obs = self._obs_norm.normalize(raw_obs)
             observations[client_id] = obs
             self._current_flattened_updates[client_id] = flat
 
@@ -289,12 +335,18 @@ class CognitiveDefencePOSG(Basedefence):
             belief = self.tracker.update(cid, obs_t)
             beliefs[cid] = belief
 
-        # Build fixed-size state: zero-pad unused slots
-        all_slots = [torch.zeros(self.tracker.hidden_dim)] * self.max_clients
-        for cid, slot_idx in self._client_slot_map.items():
-            all_slots[slot_idx] = self.tracker.get_belief(cid)
-
-        state = torch.cat(all_slots, dim=-1).detach().cpu().numpy()
+        # ---- Compact state: [mean_belief || std_belief] over active clients ----
+        # Motivation: the naive max_clients×hidden_dim concatenation produces a
+        # 6400-dim vector almost entirely zeros for sparse participation, which
+        # drowns the gradient signal.  The sufficient statistic of the belief
+        # distribution — its first two moments — is only 2×hidden_dim = 128-dim
+        # and is always dense regardless of how many clients are active.
+        b_stack = torch.stack(
+            [beliefs[cid] for cid in self._active_client_ids], dim=0
+        )  # (n_active, hidden_dim)
+        mean_b = b_stack.mean(dim=0)            # (hidden_dim,)
+        std_b = b_stack.std(dim=0) + 1e-6       # (hidden_dim,)
+        state = torch.cat([mean_b, std_b], dim=-1).detach().cpu().numpy()  # (2*hidden_dim,)
         return beliefs, state
 
     # ------------------------------------------------------------------
@@ -305,44 +357,60 @@ class CognitiveDefencePOSG(Basedefence):
         self, observations: Dict[str, np.ndarray]
     ) -> Dict[str, float]:
         """
-        Direction-aware heuristic used during warm-up rounds.
+        FLTrust-inspired pairwise cosine scoring for warm-up rounds.
 
-        Combines two signals:
-        1. **Fisher-trace z-score** — flags magnitude outliers.
-        2. **Cosine similarity to the coordinate-wise median update** — flags
-           direction outliers.  DynOpt-style attacks normalise their gradient
-           *magnitudes* to evade norm-only heuristics but must point in an
-           adversarial *direction*, so they appear as low-cosine outliers.
+        **Why previous heuristics failed against DynOpt:**
+        - Fischer-trace z-score: DynOpt at intensity=0.05 produces updates with
+          magnitude 0.05×||param||, well within ±2σ of the benign distribution.
+        - Cosine-to-median: with ≥30% Byzantine, the coordinate-wise median is
+          itself corrupted, so attacker cosine-sim to the corrupted median is
+          high (not low), defeating the signal.
 
-        Clients flagged by *either* signal receive weight 0.1.
+        **This heuristic (from FLTrust, Wu et al. 2022, NDSS):**
+        1. Normalize each update to unit length (removes magnitude as a variable).
+        2. Score each client i by the average pairwise cosine similarity to the
+           n−f nearest other clients (leave-one-out, f = expected Byzantine count).
+        3. Clients whose score is below the (f+1)-th percentile get weight
+           proportional to their score via ReLU clipping (soft thresholding).
+
+        This is robust up to f < n/2 Byzantine clients (Blanchard 2017 bound).
         """
         cids = list(observations.keys())
-
-        # ── Signal 1: Fisher-trace z-score ──────────────────────────────────
-        fisher_vals = np.array([observations[c][4] for c in cids], dtype=np.float64)
-        mean_f, std_f = fisher_vals.mean(), fisher_vals.std() + 1e-8
-
-        # ── Signal 2: Cosine similarity to the coordinate-wise median ───────
-        cos_outlier: Dict[str, bool] = {c: False for c in cids}
+        n = len(cids)
         flats = [self._current_flattened_updates.get(c) for c in cids]
-        if all(f is not None for f in flats) and len(flats) > 1:
-            stacked = np.vstack(flats).astype(np.float64)  # (N, D)
-            median_update = np.median(stacked, axis=0)      # (D,)
-            median_norm = float(np.linalg.norm(median_update))
-            cos_sims = np.array([
-                _cosine_similarity(flats[i], median_update) if median_norm > 1e-8 else 0.0
-                for i in range(len(cids))
-            ])
-            mean_cs, std_cs = cos_sims.mean(), cos_sims.std() + 1e-8
-            for i, cid in enumerate(cids):
-                # Low cosine similarity = pointing away from the majority
-                cos_outlier[cid] = float((cos_sims[i] - mean_cs) / std_cs) < -2.0
 
+        if not all(f is not None for f in flats) or n < 3:
+            return {c: 1.0 for c in cids}
+
+        # ── Step 1: L2-normalize all updates ────────────────────────────────
+        norms = np.array([float(np.linalg.norm(f)) for f in flats])
+        unit_flats = [
+            flats[i] / (norms[i] + 1e-12) for i in range(n)
+        ]
+
+        # ── Step 2: Full pairwise cosine similarity matrix ───────────────────
+        # G[i,j] = cos(unit_flat[i], unit_flat[j])
+        mat = np.vstack(unit_flats).astype(np.float64)   # (n, D)
+        G = mat @ mat.T                                    # (n, n)
+
+        # ── Step 3: Leave-one-out score = average cosine to the k nearest ────
+        # k = n - f - 1, f ≈ 30% of participants (conservative)
+        f_est = max(1, int(np.ceil(0.30 * n)))
+        k = max(1, n - f_est - 1)
+        scores = np.zeros(n)
+        for i in range(n):
+            # Sort cosines, skip self (diagonal), take top-k
+            row = np.delete(G[i], i)
+            top_k = np.sort(row)[::-1][:k]
+            scores[i] = float(top_k.mean())
+
+        # ── Step 4: Soft thresholding — ReLU(score) / max_score ──────────────
+        # Clients with negative mean cosine to the majority are hard-zeroed.
+        max_score = scores.max()
         weights: Dict[str, float] = {}
         for i, cid in enumerate(cids):
-            fisher_z = abs(fisher_vals[i] - mean_f) / std_f
-            if fisher_z > 2.0 or cos_outlier[cid]:
-                weights[cid] = 0.1
+            if max_score > 1e-8:
+                weights[cid] = float(max(0.0, scores[i]) / max_score)
             else:
                 weights[cid] = 1.0
         return weights
