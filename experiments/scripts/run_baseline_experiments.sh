@@ -44,7 +44,7 @@ CONFIGS=(
     "04_adaptive_min_max_krum_defence.yaml" //
     "04_adaptive_min_max_trimmed_mean_defence.yaml"
     "04_adaptive_min_max_vert_defence.yaml" //
-    "05_adaptive_min_sum_no_defence.yaml"
+    "05_adaptive_min_sum_no_defence.yaml" 
     "05_adaptive_min_sum_cognitive_defence.yaml"
     "05_adaptive_min_sum_krum_defence.yaml"
     "05_adaptive_min_sum_trimmed_mean_defence.yaml"

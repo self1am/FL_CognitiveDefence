@@ -159,16 +159,16 @@ class CognitiveDefencePOSG(Basedefence):
         obs_dim: int = 6,
         belief_hidden_dim: int = 64,
         sac_hidden_dims: list[int] | None = None,
-        lr: float = 3e-4,
-        gamma: float = 0.99,
-        reward_alpha: float = 1.0,
-        reward_beta: float = 0.3,
+        lr: float = 1e-3,  # Increased from 3e-4 for faster convergence
+        gamma: float = 0.95,  # Reduced from 0.99 for medium-horizon rewards
+        reward_alpha: float = 10.0,  # Increased from 1.0 to emphasize accuracy
+        reward_beta: float = 0.05,  # Reduced from 0.3 to decrease uncertainty penalty
         reward_gamma: float = 0.2,
-        buffer_capacity: int = 50_000,
-        batch_size: int = 64,
+        buffer_capacity: int = 1000,  # Reduced from 50k to match realistic sample count
+        batch_size: int = 16,  # Reduced from 64 to allow updates with small buffer
         device: str = "cpu",
         history_size: int = 200,
-        warmup_rounds: int = 5,
+        warmup_rounds: int = 10,  # Extended from 5 for better SAC initialization
     ):
         """
         Parameters
@@ -237,6 +237,10 @@ class CognitiveDefencePOSG(Basedefence):
         self._prev_state: Optional[np.ndarray] = None
         self._prev_action: Optional[np.ndarray] = None
         self._prev_val_acc: Optional[float] = None
+        # Reward stabilization: exponential moving average of validation accuracy
+        self._acc_ema: float = 0.0
+        self._prev_acc_ema: float = 0.0  # Previous EMA for delta calculation
+        self._acc_ema_alpha: float = 0.3  # Smoothing factor (0.3 = fast adaptation)
         self._active_client_ids: List[str] = []
         self._client_slot_map: Dict[str, int] = {}  # client_id → slot index
         self._round_diagnostics: deque = deque(maxlen=history_size)
@@ -357,23 +361,21 @@ class CognitiveDefencePOSG(Basedefence):
         self, observations: Dict[str, np.ndarray]
     ) -> Dict[str, float]:
         """
-        FLTrust-inspired pairwise cosine scoring for warm-up rounds.
+        Multi-Krum scoring for Byzantine-robust client selection.
 
-        **Why previous heuristics failed against DynOpt:**
-        - Fischer-trace z-score: DynOpt at intensity=0.05 produces updates with
-          magnitude 0.05×||param||, well within ±2σ of the benign distribution.
-        - Cosine-to-median: with ≥30% Byzantine, the coordinate-wise median is
-          itself corrupted, so attacker cosine-sim to the corrupted median is
-          high (not low), defeating the signal.
+        **Why we replaced FLTrust-cosine:**
+        - FLTrust fails when Byzantine fraction ≥ 30% (corrupts the majority)
+        - Cosine similarity is vulnerable to coordinated direction attacks
+        - Distance-based methods (Krum) are provably robust up to f < n/2
 
-        **This heuristic (from FLTrust, Wu et al. 2022, NDSS):**
-        1. Normalize each update to unit length (removes magnitude as a variable).
-        2. Score each client i by the average pairwise cosine similarity to the
-           n−f nearest other clients (leave-one-out, f = expected Byzantine count).
-        3. Clients whose score is below the (f+1)-th percentile get weight
-           proportional to their score via ReLU clipping (soft thresholding).
+        **Multi-Krum Algorithm (Blanchard et al., 2017):**
+        1. Compute pairwise L2 distances between all client updates
+        2. For each client i, sum distances to m nearest neighbors (m = n-f-2)
+        3. Select clients with smallest scores (closest to majority cluster)
+        4. Assign high weight to selected, low weight to isolated
 
-        This is robust up to f < n/2 Byzantine clients (Blanchard 2017 bound).
+        **Theoretical guarantee**: Robust to f < n/2 Byzantine clients.
+        With 40% Byzantine (f=0.4n < 0.5n), this should correctly isolate.
         """
         cids = list(observations.keys())
         n = len(cids)
@@ -382,37 +384,47 @@ class CognitiveDefencePOSG(Basedefence):
         if not all(f is not None for f in flats) or n < 3:
             return {c: 1.0 for c in cids}
 
-        # ── Step 1: L2-normalize all updates ────────────────────────────────
-        norms = np.array([float(np.linalg.norm(f)) for f in flats])
-        unit_flats = [
-            flats[i] / (norms[i] + 1e-12) for i in range(n)
-        ]
+        # ── Step 1: Estimate Byzantine fraction (conservative: 40%) ──────────
+        f_est = max(1, int(np.ceil(0.40 * n)))
+        m = max(1, n - f_est - 2)  # Number of nearest neighbors to consider
 
-        # ── Step 2: Full pairwise cosine similarity matrix ───────────────────
-        # G[i,j] = cos(unit_flat[i], unit_flat[j])
-        mat = np.vstack(unit_flats).astype(np.float64)   # (n, D)
-        G = mat @ mat.T                                    # (n, n)
+        # ── Step 2: Compute pairwise distance matrix ──────────────────────────
+        # D[i,j] = ||update_i - update_j||_2^2
+        mat = np.vstack([flats[i].astype(np.float64) for i in range(n)])
+        D = np.zeros((n, n), dtype=np.float64)
+        for i in range(n):
+            for j in range(i + 1, n):
+                dist_sq = float(np.sum((mat[i] - mat[j]) ** 2))
+                D[i, j] = dist_sq
+                D[j, i] = dist_sq
 
-        # ── Step 3: Leave-one-out score = average cosine to the k nearest ────
-        # k = n - f - 1, f ≈ 30% of participants (conservative)
-        f_est = max(1, int(np.ceil(0.30 * n)))
-        k = max(1, n - f_est - 1)
+        # ── Step 3: Krum score = sum of distances to m nearest neighbors ─────
         scores = np.zeros(n)
         for i in range(n):
-            # Sort cosines, skip self (diagonal), take top-k
-            row = np.delete(G[i], i)
-            top_k = np.sort(row)[::-1][:k]
-            scores[i] = float(top_k.mean())
+            distances = np.delete(D[i], i)  # Remove self-distance (0)
+            distances_sorted = np.sort(distances)
+            scores[i] = np.sum(distances_sorted[:m])
 
-        # ── Step 4: Soft thresholding — ReLU(score) / max_score ──────────────
-        # Clients with negative mean cosine to the majority are hard-zeroed.
-        max_score = scores.max()
+        # ── Step 4: Select n-f-2 clients with lowest scores (most consensus) ──
+        n_select = max(1, n - f_est - 2)
+        selected_indices = np.argsort(scores)[:n_select]
+
+        # ── Step 5: Assign weights ────────────────────────────────────────────
         weights: Dict[str, float] = {}
-        for i, cid in enumerate(cids):
-            if max_score > 1e-8:
-                weights[cid] = float(max(0.0, scores[i]) / max_score)
+        num_isolated = 0
+        for idx, cid in enumerate(cids):
+            if idx in selected_indices:
+                weights[cid] = 1.0  # Trusted (in majority cluster)
             else:
-                weights[cid] = 1.0
+                weights[cid] = 0.1  # Isolated (likely Byzantine)
+                num_isolated += 1
+
+        # Log selection stats for debugging
+        logger.debug(
+            f"Multi-Krum: {n_select}/{n} selected, {num_isolated} isolated "
+            f"(f_est={f_est}, m={m})"
+        )
+
         return weights
 
     def decide(
@@ -617,6 +629,20 @@ class CognitiveDefencePOSG(Basedefence):
 
         # 5. RL Learning step -------------------------------------------------
         if val_acc is not None and self._prev_state is not None:
+            # ── Update exponential moving average of accuracy ────────────────────
+            if self.round_number == 1:
+                self._acc_ema = val_acc
+                self._prev_acc_ema = val_acc
+            else:
+                self._prev_acc_ema = self._acc_ema
+                self._acc_ema = (
+                    self._acc_ema_alpha * val_acc +
+                    (1.0 - self._acc_ema_alpha) * self._acc_ema
+                )
+
+            # Compute smoothed accuracy change (reduces noise in reward signal)
+            delta_acc_smoothed = self._acc_ema - self._prev_acc_ema
+
             # Compute model divergence
             if aggregated_params is not None and self._global_model_flat is not None:
                 new_flat = _flatten(aggregated_params)
@@ -631,14 +657,12 @@ class CognitiveDefencePOSG(Basedefence):
                 self.tracker.belief_entropy(self._active_client_ids).item()
             )
 
-            reward = compute_reward(
-                val_acc_before=self._prev_val_acc or 0.0,
-                val_acc_after=val_acc,
-                belief_entropy=belief_ent,
-                model_divergence=divergence,
-                alpha=self.reward_alpha,
-                beta=self.reward_beta,
-                gamma=self.reward_gamma,
+            # Compute reward with smoothed accuracy and adjusted coefficients
+            # Using delta_acc_smoothed instead of raw accuracy difference
+            reward = (
+                self.reward_alpha * delta_acc_smoothed -  # 10.0 * Δacc_smooth
+                self.reward_beta * belief_ent -           # 0.05 * H(belief)
+                self.reward_gamma * divergence            # 0.2 * ||Δθ||
             )
 
             self.agent.store_transition(
@@ -651,11 +675,16 @@ class CognitiveDefencePOSG(Basedefence):
 
             update_info = self.agent.update()
             if update_info is not None:
+                # Clip GRU gradients to prevent explosion from noisy observations
+                torch.nn.utils.clip_grad_norm_(self.tracker.parameters(), max_norm=1.0)
+
                 logger.debug(
-                    "SAC update – critic=%.4f actor=%.4f α=%.4f",
+                    "SAC update – critic=%.4f actor=%.4f α=%.4f (reward=%.4f, Δacc_smooth=%.4f)",
                     update_info["critic_loss"],
                     update_info["actor_loss"],
                     update_info["alpha"],
+                    reward,
+                    delta_acc_smoothed,
                 )
 
         # 6. Book-keeping for next round --------------------------------------

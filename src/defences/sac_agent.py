@@ -226,7 +226,10 @@ class SACAgent:
         self.critic_optim = torch.optim.Adam(self.critic.parameters(), lr=lr_critic)
 
         # Automatic entropy tuning
-        self.target_entropy = -float(action_dim)  # heuristic: -dim(A)
+        # Reduced target entropy for adversarial setting (less exploration)
+        # Original: -dim(A) = -100 for 100 clients → excessive exploration
+        # New: -0.1*dim(A) = -10 → focus on exploitation of known strategies
+        self.target_entropy = -0.1 * float(action_dim)
         self.log_alpha = torch.tensor(math.log(init_alpha), requires_grad=True, device=self.device)
         self.alpha_optim = torch.optim.Adam([self.log_alpha], lr=lr_alpha)
 
@@ -278,11 +281,14 @@ class SACAgent:
     # Learning
     # ------------------------------------------------------------------
 
-    def update(self, min_buffer_size: int = 256) -> Optional[dict]:
+    def update(self, min_buffer_size: int = 32) -> Optional[dict]:
         """
         Perform a single SAC gradient step if the buffer is large enough.
 
         Returns a dict of loss metrics or ``None`` if the buffer is too small.
+        
+        Note: min_buffer_size reduced from 256 to 32 to allow updates with
+        small replay buffers in few-round FL experiments.
         """
         if len(self.replay) < max(self.batch_size, min_buffer_size):
             return None
