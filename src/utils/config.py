@@ -88,6 +88,20 @@ class defenceConfig:
     learning_rate: float = 0.01
     min_history_rounds: int = 3
     
+    # CogDef v2 parameters
+    direction_weight: float = 0.40
+    norm_weight: float = 0.15
+    cluster_weight: float = 0.25
+    temporal_weight: float = 0.20
+    initial_reputation: float = 0.5
+    recovery_rate: float = 0.03
+    penalty_severity: float = 0.8
+    yellow_threshold: float = 0.3
+    orange_threshold: float = 0.6
+    red_threshold: float = 0.8
+    clip_multiplier: float = 2.0
+    enable_mape_k: bool = True
+
     # POSG/SAC defense parameters
     max_clients: int = 100
     obs_dim: int = 6

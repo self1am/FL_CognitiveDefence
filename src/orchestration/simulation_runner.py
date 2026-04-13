@@ -20,6 +20,7 @@ from ..attacks.dny_opt_attack import DnyOptAttack
 from ..attacks.min_max_attack import MinMaxAttack
 from ..attacks.min_sum_attack import MinSumAttack
 from ..server.cognitive_server import CognitiveAggregationStrategy
+from ..server.cognitive_server_v2 import CognitiveAggregationStrategyV2
 from ..server.cognitive_defence_posg_server import POSGAggregationStrategy
 from ..server.no_defence_server import NoDefenceAggregationStrategy
 from ..server.krum_server import KrumAggregationStrategy
@@ -184,6 +185,31 @@ class SimulationRunner:
                 config=self.experiment_config,
                 anomaly_threshold=defence_config.anomaly_threshold,
                 reputation_decay=defence_config.reputation_decay,
+                history_size=defence_config.history_size,
+                logger=self.logger,
+                evaluate_fn=evaluate_fn,
+                min_fit_clients=self.experiment_config.min_clients,
+                min_evaluate_clients=self.experiment_config.min_clients,
+                min_available_clients=self.experiment_config.min_available_clients,
+                fraction_evaluate=1.0,
+            )
+        if defence_config.strategy == 'cognitive_defence_v2':
+            return CognitiveAggregationStrategyV2(
+                config=self.experiment_config,
+                anomaly_threshold=defence_config.anomaly_threshold,
+                direction_weight=defence_config.direction_weight,
+                norm_weight=defence_config.norm_weight,
+                cluster_weight=defence_config.cluster_weight,
+                temporal_weight=defence_config.temporal_weight,
+                initial_reputation=defence_config.initial_reputation,
+                recovery_rate=defence_config.recovery_rate,
+                penalty_severity=defence_config.penalty_severity,
+                yellow_threshold=defence_config.yellow_threshold,
+                orange_threshold=defence_config.orange_threshold,
+                red_threshold=defence_config.red_threshold,
+                clip_multiplier=defence_config.clip_multiplier,
+                trim_beta=defence_config.beta,
+                enable_mape_k=defence_config.enable_mape_k,
                 history_size=defence_config.history_size,
                 logger=self.logger,
                 evaluate_fn=evaluate_fn,
