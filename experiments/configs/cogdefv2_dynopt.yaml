@@ -3,7 +3,7 @@
 experiment:
   experiment_name: "cogdefv2_dynopt"
   seed: 42
-  num_rounds: 20
+  num_rounds: 30
   min_clients: 20
   min_available_clients: 20
   server_address: "localhost:8080"

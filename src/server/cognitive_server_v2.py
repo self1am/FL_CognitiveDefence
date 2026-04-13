@@ -164,8 +164,10 @@ class CognitiveAggregationStrategyV2(fl.server.strategy.FedAvg):
         result = super().evaluate(server_round, parameters)
         if result is not None:
             loss, metrics = result
-            if 'accuracy' in metrics:
-                self._last_accuracy = metrics['accuracy']
+            # evaluate_fn returns 'centralized_accuracy'; check both keys for robustness
+            accuracy = metrics.get('centralized_accuracy') or metrics.get('accuracy')
+            if accuracy is not None:
+                self._last_accuracy = accuracy
         return result
 
     def get_round_logs(self) -> List[Dict[str, Any]]:

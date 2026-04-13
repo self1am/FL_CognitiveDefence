@@ -972,16 +972,20 @@ class CognitiveDefenceV2(Basedefence):
 
         # Plan: adjust weights
         if trend < -0.005 and avg_flagged < 0.2:
-            # Accuracy dropping but few clients flagged → detectors too lenient
-            # Increase direction weight (most discriminative)
+            # Accuracy declining AND fewer than 20% of clients flagged
+            # → detectors are too lenient, missing real attackers
+            # Increase direction weight (most discriminative signal)
             self.detector_weights['direction'] = min(
                 0.6, self.detector_weights['direction'] + 0.02
             )
             self.anomaly_threshold = max(0.3, self.anomaly_threshold - 0.02)
 
-        elif trend > 0.005 and avg_flagged > 0.4:
-            # Accuracy rising but many flagged → possible false positives
-            # Relax thresholds slightly
+        elif trend > 0.005 and avg_flagged > 0.6:
+            # Accuracy rising AND more than 60% of clients flagged
+            # → likely false positives inflating the count; relax slightly.
+            # Threshold raised from 0.4 → 0.6: with legitimate 40% attack
+            # fractions, avg_flagged sits at ~0.40 while accuracy is healthy
+            # (defence working correctly) — we must not confuse that with FPs.
             self.anomaly_threshold = min(0.7, self.anomaly_threshold + 0.01)
 
         # Renormalize weights
@@ -1023,7 +1027,7 @@ class CognitiveDefenceV2(Basedefence):
             num_clients=len(client_updates),
             num_flagged=sum(
                 1 for a in analysis.values()
-                if a['client_threat'] in (ThreatLevel.ORANGE, ThreatLevel.RED)
+                if a['client_threat'] in (ThreatLevel.YELLOW, ThreatLevel.ORANGE, ThreatLevel.RED)
             ),
             num_rejected=sum(
                 1 for d in decisions.values()
