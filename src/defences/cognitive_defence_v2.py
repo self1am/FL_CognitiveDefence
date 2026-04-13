@@ -221,6 +221,33 @@ class CognitiveDefenceV2(Basedefence):
             y = y_new
         return y
 
+    def _majority_consensus(
+        self,
+        observations: Dict[str, Dict[str, Any]],
+        cluster_scores: Dict[str, float],
+    ) -> Optional[np.ndarray]:
+        """
+        Return the geometric median of the majority (honest) cluster's updates.
+
+        The cluster detector splits clients into a minority (attackers, score > 0)
+        and a majority (honest, score == 0).  When the split is detected, using
+        only the majority updates as the direction reference prevents attacker
+        gradients from corrupting the consensus — the root cause of the direction
+        detector's failure against label-flip attacks at high attack fractions.
+
+        Returns None when the cluster detector did not fire (all scores == 0),
+        so the caller keeps the existing all-clients geometric median unchanged.
+        """
+        if not any(s > 0.0 for s in cluster_scores.values()):
+            return None  # No cluster split detected — keep global consensus
+
+        majority_ids = [cid for cid, s in cluster_scores.items() if s == 0.0]
+        if len(majority_ids) < 3:
+            return None  # Too few clients to estimate a reliable direction
+
+        majority_flat = np.stack([observations[cid]['flattened'] for cid in majority_ids])
+        return self._geometric_median(majority_flat)
+
     # =================================================================
     # ORIENT — Multi-Detector Fusion
     # =================================================================
@@ -236,6 +263,15 @@ class CognitiveDefenceV2(Basedefence):
 
         # Cluster detector runs at population level before the per-client loop
         cluster_scores = self._detect_cluster_outliers(observations)
+
+        # If the cluster detector fired, recompute the consensus direction from
+        # the majority (honest) cluster only.  Without this, _detect_direction_anomaly
+        # uses a geometric median that is pulled ~40 % toward attacker updates,
+        # which suppresses the direction signal against label-flip style attacks.
+        majority_consensus = self._majority_consensus(observations, cluster_scores)
+        if majority_consensus is not None:
+            for obs_dict in observations.values():
+                obs_dict['consensus_direction'] = majority_consensus
 
         for client_id, obs in observations.items():
             profile = self._get_profile(client_id)
@@ -538,10 +574,14 @@ class CognitiveDefenceV2(Basedefence):
         decisions = {}
         explainable = []
 
-        # Count flagged clients for posture assessment
+        # Count flagged clients for posture assessment.
+        # Include YELLOW+ so that attacks detected at the lower threat tier
+        # (e.g. label-flip, which produces YELLOW scores) still trigger
+        # posture escalation.  Without this, the posture stays GREEN and
+        # peace-mode FedAvg is used regardless of how many clients are flagged.
         num_flagged = sum(
             1 for a in analysis.values()
-            if a['client_threat'] in (ThreatLevel.ORANGE, ThreatLevel.RED)
+            if a['client_threat'] in (ThreatLevel.YELLOW, ThreatLevel.ORANGE, ThreatLevel.RED)
         )
         flagged_fraction = num_flagged / max(len(analysis), 1)
         self._flagged_fraction_history.append(flagged_fraction)
@@ -556,13 +596,22 @@ class CognitiveDefenceV2(Basedefence):
 
             # Update reputation
             if client_threat in (ThreatLevel.ORANGE, ThreatLevel.RED):
-                # Penalize: multiply reputation by (1 - severity * score)
+                # Full penalty: severe and immediate
                 penalty = self.penalty_severity * fused_score
                 profile.reputation = max(0.0, profile.reputation * (1.0 - penalty))
                 profile.consecutive_flags += 1
                 profile.consecutive_clean = 0
+            elif client_threat == ThreatLevel.YELLOW:
+                # Light penalty: 30 % of full severity.
+                # Prevents reputation from growing while a client is persistently
+                # suspicious — without this, label-flip attackers at YELLOW get
+                # rewarded each round and their influence increases over time.
+                light_penalty = self.penalty_severity * 0.3 * fused_score
+                profile.reputation = max(0.0, profile.reputation * (1.0 - light_penalty))
+                profile.consecutive_flags += 1
+                profile.consecutive_clean = 0
             else:
-                # Reward: diminishing returns as reputation approaches 1.0
+                # GREEN: reward good behaviour
                 bonus = self.recovery_rate * (1.0 - profile.reputation)
                 profile.reputation = min(1.0, profile.reputation + bonus)
                 profile.consecutive_clean += 1
