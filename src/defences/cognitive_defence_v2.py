@@ -728,7 +728,14 @@ class CognitiveDefenceV2(Basedefence):
         self._rounds_since_escalation += 1
 
         # Escalation (fast)
-        if recent_avg >= 0.5:
+        # RED threshold is 0.35: with 40% malicious clients consistently
+        # detected (flagged_fraction = 0.40), the posture must reach RED so
+        # Multi-Krum (lockdown) is used instead of trimmed mean.  Trimmed
+        # mean at 20% beta trims only the extremes — coordinated attackers
+        # craft updates to land in the middle band and still influence the
+        # aggregate.  Multi-Krum selects the tightest cluster, which at
+        # 40% Byzantine fraction is the honest majority.
+        if recent_avg >= 0.35:
             self.threat_level = ThreatLevel.RED
             self._rounds_since_escalation = 0
         elif recent_avg >= self.attack_fraction_trigger:
@@ -865,10 +872,23 @@ class CognitiveDefenceV2(Basedefence):
         self,
         active_updates: Dict[str, Tuple[List[np.ndarray], int, Any, float]]
     ) -> Optional[List[np.ndarray]]:
-        """Mode 3: Trimmed mean on active (non-rejected) clients."""
+        """Mode 3: Reputation-weighted trimmed mean on active (non-rejected) clients.
+
+        For each parameter coordinate, clients are sorted by value and the top/
+        bottom trim_beta fraction are removed.  The remaining middle-band clients
+        are averaged weighted by their reputation × sample_count.
+
+        Why weights matter here: without them, a coordinated attacker group that
+        spreads its updates across the parameter range lands ~40%×(1-2β) of its
+        members in the middle band every round with full equal weight.  Reputation
+        weights ensure that clients penalised across many consecutive rounds have
+        proportionally lower influence even when they are not trimmed off.
+        """
         all_params = []
-        for client_id, (params, _, _, _) in active_updates.items():
+        all_weights = []
+        for client_id, (params, n_samples, _, rep_weight) in active_updates.items():
             all_params.append(params)
+            all_weights.append(rep_weight * n_samples)
 
         if not all_params:
             return None
@@ -876,16 +896,37 @@ class CognitiveDefenceV2(Basedefence):
         n = len(all_params)
         n_trim = int(np.floor(n * self.trim_beta))
         num_params = len(all_params[0])
+        w = np.array(all_weights, dtype=np.float64)  # (n,)
 
         aggregated = []
         for idx in range(num_params):
+            # stacked: (n, *param_shape)
             stacked = np.stack([p[idx] for p in all_params], axis=0)
-            sorted_params = np.sort(stacked, axis=0)
+            param_shape = stacked.shape[1:]
+            flat = stacked.reshape(n, -1)          # (n, d)
+            d = flat.shape[1]
+
+            # argsort along client axis — shape (n, d)
+            # sort_idx[rank, coord] = client_index at that rank for that coordinate
+            sort_idx = np.argsort(flat, axis=0)    # (n, d)
+
             if n_trim > 0 and n - 2 * n_trim > 0:
-                trimmed = sorted_params[n_trim:-n_trim]
+                band_idx = sort_idx[n_trim: n - n_trim, :]   # (n_keep, d)
             else:
-                trimmed = sorted_params
-            aggregated.append(np.mean(trimmed, axis=0))
+                band_idx = sort_idx                           # (n, d)
+
+            # Gather values and weights for the trimmed band
+            # band_vals[r, coord] = flat[band_idx[r, coord], coord]
+            coord_range = np.arange(d)
+            band_vals = flat[band_idx, coord_range]           # (n_keep, d)
+            band_w = w[band_idx]                              # (n_keep, d)
+
+            total_w = band_w.sum(axis=0)                      # (d,)
+            total_w = np.maximum(total_w, 1e-10)
+            result_flat = (band_vals * band_w).sum(axis=0) / total_w  # (d,)
+
+            aggregated.append(result_flat.reshape(param_shape) if param_shape else result_flat.item())
+
         return aggregated
 
     def _aggregate_lockdown(
