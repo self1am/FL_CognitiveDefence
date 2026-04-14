@@ -197,9 +197,27 @@ class CognitiveDefenceV2(Basedefence):
             }
             all_flattened.append(flat)
 
-        # Compute consensus direction (geometric median approximation via Weiszfeld)
+        # Compute per-round deltas: each client's deviation from the round mean.
+        #
+        # Why deltas and not full parameters:
+        #   Flower sends full model weights, not gradients.  In early rounds the
+        #   base model dominates all client vectors → cosine similarity ≈ 0.9999
+        #   for every client (honest and attacker alike), completely masking the
+        #   attack signal.  Subtracting the round mean removes the shared base
+        #   model component and leaves only the client-specific update direction.
+        #   Label-flip attackers then appear as a cluster pointing systematically
+        #   away from the honest mean, which both the direction detector and the
+        #   cluster detector can resolve.
         if all_flattened:
-            consensus = self._geometric_median(np.array(all_flattened))
+            mean_flat = np.mean(all_flattened, axis=0)
+            for client_id in observations:
+                observations[client_id]['delta'] = observations[client_id]['flattened'] - mean_flat
+
+            # Compute consensus direction on deltas (geometric median is
+            # still robust — a large minority of attackers cannot shift it
+            # more than their fraction allows)
+            all_deltas = np.stack([observations[cid]['delta'] for cid in observations])
+            consensus = self._geometric_median(all_deltas)
             for client_id in observations:
                 observations[client_id]['consensus_direction'] = consensus
 
@@ -245,7 +263,8 @@ class CognitiveDefenceV2(Basedefence):
         if len(majority_ids) < 3:
             return None  # Too few clients to estimate a reliable direction
 
-        majority_flat = np.stack([observations[cid]['flattened'] for cid in majority_ids])
+        majority_flat = np.stack([observations[cid].get('delta', observations[cid]['flattened'])
+                                  for cid in majority_ids])
         return self._geometric_median(majority_flat)
 
     # =================================================================
@@ -358,7 +377,10 @@ class CognitiveDefenceV2(Basedefence):
         if consensus is None:
             return 0.0
 
-        flat = obs['flattened']
+        # Use delta (deviation from round mean) so the base model does not
+        # dominate the direction comparison.  Fall back to full params only
+        # if delta is not available (shouldn't happen after observe()).
+        flat = obs.get('delta', obs['flattened'])
         norm_flat = np.linalg.norm(flat)
         norm_consensus = np.linalg.norm(consensus)
 
@@ -500,8 +522,12 @@ class CognitiveDefenceV2(Basedefence):
         if n < 6:
             return {cid: 0.0 for cid in client_ids}
 
-        # L2-normalise — angular clustering, magnitude-invariant
-        X = np.stack([observations[cid]['flattened'] for cid in client_ids])
+        # Use deltas for clustering — same reason as direction detector:
+        # full parameters are dominated by the shared base model and produce
+        # near-identical vectors for all clients.  Deltas isolate the client-
+        # specific update direction, making the attacker cluster visible.
+        X = np.stack([observations[cid].get('delta', observations[cid]['flattened'])
+                      for cid in client_ids])
         row_norms = np.linalg.norm(X, axis=1, keepdims=True)
         X = X / np.maximum(row_norms, 1e-10)
 
