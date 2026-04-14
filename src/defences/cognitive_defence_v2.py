@@ -242,14 +242,21 @@ class CognitiveDefenceV2(Basedefence):
             all_head_deltas = np.stack([observations[cid]['head_delta'] for cid in observations])
             head_consensus = self._geometric_median(all_head_deltas)
 
-            # Per-client head-delta norm and population convergence floor.
-            # The 20th-percentile norm is the "fastest converger" reference:
-            # as honest clients converge their norms drop toward this floor.
-            # A client whose norm stays large relative to the floor is resisting
-            # convergence — a strong late-round signal for persistent attackers.
+            # Per-client head-delta norm and population convergence reference.
+            # Use the MEDIAN (50th percentile) — the "typical converger" — not
+            # the 20th percentile (fastest converger).
+            #
+            # Why median, not 20th percentile:
+            #   Honest clients have a natural 5-10× spread between fast and slow
+            #   convergers.  With the 20th-pct floor an honest "slow" converger
+            #   has ratio = 0.10 / 0.01 = 10 → EMA = 10 → false-positive temporal
+            #   score of 1.0.  With the median, the same client has ratio ≈ 1-2×,
+            #   which stays below the 2.0 resistance threshold (see
+            #   _detect_convergence_resistance).  Attackers have ratio 5-25× the
+            #   median in late rounds, giving a clean separation.
             all_head_norms = np.array([np.linalg.norm(observations[cid]['head_delta'])
                                        for cid in observations])
-            pop_norm_floor = float(np.percentile(all_head_norms, 20))
+            pop_norm_floor = float(np.percentile(all_head_norms, 50))
 
             for client_id in observations:
                 observations[client_id]['consensus_direction'] = head_consensus
@@ -586,9 +593,9 @@ class CognitiveDefenceV2(Basedefence):
         log-normalised: ratio=1 → 0.0, ratio=10 → 1.0.
 
         Phase behaviour:
-          Early rounds: all norms are large and similar → ratio ≈ 1 → score ≈ 0
+          Early rounds: all norms large and similar → ratio ≈ 1 → below threshold → 0
           Mid rounds:   honest norms shrink; attacker norms stay large → ratio climbs
-          Late rounds:  ratio >> 1 for attackers → score → 1.0
+          Late rounds:  ratio > 2× for attackers → signal fires; honest ratio ≈ 1-1.5× → silent
 
         Does NOT interfere with DynOpt detection — DynOpt is already caught by
         direction + cluster from round 1.  This signal only becomes critical
@@ -601,10 +608,27 @@ class CognitiveDefenceV2(Basedefence):
             self._resistance_ema[client_id] = 1.0
             return 0.0
 
-        return float(np.clip(
-            np.log10(max(self._resistance_ema[client_id], 1.0)),
-            0.0, 1.0
-        ))
+        ema = self._resistance_ema[client_id]
+
+        # Threshold guard — only fire when the client's norm is > 2× the
+        # population median.  Natural honest-client variation keeps the ratio
+        # below 2× (slow converger ≈ 1.5× median, not 2×).  Label-flip
+        # attackers whose loss never converges reach 5-25× the median in
+        # late rounds, well above this gate.
+        #
+        # Without this guard, any honest client above the median accumulates
+        # a non-zero score through the EMA, eventually causing false positives
+        # that cascade into model poisoning (observed: 78/100 flagged at R16).
+        RESISTANCE_THRESHOLD = 2.0
+        if ema < RESISTANCE_THRESHOLD:
+            return 0.0
+
+        # Normalise so that:
+        #   ema = 2×  → score = 0.0  (just above gate, no signal)
+        #   ema = 4×  → score = log10(2) ≈ 0.30
+        #   ema = 10× → score = log10(5) ≈ 0.70
+        #   ema = 20× → score = log10(10) = 1.0  (hard cap)
+        return float(np.clip(np.log10(ema / RESISTANCE_THRESHOLD), 0.0, 1.0))
 
     def _detect_cluster_outliers(
         self, observations: Dict[str, Dict[str, Any]]
