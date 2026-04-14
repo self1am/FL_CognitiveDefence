@@ -183,43 +183,64 @@ class CognitiveDefenceV2(Basedefence):
         """
         observations = {}
         all_flattened = []
+        all_head_flat = []   # last-layer parameters only
 
         for client_id, (parameters, num_samples, metrics) in client_updates.items():
             flat = np.concatenate([p.flatten() for p in parameters])
             per_layer_norms = [float(np.linalg.norm(p)) for p in parameters]
             total_norm = float(np.linalg.norm(flat))
 
+            # Classification head = last parameter tensor (bias or weight of
+            # the final linear layer).  For label-flip attacks the adversarial
+            # signal is concentrated here — the conv/dense layers are largely
+            # label-agnostic and contribute only noise to a full-vector analysis.
+            head_flat = parameters[-1].flatten()
+
             observations[client_id] = {
                 'flattened': flat,
+                'head_flat': head_flat,
                 'per_layer_norms': per_layer_norms,
                 'total_norm': total_norm,
                 'num_samples': num_samples,
             }
             all_flattened.append(flat)
+            all_head_flat.append(head_flat)
 
-        # Compute per-round deltas: each client's deviation from the round mean.
-        #
-        # Why deltas and not full parameters:
-        #   Flower sends full model weights, not gradients.  In early rounds the
-        #   base model dominates all client vectors → cosine similarity ≈ 0.9999
-        #   for every client (honest and attacker alike), completely masking the
-        #   attack signal.  Subtracting the round mean removes the shared base
-        #   model component and leaves only the client-specific update direction.
-        #   Label-flip attackers then appear as a cluster pointing systematically
-        #   away from the honest mean, which both the direction detector and the
-        #   cluster detector can resolve.
+        # Full-parameter delta: removes the shared base model so that
+        # gradient-manipulation attacks (DynOpt, StatOpt, MinMax, MinSum)
+        # are visible — they perturb the full parameter space.
         if all_flattened:
             mean_flat = np.mean(all_flattened, axis=0)
             for client_id in observations:
                 observations[client_id]['delta'] = observations[client_id]['flattened'] - mean_flat
 
-            # Compute consensus direction on deltas (geometric median is
-            # still robust — a large minority of attackers cannot shift it
-            # more than their fraction allows)
-            all_deltas = np.stack([observations[cid]['delta'] for cid in observations])
-            consensus = self._geometric_median(all_deltas)
+        # Classification-head delta: the label-flip signal lives almost
+        # entirely in the last layer.  In the full-parameter delta it is
+        # diluted across tens-of-thousands of conv/fc dimensions; in the
+        # head delta it is the dominant signal.
+        #
+        # Why the full delta misses label flip:
+        #   Honest clients training on diverse IID data produce high-variance
+        #   conv gradients (spread across the sphere).  The geometric median
+        #   of all-client deltas ends up near zero — no clear consensus for
+        #   the direction detector to reference.  But in the head space all
+        #   honest clients push class boundaries in the *same correct*
+        #   direction; the attacker cluster pushing in the wrong direction is
+        #   immediately visible.
+        if all_head_flat:
+            mean_head = np.mean(all_head_flat, axis=0)
             for client_id in observations:
-                observations[client_id]['consensus_direction'] = consensus
+                observations[client_id]['head_delta'] = observations[client_id]['head_flat'] - mean_head
+
+            # Consensus computed on head deltas — geometric median is
+            # robust: 40 % attackers cannot pull it past the honest majority
+            all_head_deltas = np.stack([observations[cid]['head_delta'] for cid in observations])
+            head_consensus = self._geometric_median(all_head_deltas)
+            for client_id in observations:
+                # head_consensus is the reference for direction detection;
+                # full delta kept separately for cluster detection fallback
+                observations[client_id]['consensus_direction'] = head_consensus
+                observations[client_id]['cluster_delta'] = observations[client_id]['delta']
 
         return observations
 
@@ -263,7 +284,8 @@ class CognitiveDefenceV2(Basedefence):
         if len(majority_ids) < 3:
             return None  # Too few clients to estimate a reliable direction
 
-        majority_flat = np.stack([observations[cid].get('delta', observations[cid]['flattened'])
+        majority_flat = np.stack([observations[cid].get('head_delta',
+                                   observations[cid].get('delta', observations[cid]['flattened']))
                                   for cid in majority_ids])
         return self._geometric_median(majority_flat)
 
@@ -377,10 +399,11 @@ class CognitiveDefenceV2(Basedefence):
         if consensus is None:
             return 0.0
 
-        # Use delta (deviation from round mean) so the base model does not
-        # dominate the direction comparison.  Fall back to full params only
-        # if delta is not available (shouldn't happen after observe()).
-        flat = obs.get('delta', obs['flattened'])
+        # Use the classification-head delta for direction comparison.
+        # The head delta has the highest signal-to-noise ratio for label-flip
+        # attacks (the adversarial signal concentrates in the last layer).
+        # Fall back to full delta, then full params, for robustness.
+        flat = obs.get('head_delta', obs.get('delta', obs['flattened']))
         norm_flat = np.linalg.norm(flat)
         norm_consensus = np.linalg.norm(consensus)
 
@@ -522,11 +545,13 @@ class CognitiveDefenceV2(Basedefence):
         if n < 6:
             return {cid: 0.0 for cid in client_ids}
 
-        # Use deltas for clustering — same reason as direction detector:
-        # full parameters are dominated by the shared base model and produce
-        # near-identical vectors for all clients.  Deltas isolate the client-
-        # specific update direction, making the attacker cluster visible.
-        X = np.stack([observations[cid].get('delta', observations[cid]['flattened'])
+        # Cluster on head deltas first (highest SNR for label-flip attacks),
+        # falling back to full delta (catches gradient-manipulation attacks
+        # whose signal is spread across all layers).
+        # 'cluster_delta' == full delta; 'head_delta' == last-layer delta.
+        X = np.stack([observations[cid].get('head_delta',
+                       observations[cid].get('cluster_delta',
+                       observations[cid].get('delta', observations[cid]['flattened'])))
                       for cid in client_ids])
         row_norms = np.linalg.norm(X, axis=1, keepdims=True)
         X = X / np.maximum(row_norms, 1e-10)
