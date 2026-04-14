@@ -153,6 +153,11 @@ class CognitiveDefenceV2(Basedefence):
         # Previous observation vectors — used to compute inter-round signal change
         self._prev_observations: Dict[str, torch.Tensor] = {}
 
+        # Per-client EMA of head-delta norm relative to population floor.
+        # Used by _detect_convergence_resistance() to build up a persistent
+        # signal for label-flip attackers as the model converges.
+        self._resistance_ema: Dict[str, float] = {}
+
     # -----------------------------------------------------------------
     # Client profile management
     # -----------------------------------------------------------------
@@ -236,11 +241,23 @@ class CognitiveDefenceV2(Basedefence):
             # robust: 40 % attackers cannot pull it past the honest majority
             all_head_deltas = np.stack([observations[cid]['head_delta'] for cid in observations])
             head_consensus = self._geometric_median(all_head_deltas)
+
+            # Per-client head-delta norm and population convergence floor.
+            # The 20th-percentile norm is the "fastest converger" reference:
+            # as honest clients converge their norms drop toward this floor.
+            # A client whose norm stays large relative to the floor is resisting
+            # convergence — a strong late-round signal for persistent attackers.
+            all_head_norms = np.array([np.linalg.norm(observations[cid]['head_delta'])
+                                       for cid in observations])
+            pop_norm_floor = float(np.percentile(all_head_norms, 20))
+
             for client_id in observations:
-                # head_consensus is the reference for direction detection;
-                # full delta kept separately for cluster detection fallback
                 observations[client_id]['consensus_direction'] = head_consensus
                 observations[client_id]['cluster_delta'] = observations[client_id]['delta']
+                observations[client_id]['head_delta_norm'] = float(
+                    np.linalg.norm(observations[client_id]['head_delta'])
+                )
+                observations[client_id]['pop_norm_floor'] = pop_norm_floor
 
         return observations
 
@@ -321,15 +338,26 @@ class CognitiveDefenceV2(Basedefence):
             # --- Detector 1: Norm Anomaly ---
             scores['norm'] = self._detect_norm_anomaly(obs, profile)
 
-            # --- Detector 2: Direction Anomaly (CRITICAL NEW SIGNAL) ---
+            # --- Detector 2: Direction Anomaly (head-delta cosine divergence) ---
             scores['direction'] = self._detect_direction_anomaly(obs)
 
             # --- Detector 3: Cluster Outlier ---
             scores['cluster'] = cluster_scores.get(client_id, 0.0)
 
+            # --- Update convergence-resistance EMA before GRU step ---
+            # resistance = client head-delta norm / population 20th-percentile norm
+            # EMA α=0.8 (long memory): the signal builds up over rounds rather
+            # than reacting to single-round noise.
+            head_norm = obs.get('head_delta_norm', obs['total_norm'])
+            pop_floor = obs.get('pop_norm_floor', head_norm)
+            resistance = head_norm / max(pop_floor, 1e-10)
+            prev_ema = self._resistance_ema.get(client_id, resistance)
+            self._resistance_ema[client_id] = 0.8 * prev_ema + 0.2 * resistance
+
             # --- Detector 4: GRU Temporal Belief (POSG belief state) ---
-            # Feed [norm, direction, cluster] into the GRU and measure how
-            # rapidly this client's belief state is changing across rounds.
+            # Returns max(instability_score, convergence_resistance_score):
+            #   instability    — catches DynOpt strategy switching
+            #   conv.resistance — catches label-flip in the late-convergence phase
             scores['temporal'] = self._update_gru_belief(
                 client_id,
                 scores['norm'],
@@ -397,6 +425,15 @@ class CognitiveDefenceV2(Basedefence):
         """
         consensus = obs.get('consensus_direction')
         if consensus is None:
+            return 0.0
+
+        # Cold-start guard: in early rounds all head deltas are near-zero
+        # (model barely trained).  Normalising a near-zero vector to unit
+        # length turns noise into a random direction — every client looks
+        # anomalous.  Suppress the signal until the population floor exceeds
+        # a meaningful magnitude.
+        pop_floor = obs.get('pop_norm_floor', 1.0)
+        if pop_floor < 1e-3:
             return 0.0
 
         # Use the classification-head delta for direction comparison.
@@ -514,7 +551,60 @@ class CognitiveDefenceV2(Basedefence):
         # L2 distance between consecutive observation vectors,
         # normalised by the theoretical maximum change (all signals 0↔1 → √3)
         obs_delta = torch.norm(obs_vec - prev_obs).item()
-        return float(np.clip(obs_delta / (3.0 ** 0.5), 0.0, 1.0))
+        instability_score = float(np.clip(obs_delta / (3.0 ** 0.5), 0.0, 1.0))
+
+        # The instability score catches adaptive attackers who switch strategy
+        # (DynOpt probing).  But label-flip attackers are STABLE — they apply
+        # the same semantic corruption every round.  Their instability score is
+        # low even as they steadily poison the model.
+        #
+        # The convergence resistance score closes this gap: it fires in the
+        # late-convergence phase when honest clients' updates shrink toward
+        # zero while the attacker keeps pushing hard against the model.
+        # Take the max so that neither signal suppresses the other.
+        resistance_score = self._detect_convergence_resistance(client_id)
+        return float(max(instability_score, resistance_score))
+
+    def _detect_convergence_resistance(self, client_id: str) -> float:
+        """
+        Detect clients that resist model convergence — a persistent late-round
+        signal for semantic attacks (label-flip, backdoor).
+
+        As honest clients converge their classification-head updates shrink
+        toward zero.  An attacker running honest SGD on mislabeled data keeps
+        generating updates of similar magnitude round after round, because the
+        well-trained model strongly disagrees with their flipped labels and
+        produces large loss gradients.
+
+        Signal:
+            resistance_t = head_delta_norm_i / pop_norm_floor_t
+
+        where pop_norm_floor is the 20th-percentile head-delta norm across all
+        clients this round (the "fastest convergers").
+
+        A per-client EMA smooths out round-to-round noise.  Score is
+        log-normalised: ratio=1 → 0.0, ratio=10 → 1.0.
+
+        Phase behaviour:
+          Early rounds: all norms are large and similar → ratio ≈ 1 → score ≈ 0
+          Mid rounds:   honest norms shrink; attacker norms stay large → ratio climbs
+          Late rounds:  ratio >> 1 for attackers → score → 1.0
+
+        Does NOT interfere with DynOpt detection — DynOpt is already caught by
+        direction + cluster from round 1.  This signal only becomes critical
+        when those signals weaken (converging honest clients → noisy head deltas).
+        """
+        # These fields are populated by observe(); if missing (first round or
+        # no head-delta computation), return 0.
+        if client_id not in self._resistance_ema:
+            # Not enough history yet — initialise on first call
+            self._resistance_ema[client_id] = 1.0
+            return 0.0
+
+        return float(np.clip(
+            np.log10(max(self._resistance_ema[client_id], 1.0)),
+            0.0, 1.0
+        ))
 
     def _detect_cluster_outliers(
         self, observations: Dict[str, Dict[str, Any]]
@@ -545,14 +635,24 @@ class CognitiveDefenceV2(Basedefence):
         if n < 6:
             return {cid: 0.0 for cid in client_ids}
 
-        # Cluster on head deltas first (highest SNR for label-flip attacks),
-        # falling back to full delta (catches gradient-manipulation attacks
-        # whose signal is spread across all layers).
-        # 'cluster_delta' == full delta; 'head_delta' == last-layer delta.
-        X = np.stack([observations[cid].get('head_delta',
-                       observations[cid].get('cluster_delta',
-                       observations[cid].get('delta', observations[cid]['flattened'])))
-                      for cid in client_ids])
+        # Cold-start guard: if the population head-delta norm floor is below
+        # a meaningful threshold, the head-delta vectors are noise-dominated.
+        # Fall back to full delta (which is larger and more stable) to avoid
+        # spurious cluster splits that flag all honest clients.
+        sample_obs = observations[client_ids[0]]
+        pop_floor = sample_obs.get('pop_norm_floor', 1.0)
+        if pop_floor >= 1e-3:
+            # Head deltas have meaningful signal — use them (highest SNR for label-flip)
+            X = np.stack([observations[cid].get('head_delta',
+                           observations[cid].get('cluster_delta',
+                           observations[cid].get('delta', observations[cid]['flattened'])))
+                          for cid in client_ids])
+        else:
+            # Fall back to full delta (catches gradient-manipulation attacks;
+            # head delta too noisy this early)
+            X = np.stack([observations[cid].get('cluster_delta',
+                           observations[cid].get('delta', observations[cid]['flattened']))
+                          for cid in client_ids])
         row_norms = np.linalg.norm(X, axis=1, keepdims=True)
         X = X / np.maximum(row_norms, 1e-10)
 
