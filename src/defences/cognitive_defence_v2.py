@@ -809,8 +809,19 @@ class CognitiveDefenceV2(Basedefence):
                 profile.consecutive_flags += 1
                 profile.consecutive_clean = 0
             else:
-                # GREEN: reward good behaviour
-                bonus = self.recovery_rate * (1.0 - profile.reputation)
+                # GREEN: reward good behaviour.
+                # Accelerated recovery for clients with consecutive clean rounds:
+                # a client that was mis-flagged once but clears GREEN for 3+ rounds
+                # in a row should not be stuck at low reputation indefinitely.
+                #
+                # Why this matters:
+                #   base recovery_rate = 0.03 → a client at rep=0.05 takes ~32
+                #   rounds to reach rep=0.5.  Any false-positive cascade locks out
+                #   innocent clients permanently.  An attacker meanwhile has a
+                #   consistently high fused_score so its rep stays near 0 regardless
+                #   of the accelerated recovery (they never hit the GREEN branch).
+                accel = min(1.0 + 0.5 * profile.consecutive_clean, 4.0)
+                bonus = self.recovery_rate * accel * (1.0 - profile.reputation)
                 profile.reputation = min(1.0, profile.reputation + bonus)
                 profile.consecutive_clean += 1
                 profile.consecutive_flags = 0
