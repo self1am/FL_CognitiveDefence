@@ -237,10 +237,29 @@ class CognitiveDefenceV2(Basedefence):
             for client_id in observations:
                 observations[client_id]['head_delta'] = observations[client_id]['head_flat'] - mean_head
 
-            # Consensus computed on head deltas — geometric median is
-            # robust: 40 % attackers cannot pull it past the honest majority
+            # Consensus computed from UNIT-NORMALISED head deltas.
+            #
+            # Why normalise before geometric median:
+            #   Label-flip attackers generate large-magnitude head deltas in
+            #   early rounds because the (barely-trained) model strongly
+            #   disagrees with their flipped labels → large loss gradients.
+            #   Honest clients have small head deltas at the same stage.
+            #   If we feed raw head deltas to the geometric median, the
+            #   attacker cluster dominates by magnitude and pulls the consensus
+            #   toward -correct_direction.  Every honest client then appears
+            #   to be pointing away from consensus → direction_score ≈ 1.0
+            #   for 99 / 100 clients at round 2 (observed catastrophic spike).
+            #
+            #   With unit normalisation each client has an equal directional
+            #   "vote".  60 honest unit vectors vs 40 attacker unit vectors:
+            #   the geometric median converges to the honest majority direction
+            #   regardless of magnitude differences.  This also holds for
+            #   DynOpt / StatOpt — their attacks shift direction, not just
+            #   scale, so the signal is preserved.
             all_head_deltas = np.stack([observations[cid]['head_delta'] for cid in observations])
-            head_consensus = self._geometric_median(all_head_deltas)
+            delta_norms = np.linalg.norm(all_head_deltas, axis=1, keepdims=True)
+            all_head_deltas_unit = all_head_deltas / np.maximum(delta_norms, 1e-10)
+            head_consensus = self._geometric_median(all_head_deltas_unit)
 
             # Per-client head-delta norm and population convergence reference.
             # Use the MEDIAN (50th percentile) — the "typical converger" — not
@@ -311,7 +330,11 @@ class CognitiveDefenceV2(Basedefence):
         majority_flat = np.stack([observations[cid].get('head_delta',
                                    observations[cid].get('delta', observations[cid]['flattened']))
                                   for cid in majority_ids])
-        return self._geometric_median(majority_flat)
+        # Normalise to unit vectors — same reason as in observe():
+        # magnitude differences across rounds should not bias the direction estimate.
+        majority_norms = np.linalg.norm(majority_flat, axis=1, keepdims=True)
+        majority_unit = majority_flat / np.maximum(majority_norms, 1e-10)
+        return self._geometric_median(majority_unit)
 
     # =================================================================
     # ORIENT — Multi-Detector Fusion
