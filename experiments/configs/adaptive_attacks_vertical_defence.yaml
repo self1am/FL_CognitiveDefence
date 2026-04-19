@@ -1,0 +1,44 @@
+# Adaptive attacks with vertical defense
+# Scenario: Defends against adaptive poison attacks using differential privacy
+experiment:
+  experiment_name: "adaptive_attacks_vertical_defence"
+  seed: 123
+  num_rounds: 10
+  min_clients: 20
+  min_available_clients: 20
+  server_address: "localhost:8080"
+
+defence:
+  strategy: "vert"  # Fixed: was "vertical" which silently fell through to NoDefence
+  kappa: 5
+  history_size: 10
+  projection_dim: 100
+  learning_rate: 0.01
+  min_history_rounds: 3
+
+attacks:
+  - enabled: true
+    attack_type: "min_max"
+    intensity: 0.5
+    target_clients: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    defense_models: ['krum', 'trimmed_mean']
+    optimization_steps: 10
+
+orchestration:
+  num_clients: 100
+  batch_size: 2
+  max_memory_mb: 6000
+  spawn_delay: 2.0
+  epochs: 1
+  batch_size_client: 64
+
+simulation:
+  client_resources:
+    num_cpus: 0.25
+  ray_init_args:
+    include_dashboard: false
+    log_to_driver: false
+    num_cpus: 8
+
+evaluation:
+  num_test_samples: 5000

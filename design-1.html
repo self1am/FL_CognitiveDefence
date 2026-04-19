@@ -1,0 +1,124 @@
+<style>
+    body { background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; height: 100vh; width: 100vw; flex-direction: column; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .wrapper { display: flex; background-color: rgb(232, 232, 10); padding: 30px; }
+    .ticket { background-color: white; padding: 8px 0; display: flex; flex-direction: column; align-items: space-evenly; justify-content: space-evenly; border-radius: 70px; corner-shape: squircle; width: 360px; height: auto; border: #4f4b4b9a 1px solid; }
+    .row { display: flex; justify-content: space-between; align-items: center; padding: 16px; }
+    .row:last-child { border-top: 1px solid #38363658; justify-content: center; }
+    .column { display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: white; }
+    .row:first-child { border-bottom: rgba(194, 189, 189, 0.653) 1px dashed; position: relative; }
+    .row:first-child::before, .row:first-child::after { content: ""; position: absolute; width: 40px; height: 30px; background-color: rgb(232, 232, 10); border-radius: 50%; border: #4f4b4b9a 1px solid; border-top: none; border-bottom: none; bottom: -15px; transform: translateY(0); }
+    .row:first-child::before { left: -25; border-left: none; }
+    .row:first-child::after { right: -25; border-right: none; }
+    .train-icon { font-size: 16px; border-radius: 50%; padding: 4px; background-color: yellow; border: black 1px solid; }
+    .title { font-size: 20px; font-weight: 500; }
+    .profile-pic { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; }
+    .passenger-info { display: flex; align-items: center; gap: 10px; }
+    .barcode { background-color: rgba(255, 99, 71, 0.143); }
+    .barcode img { object-fit: cover; }
+    .label { font-weight: lighter; font-size: 16px; color: gray; }
+    .value { font-weight: bold; font-size: 20px; }
+    .special { font-size: 24px; font-weight: bolder; }
+    .hour-column { display: flex; flex-direction: row; align-items: center; justify-content: center; background-color: yellow; border: black 1px solid; border-radius: 36px; padding: 4px 12px; gap: 4px; position: relative; }
+    .hour-column::before, .hour-column::after { content: ""; position: absolute; height: 2px; background: repeating-linear-gradient(to right, gray 0, gray 4px, transparent 4px, transparent 8px); top: 50%; transform: translateY(-50%); width: 20px; }
+    .hour-column::before { right: 100%; margin-right: 0; }
+    .hour-column::after { left: 100%; margin-left: 0; }
+    .row:has(.hour-column) { position: relative; }
+    .row:has(.hour-column)::before, .row:has(.hour-column)::after { content: ""; position: absolute; width: 10px; height: 10px; background-color: #333; border-radius: 50%; top: 50%; transform: translateY(-50%); }
+    .row:has(.hour-column)::before { left: 27%; }
+    .row:has(.hour-column)::after { right: 27%; }
+    .row .column:first-child { align-items: flex-start; }
+    .row .column:last-child { align-items: flex-end; }
+    button { border: 0; background-color: transparent; font-size: 24px; font-weight: 400; }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+    integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+<div class="wrapper">
+    <div class="ticket">
+        <div class="row">
+            <div class="column">
+                <!-- Train Icon -->
+                <div>
+                    <span class="train-icon"><i class="fas fa-train"></i></span>
+                    <span class="title">Swiss Express</span>
+                </div>
+            </div>
+            <div class="column title">
+                $240
+            </div>
+        </div>
+        <div class="row">
+            <div class="column">
+                <span class="special">ZUR</span>
+                <span class="label">Zurich</span>
+            </div>
+            <div class="hour-column">
+                <i class="fas fa-train"></i>
+                <span>1h 23m</span>
+            </div>
+            <div class="column">
+                <span class="special">LUZ</span>
+                <span class="label">Luzern</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="column">
+                <div class="passenger-info">
+                    <div>
+                        <!-- Profile Pic placeholder -->
+                        <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Profile Picture"
+                            class="profile-pic" width="50" height="50">
+                    </div>
+                    <div>
+                        <span class="value">Guy Hawkins</span>
+                        <span class="label">guy.haw@gmail.com</span>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <span class="label">Seat</span>
+                <span class="value">A2</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="column">
+                <span class="label">
+                    Train No
+                </span>
+                <span class="value">JWI008</span>
+            </div>
+            <div class="column">
+                <span class="label">Class</span>
+                <span class="value">Business</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="column">
+                <span class="label">Departure</span>
+                <span class="value">08:30 AM</span>
+            </div>
+            <div class="column">
+                <span class="label">Arrival</span>
+                <span class="value">09:53 AM</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="column">
+                <span class="label">Terminal</span>
+                <span class="value">16D</span>
+            </div>
+            <div class="column">
+                <span class="label">Gate</span>
+                <span class="value">G12</span>
+            </div>
+        </div>
+        <div class="row barcode">
+            <!-- Barcode Image -->
+            <img src="barcode.png" alt="barcode" width="100%" height="60">
+        </div>
+        <div class="row">
+            <!-- download button -->
+            <button>Download Ticket</button>
+        </div>
+    </div>
+</div>

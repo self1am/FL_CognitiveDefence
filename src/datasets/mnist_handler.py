@@ -3,10 +3,16 @@ import torch
 from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms
 import numpy as np
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Optional
+import threading
+import hashlib
 
 class MNISTDataHandler:
-    """Handle MNIST dataset loading and client distribution"""
+    """Handle MNIST dataset loading and client distribution with global caching"""
+    
+    # Class-level cache for shared datasets and splits
+    _cache: Dict[str, any] = {}
+    _cache_lock = threading.Lock()
     
     def __init__(self, data_path: str = "./data", batch_size: int = 32):
         self.data_path = data_path
@@ -19,7 +25,15 @@ class MNISTDataHandler:
         ])
     
     def load_datasets(self) -> Tuple[datasets.MNIST, datasets.MNIST]:
-        """Load train and test datasets"""
+        """Load train and test datasets with caching"""
+        cache_key = f"datasets_{self.data_path}"
+        
+        # Check cache first
+        with MNISTDataHandler._cache_lock:
+            if cache_key in MNISTDataHandler._cache:
+                return MNISTDataHandler._cache[cache_key]
+        
+        # Load if not cached
         train_dataset = datasets.MNIST(
             self.data_path, 
             train=True, 
@@ -34,11 +48,25 @@ class MNISTDataHandler:
             transform=self.transform
         )
         
-        return train_dataset, test_dataset
+        result = (train_dataset, test_dataset)
+        
+        # Store in cache
+        with MNISTDataHandler._cache_lock:
+            MNISTDataHandler._cache[cache_key] = result
+        
+        return result
     
     def create_non_iid_split(self, dataset: datasets.MNIST, num_clients: int, 
                             alpha: float = 0.5) -> List[Subset]:
-        """Create non-IID data split using Dirichlet distribution"""
+        """Create non-IID data split using Dirichlet distribution with caching"""
+        # Create cache key based on dataset size, num_clients, and alpha
+        cache_key = f"split_{len(dataset)}_{num_clients}_{alpha}"
+        
+        # Check cache first
+        with MNISTDataHandler._cache_lock:
+            if cache_key in MNISTDataHandler._cache:
+                return MNISTDataHandler._cache[cache_key]
+        
         labels = np.array([dataset[i][1] for i in range(len(dataset))])
         num_classes = len(np.unique(labels))
         
@@ -64,6 +92,10 @@ class MNISTDataHandler:
                 fallback_indices = np.random.choice(len(dataset), 100, replace=False)
                 client_datasets.append(Subset(dataset, fallback_indices))
         
+        # Store in cache
+        with MNISTDataHandler._cache_lock:
+            MNISTDataHandler._cache[cache_key] = client_datasets
+        
         return client_datasets
     
     def create_client_dataloaders(self, num_clients: int, alpha: float = 0.5) -> Tuple[List[DataLoader], DataLoader]:
@@ -84,5 +116,15 @@ class MNISTDataHandler:
         )
         
         return client_loaders, test_loader
-        
     
+    @classmethod
+    def clear_cache(cls):
+        """Clear the global cache - useful for cleanup between experiments"""
+        with cls._cache_lock:
+            cls._cache.clear()
+    
+    @classmethod
+    def get_cache_info(cls) -> Dict[str, str]:
+        """Get information about cached items"""
+        with cls._cache_lock:
+            return {k: type(v).__name__ for k, v in cls._cache.items()}

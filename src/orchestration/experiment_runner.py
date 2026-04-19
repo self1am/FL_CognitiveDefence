@@ -7,9 +7,13 @@ from pathlib import Path
 from typing import Dict, Any
 import subprocess
 import time
+import signal
+import os
+import sys
 
 from .client_orchestrator import ClientOrchestrator
 from ..server.cognitive_server import CognitiveAggregationStrategy
+from ..server.cognitive_server_v2 import CognitiveAggregationStrategyV2
 from ..server.no_defence_server import NoDefenceAggregationStrategy
 from ..server.krum_server import KrumAggregationStrategy
 from ..server.trimmed_mean_server import TrimmedMeanAggregationStrategy
@@ -141,6 +145,33 @@ class ExperimentRunner:
                 min_available_clients=self.experiment_config.min_available_clients,
                 fraction_evaluate=1.0,  # Evaluate on all clients for distributed metrics
             )
+        elif defence_config.strategy == 'cognitive_defence_v2':
+            # CogDef v2: multi-signal OODA + MAPE-K adaptive defence
+            defence_raw = self.config.get('defence', {})
+            strategy = CognitiveAggregationStrategyV2(
+                config=self.experiment_config,
+                anomaly_threshold=defence_raw.get('anomaly_threshold', 0.5),
+                direction_weight=defence_raw.get('direction_weight', 0.40),
+                norm_weight=defence_raw.get('norm_weight', 0.15),
+                cluster_weight=defence_raw.get('cluster_weight', 0.25),
+                temporal_weight=defence_raw.get('temporal_weight', 0.20),
+                initial_reputation=defence_raw.get('initial_reputation', 0.5),
+                recovery_rate=defence_raw.get('recovery_rate', 0.03),
+                penalty_severity=defence_raw.get('penalty_severity', 0.8),
+                yellow_threshold=defence_raw.get('yellow_threshold', 0.3),
+                orange_threshold=defence_raw.get('orange_threshold', 0.6),
+                red_threshold=defence_raw.get('red_threshold', 0.8),
+                clip_multiplier=defence_raw.get('clip_multiplier', 2.0),
+                trim_beta=defence_raw.get('trim_beta', 0.2),
+                enable_mape_k=defence_raw.get('enable_mape_k', True),
+                history_size=defence_raw.get('history_size', 100),
+                logger=self.logger,
+                evaluate_fn=evaluate_fn,
+                min_fit_clients=self.experiment_config.min_clients,
+                min_evaluate_clients=self.experiment_config.min_clients,
+                min_available_clients=self.experiment_config.min_available_clients,
+                fraction_evaluate=1.0,
+            )
         elif defence_config.strategy == 'krum':
             # Extract Krum-specific parameters
             num_byzantine = self.config.get('defence', {}).get('num_byzantine', 2)
@@ -205,41 +236,36 @@ class ExperimentRunner:
                 fraction_evaluate=1.0,  # Evaluate on all clients for distributed metrics
             )
         
+        
         self.logger.logger.info("Starting federated learning server with centralized evaluation")
         
-        # Configure server to run evaluation after each round
-        server_config = fl.server.ServerConfig(
-            num_rounds=self.experiment_config.num_rounds,
-            round_timeout=None  # No timeout for evaluation
-        )
+        # Create server log file
+        server_log_file = f"logs/{self.experiment_config.experiment_name}_server.log"
+        Path("logs").mkdir(exist_ok=True)
         
-        if run_in_main_thread:
-            # Run directly on main thread (blocking) - for server-only mode
-            self.logger.logger.info("Running server on main thread (blocking)")
-            fl.server.start_server(
-                server_address=self.experiment_config.server_address,
-                config=server_config,
-                strategy=strategy,
+        # Use run_server_with_eval.py as separate process
+        # run_server_with_eval.py only accepts --config argument, server address comes from config file
+        cmd = [
+            sys.executable,
+            "run_server_with_eval.py",
+            "--config", self.config_path
+        ]
+        
+        with open(server_log_file, 'w') as log_file:
+            server_process = subprocess.Popen(
+                cmd,
+                stdout=log_file,
+                stderr=subprocess.STDOUT,
+                text=True
             )
-            return None
-        else:
-            # Run in daemon thread (non-blocking) - for client-server mode
-            def run_server():
-                fl.server.start_server(
-                    server_address=self.experiment_config.server_address,
-                    config=server_config,
-                    strategy=strategy,
-                )
-            
-            import threading
-            server_thread = threading.Thread(target=run_server)
-            server_thread.daemon = True
-            server_thread.start()
-            
-            # Give server time to start
-            time.sleep(5)
-            
-            return server_thread
+        
+        # Give server time to start and bind to port
+        time.sleep(3)
+        
+        self.logger.logger.info(f"Server logs being written to: {server_log_file}")
+        self.logger.logger.info(f"Server process PID: {server_process.pid}")
+        
+        return server_process
     
     def run_experiment(self) -> Dict[str, Any]:
         """Run complete federated learning experiment"""
@@ -247,11 +273,20 @@ class ExperimentRunner:
         
         # Check if server_only mode is enabled
         if self.config.get('server_only', False):
-            self.logger.logger.info("Server-only mode: Running server on main thread, waiting for external clients to connect")
-            self.start_server(run_in_main_thread=True)
+            self.logger.logger.info("Server-only mode: Running server as subprocess, waiting for external clients to connect")
+            server_process = self.start_server()
             
-            # If we get here, the server was interrupted
-            self.logger.logger.info("Server interrupted")
+            try:
+                # Wait for server process
+                server_process.wait()
+            except KeyboardInterrupt:
+                self.logger.logger.info("Server interrupted")
+                server_process.terminate()
+                try:
+                    server_process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    server_process.kill()
+                    server_process.wait()
             
             # Save experiment log
             self.logger.save_experiment_log()
@@ -264,43 +299,67 @@ class ExperimentRunner:
                 'mode': 'server_only'
             }
         
-        # Start server in background thread
-        server_thread = self.start_server(run_in_main_thread=False)
+        # Start server in subprocess mode
+        server_process = self.start_server()
         
-        # Create client orchestrator
-        orchestrator = ClientOrchestrator(
-            server_address=self.experiment_config.server_address,
-            experiment_config=self.experiment_config,
-            logger=self.logger,
-            max_memory_mb=self.config.get('orchestration', {}).get('max_memory_mb', 6000)
-        )
+        # Verify server is alive
+        if server_process.poll() is not None:
+            self.logger.logger.error("❌ Server process failed to start!")
+            raise RuntimeError("Server process exited immediately. Check server logs.")
         
-        # Get attack configurations
-        attack_configs = self.create_attack_configs()
+        self.logger.logger.info(f"✅ Server started on {self.experiment_config.server_address}")
         
-        # Run multi-client experiment
-        num_clients = self.config.get('orchestration', {}).get('num_clients', 10)
-        batch_size = self.config.get('orchestration', {}).get('batch_size', 3)
-        
-        experiment_results = orchestrator.run_experiment(
-            num_clients=num_clients,
-            attack_configs=attack_configs,
-            batch_size=batch_size
-        )
-        
-        # Save complete experiment log
-        self.logger.save_experiment_log()
-        
-        # Save experiment results
-        results_file = f"experiments/results/{self.experiment_config.experiment_name}_results.json"
-        Path(results_file).parent.mkdir(parents=True, exist_ok=True)
-        
-        with open(results_file, 'w') as f:
-            json.dump(experiment_results, f, indent=2)
-        
-        self.logger.logger.info(f"Experiment completed. Results saved to {results_file}")
-        
-        return experiment_results
+        try:
+            # Create client orchestrator
+            orchestrator = ClientOrchestrator(
+                server_address=self.experiment_config.server_address,
+                experiment_config=self.experiment_config,
+                logger=self.logger,
+                max_memory_mb=self.config.get('orchestration', {}).get('max_memory_mb', 6000)
+            )
+            
+            # Get attack configurations
+            attack_configs = self.create_attack_configs()
+            
+            # Run multi-client experiment
+            num_clients = self.config.get('orchestration', {}).get('num_clients', 10)
+            batch_size = self.config.get('orchestration', {}).get('batch_size', 3)
+            
+            experiment_results = orchestrator.run_experiment(
+                num_clients=num_clients,
+                attack_configs=attack_configs,
+                batch_size=batch_size,
+                server_process=server_process
+            )
+            
+            # Save complete experiment log
+            self.logger.save_experiment_log()
+            
+            # Save experiment results
+            results_file = f"experiments/results/{self.experiment_config.experiment_name}_results.json"
+            Path(results_file).parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(results_file, 'w') as f:
+                json.dump(experiment_results, f, indent=2)
+            
+            self.logger.logger.info(f"Experiment completed. Results saved to {results_file}")
+            
+            return experiment_results
+            
+        finally:
+            # Cleanup: terminate server process
+            if server_process.poll() is None:  # Still running
+                self.logger.logger.info("Terminating server process...")
+                server_process.terminate()
+                
+                try:
+                    server_process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    self.logger.logger.warning("Server process did not terminate gracefully, killing...")
+                    server_process.kill()
+                    server_process.wait()
+            
+            self.logger.logger.info("Cleanup complete")
 
 def main():
     parser = argparse.ArgumentParser()

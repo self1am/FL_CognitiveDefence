@@ -1,0 +1,40 @@
+# Static attacks with cognitive defense
+# Scenario: Defends against static poison attacks using cognitive defense mechanisms
+experiment:
+  experiment_name: "static_attacks_cognitive_defence"
+  seed: 123
+  num_rounds: 10
+  min_clients: 20
+  min_available_clients: 20
+  server_address: "localhost:8080"
+
+defence:
+  strategy: "cognitive_defence"
+  anomaly_threshold: 0.75
+  reputation_decay: 0.92
+  history_size: 10
+
+attacks:
+  - enabled: true
+    attack_type: "label_flip"
+    intensity: 1.0  # ← 100% of labels flipped (full poisoning)
+    target_clients: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+
+orchestration:
+  num_clients: 100
+  batch_size: 2
+  max_memory_mb: 6000
+  spawn_delay: 2.0
+  epochs: 1
+  batch_size_client: 64
+
+simulation:
+  client_resources:
+    num_cpus: 0.25
+  ray_init_args:
+    include_dashboard: false
+    log_to_driver: false
+    num_cpus: 8
+
+evaluation:
+  num_test_samples: 5000

@@ -27,19 +27,101 @@ class ClientConfig:
     
 @dataclass
 class AttackConfig:
-    """Attack configuration"""
+    """Attack configuration with support for adaptive attack parameters"""
     enabled: bool = False
     attack_type: str = "label_flip"
     intensity: float = 0.1
     target_clients: List[int] = None  # None means random selection
     
+    # Parameters for stat-opt attack
+    constraint_factor: float = 1.5
+    adaptive_learning_rate: float = 0.1
+    
+    # Parameters for dny-opt attack
+    learning_rate: float = 0.1
+    exploration_rate: float = 0.1
+    discount_factor: float = 0.95
+    detection_threshold: float = 0.7
+    
+    # Parameters for min-max attack
+    defense_models: List[str] = None
+    optimization_steps: int = 10
+    threat_model_weights: Dict[str, float] = None
+    
+    # Parameters for min-sum attack
+    distance_weight: float = 0.7
+    optimization_lr: float = 0.01
+    max_iterations: int = 100
+    convergence_threshold: float = 1e-5
+    
+    def __post_init__(self):
+        """Initialize default values for lists and dicts"""
+        if self.target_clients is None:
+            self.target_clients = []
+        if self.defense_models is None:
+            self.defense_models = ['krum', 'trimmed_mean']
+        if self.threat_model_weights is None:
+            # Initialize with uniform weights over defense models
+            uniform_weight = 1.0 / len(self.defense_models)
+            self.threat_model_weights = {d: uniform_weight for d in self.defense_models}
+    
 @dataclass
 class defenceConfig:
-    """defence configuration"""
+    """defence configuration - supports all defense strategies"""
     strategy: str = "cognitive_defence"
+    
+    # Cognitive defense parameters
     anomaly_threshold: float = 0.7
     reputation_decay: float = 0.8
     history_size: int = 100
+    
+    # Krum defense parameters
+    num_byzantine: int = 2
+    multi_krum: bool = False
+    
+    # Trimmed Mean defense parameters
+    beta: float = 0.2
+    
+    # VERT defense parameters
+    kappa: int = 5
+    projection_dim: int = 100
+    learning_rate: float = 0.01
+    min_history_rounds: int = 3
+    
+    # CogDef v2 parameters
+    direction_weight: float = 0.40
+    norm_weight: float = 0.15
+    cluster_weight: float = 0.25
+    temporal_weight: float = 0.20
+    initial_reputation: float = 0.5
+    recovery_rate: float = 0.03
+    penalty_severity: float = 0.8
+    yellow_threshold: float = 0.3
+    orange_threshold: float = 0.6
+    red_threshold: float = 0.8
+    clip_multiplier: float = 2.0
+    enable_mape_k: bool = True
+
+    # POSG/SAC defense parameters
+    max_clients: int = 100
+    obs_dim: int = 6
+    belief_hidden_dim: int = 64
+    sac_hidden_dims: list = None  # Will be [256, 256] by default
+    lr: float = 0.0003
+    gamma: float = 0.99
+    reward_alpha: float = 1.0
+    reward_beta: float = 0.3
+    reward_gamma: float = 0.2
+    buffer_capacity: int = 50_000
+    batch_size: int = 64
+    device: str = "cpu"
+    warmup_rounds: int = 5
+    
+    def __post_init__(self):
+        """Initialize default values for mutable types"""
+        if self.sac_hidden_dims is None:
+            self.sac_hidden_dims = [256, 256]
+
 
 class DeterministicEnvironment:
     """Ensures deterministic behavior across experiments"""
@@ -48,23 +130,31 @@ class DeterministicEnvironment:
     def setup_seeds(seed: int = 42):
         """Set seeds for reproducibility"""
         torch.manual_seed(seed)
-        torch.cuda.manual_seed(seed)
-        torch.cuda.manual_seed_all(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
+            # Make CuDNN deterministic (CUDA only)
+            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.benchmark = False
         np.random.seed(seed)
         random.seed(seed)
-        
-        # Make CuDNN deterministic
-        torch.backends.cudnn.deterministic = True
-        torch.backends.cudnn.benchmark = False
-        
+
     @staticmethod
     def get_device():
         """Get appropriate device"""
+        import os
         if torch.cuda.is_available():
-            return torch.device("cuda")
+            device = torch.device("cuda")
+            print(f"[Device] CUDA GPU: {torch.cuda.get_device_name(0)} "
+                  f"({torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB VRAM)")
+            return device
         elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
-            return torch.device("mps")  # Apple Silicon
+            # Enable CPU fallback for MPS-unsupported ops (must be set before first MPS use)
+            os.environ.setdefault('PYTORCH_ENABLE_MPS_FALLBACK', '1')
+            print("[Device] Apple Silicon MPS GPU (PYTORCH_ENABLE_MPS_FALLBACK=1 enabled)")
+            return torch.device("mps")
         else:
+            print("[Device] No GPU detected, using CPU")
             return torch.device("cpu")
 
 class ConfigManager:

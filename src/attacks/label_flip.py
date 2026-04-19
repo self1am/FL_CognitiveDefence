@@ -38,10 +38,11 @@ class LabelFlipAttack(BaseAttack):
                     flipped_labels[idx] = self.target_class
                 else:
                     # Random flip to different class
-                    num_classes = len(torch.unique(labels))
-                    available_classes = list(range(num_classes))
-                    available_classes.remove(labels[idx].item())
-                    flipped_labels[idx] = np.random.choice(available_classes)
+                    all_classes = torch.unique(labels).tolist()
+                    current_class = labels[idx].item()
+                    available_classes = [c for c in all_classes if c != current_class]
+                    if available_classes:
+                        flipped_labels[idx] = np.random.choice(available_classes)
         
         self.log_attack(client_id, "label_flip", {
             'num_flipped': num_to_flip,

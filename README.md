@@ -10,7 +10,9 @@ A modular federated learning framework implementing cognitive defence strategies
   - **Cognitive Defence**: OODA loop and MAPE-K framework implementation
   - **Krum**: Byzantine-robust aggregation selecting updates with minimal distance scores
   - **Trimmed Mean**: Robust aggregation removing outliers from both ends
-- **Attack Simulation**: Label flipping, gradient noise, model replacement, and more
+- **Attack Simulation**: 
+  - **Static Attacks**: Label flipping, gradient noise
+  - **Adaptive Attacks**: stat-opt, dny-opt, min-max, min-sum (see [docs/ADAPTIVE_ATTACKS.md](docs/ADAPTIVE_ATTACKS.md))
 - **Explainable AI**: Decision logging with reasoning and evidence
 - **Deterministic Experiments**: Reproducible results with proper seeding
 
@@ -159,12 +161,33 @@ Results are automatically saved to:
 - `logs/`: Detailed execution logs
 - Individual client logs with training history
 
+## Attack Strategies
+
+### Static Attacks
+- **Label Flipping**: Randomly flips labels during training to corrupt the model
+- **Gradient Noise**: Adds Gaussian/uniform noise to gradient updates
+
+### Adaptive Attacks
+Advanced attacks that learn from defense responses. See [docs/ADAPTIVE_ATTACKS.md](docs/ADAPTIVE_ATTACKS.md) for detailed documentation.
+
+1. **stat-opt (Statistical Optimization)**: Crafts updates that stay within statistical bounds of benign clients to evade detection
+2. **dny-opt (Dynamic Optimization)**: Uses reinforcement learning to adapt attack parameters based on real-time feedback
+3. **min-max (Minimax)**: Game-theoretic attack that assumes optimal defender response
+4. **min-sum (Minimum Sum)**: Minimizes total distance to benign updates while maintaining attack impact
+
+Example configurations available in `experiments/configs/`:
+- `stat_opt_attack_test.yaml`
+- `dny_opt_attack_test.yaml`
+- `min_max_attack_test.yaml`
+- `min_sum_attack_test.yaml`
+- `all_adaptive_attacks_test.yaml`
+
 ## Next Steps
 
 1. **FEMNIST Integration**: More realistic FL dataset
 2. **Quantum Neural Networks**: PennyLane integration
 3. **Advanced defences**: FreqFed, Median, FoolsGold
-4. **Adaptive Attacks**: Learning-based adversarial strategies
+4. ~~**Adaptive Attacks**: Learning-based adversarial strategies~~ ✓ Completed
 5. **Comparative Analysis**: Benchmark defences against various attack scenarios
 
 ## Contributing
@@ -177,3 +200,16 @@ Results are automatically saved to:
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
+<!-- 
+# SSH via browser, then run:
+tmux new-session -d -s experiment -c /path/to/FL_CognitiveDefence
+
+# Start experiment in that session
+tmux send-keys -t experiment "python run_server_with_eval.py" Enter
+
+# Close the browser tab, come back later, then:
+tmux attach -t experiment
+
+# See what happened while you were gone
+tmux capture-pane -t experiment -p
+ -->

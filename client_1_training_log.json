@@ -2,51 +2,101 @@
   {
     "client_id": 1,
     "round": 1,
-    "avg_loss": 0.14393861579748696,
-    "training_accuracy": 0.9549774887443722,
-    "num_samples": 5997,
+    "avg_loss": 0.21528009610206245,
+    "training_accuracy": 0.9366815846179347,
+    "num_samples": 6033,
     "attacked": false,
     "attack_type": null,
-    "timestamp": "2025-09-06T14:10:05.746181"
+    "timestamp": "2025-10-27T17:29:38.663446"
   },
   {
     "client_id": 1,
     "round": 2,
-    "avg_loss": 0.037786869109822874,
-    "training_accuracy": 0.9882441220610305,
-    "num_samples": 5997,
+    "avg_loss": 0.08225007650378362,
+    "training_accuracy": 0.976462787999337,
+    "num_samples": 6033,
     "attacked": false,
     "attack_type": null,
-    "timestamp": "2025-09-06T14:10:25.762233"
+    "timestamp": "2025-10-27T17:30:48.212390"
   },
   {
     "client_id": 1,
     "round": 3,
-    "avg_loss": 0.0318098289125267,
-    "training_accuracy": 0.9914123728530932,
-    "num_samples": 5997,
+    "avg_loss": 0.052956264371498335,
+    "training_accuracy": 0.9848334162108404,
+    "num_samples": 6033,
     "attacked": false,
     "attack_type": null,
-    "timestamp": "2025-09-06T14:10:48.732301"
+    "timestamp": "2025-10-27T17:32:13.598831"
   },
   {
     "client_id": 1,
     "round": 4,
-    "avg_loss": 0.028765420447492997,
-    "training_accuracy": 0.9913289978322495,
-    "num_samples": 5997,
+    "avg_loss": 0.03861771704626253,
+    "training_accuracy": 0.989557434112382,
+    "num_samples": 6033,
     "attacked": false,
     "attack_type": null,
-    "timestamp": "2025-09-06T14:11:07.771276"
+    "timestamp": "2025-10-27T17:33:23.860243"
   },
   {
     "client_id": 1,
     "round": 5,
-    "avg_loss": 0.020424314182423464,
-    "training_accuracy": 0.9941637485409371,
-    "num_samples": 5997,
+    "avg_loss": 0.03148463071965764,
+    "training_accuracy": 0.9908005967180508,
+    "num_samples": 6033,
     "attacked": false,
     "attack_type": null,
-    "timestamp": "2025-09-06T14:11:27.260590"
+    "timestamp": "2025-10-27T17:34:56.473087"
+  },
+  {
+    "client_id": 1,
+    "round": 6,
+    "avg_loss": 0.03244326341807748,
+    "training_accuracy": 0.991960881816675,
+    "num_samples": 6033,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-10-27T17:36:17.006455"
+  },
+  {
+    "client_id": 1,
+    "round": 7,
+    "avg_loss": 0.03279946916763277,
+    "training_accuracy": 0.9917951268025857,
+    "num_samples": 6033,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-10-27T17:37:45.845038"
+  },
+  {
+    "client_id": 1,
+    "round": 8,
+    "avg_loss": 0.025447938741061014,
+    "training_accuracy": 0.9932040444223438,
+    "num_samples": 6033,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-10-27T17:39:02.292232"
+  },
+  {
+    "client_id": 1,
+    "round": 9,
+    "avg_loss": 0.024402915853006576,
+    "training_accuracy": 0.9936184319575667,
+    "num_samples": 6033,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-10-27T17:40:16.835132"
+  },
+  {
+    "client_id": 1,
+    "round": 10,
+    "avg_loss": 0.015405076454433122,
+    "training_accuracy": 0.9961047571689043,
+    "num_samples": 6033,
+    "attacked": false,
+    "attack_type": null,
+    "timestamp": "2025-10-27T17:41:58.788424"
   }
 ]

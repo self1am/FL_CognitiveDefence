@@ -4,6 +4,10 @@ Run FL server with centralized evaluation on a clean test set.
 This script demonstrates the TRUE impact of attacks on the global model.
 """
 
+import os
+# Must be set before any torch/MPS operations for Apple Silicon compatibility
+os.environ.setdefault('PYTORCH_ENABLE_MPS_FALLBACK', '1')
+
 import argparse
 import yaml
 import torch
@@ -15,6 +19,7 @@ from src.models.cnn_mnist import MNISTNet
 from src.datasets.mnist_handler import MNISTDataHandler
 from src.server.no_defence_server import NoDefenceAggregationStrategy
 from src.server.cognitive_server import CognitiveAggregationStrategy
+from src.server.cognitive_server_v2 import CognitiveAggregationStrategyV2
 from src.utils.config import ExperimentConfig, defenceConfig, DeterministicEnvironment
 from src.utils.logging_utils import ExperimentLogger
 
@@ -30,7 +35,8 @@ def create_centralized_eval_fn(test_loader, device, logger):
             
             # Load parameters
             params_dict = zip(model.state_dict().keys(), parameters)
-            state_dict = {k: torch.tensor(v) for k, v in params_dict}
+            # Move tensors to device to avoid MPS/CUDA device mismatches
+            state_dict = {k: torch.tensor(v).to(device) for k, v in params_dict}
             model.load_state_dict(state_dict, strict=True)
             
             # Evaluate
@@ -106,12 +112,39 @@ def main():
     
     # Create strategy
     if defence_config.strategy == 'cognitive_defence':
-        logger.logger.info("Using Cognitive Defense Strategy")
+        logger.logger.info("Using Cognitive Defense Strategy (v1)")
         strategy = CognitiveAggregationStrategy(
             config=experiment_config,
             anomaly_threshold=defence_config.anomaly_threshold,
             reputation_decay=defence_config.reputation_decay,
             history_size=defence_config.history_size,
+            logger=logger,
+            evaluate_fn=evaluate_fn,
+            min_fit_clients=experiment_config.min_clients,
+            min_evaluate_clients=experiment_config.min_clients,
+            min_available_clients=experiment_config.min_available_clients,
+            fraction_evaluate=1.0,
+        )
+    elif defence_config.strategy == 'cognitive_defence_v2':
+        logger.logger.info("Using CogDef v2 — Multi-Signal OODA + MAPE-K")
+        defence_raw = config.get('defence', {})
+        strategy = CognitiveAggregationStrategyV2(
+            config=experiment_config,
+            anomaly_threshold=defence_raw.get('anomaly_threshold', 0.5),
+            direction_weight=defence_raw.get('direction_weight', 0.40),
+            norm_weight=defence_raw.get('norm_weight', 0.15),
+            cluster_weight=defence_raw.get('cluster_weight', 0.25),
+            temporal_weight=defence_raw.get('temporal_weight', 0.20),
+            initial_reputation=defence_raw.get('initial_reputation', 0.5),
+            recovery_rate=defence_raw.get('recovery_rate', 0.03),
+            penalty_severity=defence_raw.get('penalty_severity', 0.8),
+            yellow_threshold=defence_raw.get('yellow_threshold', 0.3),
+            orange_threshold=defence_raw.get('orange_threshold', 0.6),
+            red_threshold=defence_raw.get('red_threshold', 0.8),
+            clip_multiplier=defence_raw.get('clip_multiplier', 2.0),
+            trim_beta=defence_raw.get('trim_beta', 0.2),
+            enable_mape_k=defence_raw.get('enable_mape_k', True),
+            history_size=defence_raw.get('history_size', 100),
             logger=logger,
             evaluate_fn=evaluate_fn,
             min_fit_clients=experiment_config.min_clients,

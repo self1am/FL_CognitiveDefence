@@ -1,0 +1,42 @@
+# =============================================================================
+# ADAPTIVE ATTACK: StatOpt (Statistical Optimization) — No Defence (FedAvg)
+# Purpose: Show statistical attack impact without defence
+# Attack: 40% malicious clients with statistically-constrained poisoning
+# =============================================================================
+experiment:
+  experiment_name: "adaptive_stat_opt_no_defence"
+  seed: 123
+  num_rounds: 30
+  min_clients: 20
+  min_available_clients: 20
+  server_address: "localhost:8080"
+
+defence:
+  strategy: "none"
+
+attacks:
+  - enabled: true
+    attack_type: "stat_opt"
+    intensity: 0.5
+    constraint_factor: 1.5
+    adaptive_learning_rate: 0.1
+    target_clients: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+
+orchestration:
+  num_clients: 100
+  batch_size: 2
+  max_memory_mb: 6000
+  spawn_delay: 2.0
+  epochs: 1
+  batch_size_client: 64
+
+simulation:
+  client_resources:
+    num_cpus: 0.25
+  ray_init_args:
+    include_dashboard: false
+    log_to_driver: false
+    num_cpus: 8
+
+evaluation:
+  num_test_samples: 10000

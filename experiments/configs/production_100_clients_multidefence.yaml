@@ -1,0 +1,62 @@
+# Production-scale experiment: 100 clients, 40 rounds
+# Compares Krum, Trimmed Mean, and Cognitive Defence
+# Resource estimate: ~60GB memory, 6-8 vCPU cores
+# Expected duration: 4-6 hours
+# NOTE: Run this 3 times with different defence strategies (Krum, Trimmed Mean, Cognitive)
+
+experiment:
+  experiment_name: "production_100_clients_krum_defence"  # Change to trimmed_mean or cognitive for other runs
+  seed: 42
+  num_rounds: 40
+  min_clients: 80
+  min_available_clients: 80
+  server_address: "0.0.0.0:8080"
+
+defence:
+  strategy: "krum"  # Change to "trimmed_mean" or "cognitive_defence"
+  # For Krum
+  num_byzantine: 20  # Tolerate up to 20% Byzantine clients
+  multi_krum: false
+  
+  # For Trimmed Mean
+  beta: 0.20  # Remove top/bottom 20% of updates
+  
+  # For Cognitive Defence
+  anomaly_threshold: 0.65
+  reputation_decay: 0.80
+  history_size: 200
+
+attacks:
+  # 30 clients with mixed attacks (30% attack rate)
+  - enabled: true
+    attack_type: "label_flip"
+    intensity: 0.15
+    target_clients: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+  
+  - enabled: true
+    attack_type: "gradient_noise"
+    intensity: 0.12
+    target_clients: [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+
+orchestration:
+  num_clients: 100
+  batch_size: 8
+  max_memory_mb: 58000
+  spawn_delay: 2.0
+  client_timeout_seconds: 1800
+
+model:
+  name: "MNISTNet"
+  input_shape: [28, 28, 1]
+
+data:
+  dataset: "MNIST"
+  num_classes: 10
+  batch_size: 32
+  train_split: 0.8
+  alpha: 0.5
+
+client_config:
+  local_epochs: 2
+  learning_rate: 0.001
+  optimizer: "SGD"

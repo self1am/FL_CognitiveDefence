@@ -60,7 +60,7 @@ class KrumDefenceStrategy(Basedefence):
         params = []
         idx = 0
         for shape in shapes:
-            size = np.prod(shape)
+            size = int(np.prod(shape))  # Convert to Python int for slicing
             params.append(flat_params[idx:idx + size].reshape(shape))
             idx += size
         return params

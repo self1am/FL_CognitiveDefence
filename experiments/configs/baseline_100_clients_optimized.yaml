@@ -1,0 +1,39 @@
+# Optimized baseline with 100 clients
+# Optimizations: epochs=1, batch_size=64, skip every other eval
+experiment:
+  experiment_name: "baseline_100_clients_optimized"
+  seed: 123
+  num_rounds: 10
+  min_clients: 20
+  min_available_clients: 20
+  server_address: "localhost:8080"
+
+defence:
+  strategy: "none"
+  anomaly_threshold: 0.0
+  reputation_decay: 0.0
+  history_size: 0
+
+attacks: []
+
+orchestration:
+  num_clients: 100
+  batch_size: 2
+  max_memory_mb: 6000
+  spawn_delay: 2.0
+  # OPTIMIZATION: Faster per-client training
+  epochs: 1  # From 2 - saves time
+  batch_size_client: 64  # Larger batches
+
+# Flower simulation settings (Ray)
+simulation:
+  client_resources:
+    num_cpus: 0.25  # OPTIMIZATION: Better than 0.5
+  ray_init_args:
+    include_dashboard: false
+    log_to_driver: false
+    num_cpus: 8
+
+# Evaluation settings
+evaluation:
+  num_test_samples: 5000  # OPTIMIZATION: From 10000

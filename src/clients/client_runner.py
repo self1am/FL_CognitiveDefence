@@ -16,6 +16,10 @@ from src.models.cnn_mnist import MNISTNet
 from src.datasets.mnist_handler import MNISTDataHandler
 from src.attacks.label_flip import LabelFlipAttack
 from src.attacks.gradient_noise import GradientNoiseAttack
+from src.attacks.stat_opt_attack import StatOptAttack
+from src.attacks.dny_opt_attack import DnyOptAttack
+from src.attacks.min_max_attack import MinMaxAttack
+from src.attacks.min_sum_attack import MinSumAttack
 from src.utils.config import ClientConfig, DeterministicEnvironment
 from src.utils.logging_utils import ExperimentLogger
 
@@ -31,6 +35,46 @@ def create_attack(attack_config: dict):
         return LabelFlipAttack(intensity=intensity)
     elif attack_type == 'gradient_noise':
         return GradientNoiseAttack(intensity=intensity)
+    elif attack_type == 'stat_opt':
+        constraint_factor = attack_config.get('constraint_factor', 1.5)
+        adaptive_learning_rate = attack_config.get('adaptive_learning_rate', 0.1)
+        return StatOptAttack(
+            intensity=intensity,
+            constraint_factor=constraint_factor,
+            adaptive_learning_rate=adaptive_learning_rate
+        )
+    elif attack_type == 'dny_opt':
+        learning_rate = attack_config.get('learning_rate', 0.1)
+        exploration_rate = attack_config.get('exploration_rate', 0.1)
+        discount_factor = attack_config.get('discount_factor', 0.95)
+        detection_threshold = attack_config.get('detection_threshold', 0.7)
+        return DnyOptAttack(
+            intensity=intensity,
+            learning_rate=learning_rate,
+            exploration_rate=exploration_rate,
+            discount_factor=discount_factor,
+            detection_threshold=detection_threshold
+        )
+    elif attack_type == 'min_max':
+        defense_models = attack_config.get('defense_models', ['krum', 'trimmed_mean'])
+        optimization_steps = attack_config.get('optimization_steps', 10)
+        return MinMaxAttack(
+            intensity=intensity,
+            defense_models=defense_models,
+            optimization_steps=optimization_steps
+        )
+    elif attack_type == 'min_sum':
+        distance_weight = attack_config.get('distance_weight', 0.7)
+        optimization_lr = attack_config.get('optimization_lr', 0.01)
+        max_iterations = attack_config.get('max_iterations', 100)
+        convergence_threshold = attack_config.get('convergence_threshold', 1e-5)
+        return MinSumAttack(
+            intensity=intensity,
+            distance_weight=distance_weight,
+            optimization_lr=optimization_lr,
+            max_iterations=max_iterations,
+            convergence_threshold=convergence_threshold
+        )
     else:
         return None
 
